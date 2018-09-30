@@ -73,6 +73,7 @@ String getLatestToolchain(String ndk, String tch) {
     def matchFile = null
     file(cygpath("$ndk/toolchains")).eachFile() {file->
         def filename = file.getName()
+println("FILE = $filename, tch = $tch");
         if (filename.startsWith(tch)) {
             def p = filename - "$tch-"
             if (compareVersions(p, max) > 0) {
@@ -94,7 +95,6 @@ boolean assertDir(String dir) {
 
 def closedDir = file("$projectDir/../rt-closed")
 
-def toolchainArchs = ["arm-linux-androideabi", "mipsel-linux-android", "x86"]
 def armArchs = ["armeabi", "armeabiv-7a"]
 
 ext.DALVIK = [:]
@@ -146,8 +146,18 @@ if (!DALVIK.canBuild) {
     return
 }
 
+def platforms = [ "arm", "x86", "mips" ]
+def toolchainArchs = [ "arm": "arm-linux-androideabi", "x86": "x86", "mips": "mipsel-linux-android" ]
+def toolchainTools = [ "arm": "arm-linux-androideabi", "x86": "i686-linux-android", "mips": "mipsel-linux-android" ]
+def toolchainLibs = [ "arm": ["armeabi-v7a", "armeabi"], "x86": ["x86"], "mips": ["mips"] ]
+
+defineProperty("DALVIK_PLATFORM", platforms.get(0))
+defineProperty("TOOLCHAIN_ARCH", toolchainArchs[DALVIK_PLATFORM])
+defineProperty("TOOLCHAIN_TOOL", toolchainTools[DALVIK_PLATFORM])
+defineProperty("TOOLCHAIN_LIB", toolchainLibs[DALVIK_PLATFORM].get(0))
+
 def toolchainHome = project.hasProperty("ANDROID_CROSS_TOOLS_VER") ?
-    "$ndk/toolchains/${ANDROID_CROSS_TOOLS_VER}" : getLatestToolchain(ndk, toolchainArchs[0])
+    "$ndk/toolchains/${ANDROID_CROSS_TOOLS_VER}" : getLatestToolchain(ndk, TOOLCHAIN_ARCH)
 if (!assertDir(toolchainHome)) {
     toolchainHome = getLatestToolchain(ndk, toolchainArchs[0])
     logger.warn("Redefine toolchain to [$toolchainHome]")
@@ -185,273 +195,6 @@ logger.quiet("FREETYPE_DIR: $freetypeDir")
 logger.quiet("Compile native text: $compileNativeText")
 logger.quiet("Android Compiler: $compiler")
 logger.quiet("Android Linker: $linker")
-
-//exclude from build
-project(":swing") {
-    apply plugin: 'java'
-
-    compileJava {
-        enabled = false
-    }
-}
-
-project(":fxml") {
-    apply plugin: 'java'
-
-    jar.dependsOn("retroClass");
-
-    compileJava {
-        enabled = true
-    }
-}
-
-allprojects() {
-    repositories {
-        mavenCentral()
-    }
-    configurations {
-        retroconfig
-    }
-
-    dependencies {
-        retroconfig 'net.orfjackal.retrolambda:retrolambda:1.1.4'
-    }
-    task retroClass() <<{
-            file classdirs = file ("$buildDir/classes");
-            lf = classdirs.listFiles();
-            classdirs.eachDir{t ->
-                javaexec {
-                    inputdir = t
-                    basecp = files(lf, "${project("base").buildDir}/classes/main", "${project("graphics").buildDir}/classes/main", "${project("controls").buildDir}/classes/main").asPath
-                    myconfig = configurations.retroconfig;
-                    lambdaloc = myconfig.resolve().toArray()[0];
-                    classpath = configurations.retroconfig
-                    main = 'net.orfjackal.retrolambda.Main'
-                    jvmArgs = [
-                               "-Xbootclasspath:$JDK_HOME/jre/lib/rt.jar",
-                                "-Dretrolambda.inputDir=$inputdir",
-                                "-Dretrolambda.classpath=$basecp",
-                                "-Dretrolambda.bytecodeVersion=51",
-                                "-javaagent:$lambdaloc"
-                   ]
-            }
-        }
-    }
-}
-
-
-project(":base") {
-    apply plugin: 'java'
-    jar.dependsOn("retroClass");
-}
-
-project(":web") {
-    apply plugin: 'java'
-    jar.dependsOn("retroClass");
-    compileJava.dependsOn(":graphics:assemble");
-    sourceSets.main.java.srcDirs = ['src/android/java'];
-    sourceSets {
-        main {
-            java {
-                srcDirs= ['src/android/java']
-            }
-        }
-    }
-    dependencies {
-         compile files("../graphics/build/classes/dalvik");
-    }
-
-    afterEvaluate {
-    sourceSets.main.java.srcDirs = ['src/android/java'];
-        def compileWebJavaAndroid = task("compileWebJavaAndroid",
-            type: JavaCompile, group: "Build") {
-
-            dependsOn(project(":graphics").classes, project(":base").classes)
-            description = "Task compiles web component for Android."
-            classpath = files(
-                project(":controls").sourceSets.main.java.outputDir,
-                project(":graphics").sourceSets.main.java.outputDir,
-                project(":base").sourceSets.main.java.outputDir,
-                "${project("graphics").buildDir}/classes/dalvik"
-            )
-            destinationDir = file("${project("web").buildDir}/classes/android")
-            dependencyCacheDir = file("${project("web").buildDir}/dependency-cache")
-            source file("${project("web").projectDir}/src/android/java")
-        }
-
-        def jarWebJavaAndroid = task("jarWebJavaAndroid",
-            type: Jar, group: "Build") {
-            description = "Creates web.jar for Android."
-            dependsOn(compileWebJavaAndroid)
-            archiveName = "web.jar"
-            includeEmptyDirs = false
-            destinationDir = project.file("build/libs/android")
-            from("build/classes/android")
-        }
-        addNative(project, "webview")
-        // addNative(project, "dvkwebview")
-        javahDalvikWebview.dependsOn(compileWebJavaAndroid)
-        // javahDalvikDvkwebview.dependsOn(compileWebJavaAndroid)
-
-        jfxrtDalvik {
-            from "${project("web").buildDir}/classes/android"
-        }
-
-  sdkDalvik  {
-            dependsOn(jarWebJavaAndroid)
-            doLast {
-                def props = project.ext["DALVIK"]
-                copy {
-                    from ("${project("web").buildDir}/libs/webview/dalvik/${props.library(props.webview.lib)}")
-                    into ("build/dalvik-sdk/${props.libDest}")
-                }
-            }
-        }
-    }
-
-
-    jar.dependsOn("retroClass");
-}
-
-project(":media") {
-    apply plugin: 'java'
-    jar.dependsOn("retroClass");
-}
-
-
-project(":graphics") {
-
-    apply plugin: 'java'
-
-    sourceSets.main.java {
-        exclude "com/sun/glass/ui/swt/**"
-    }
-
-    assemble.dependsOn("retroClass");
-    task compileDalvikLibs(type: JavaCompile, group: "Build") {
-        description = "Task compiles dalvik vm based libraries."
-        options.bootClasspath = "$sdk/platforms/$sdk_target/android.jar"
-        classpath = files("build/classes/dalvik", "build/classes/main")
-        destinationDir = file("build/classes/dalvik")
-        dependencyCacheDir = file("build/dependency-cache")
-        source fileTree(dir: 'src/dalvik/java').matching { include '**' }
-    }
-
-    task jarDalvikLibs(type: Jar, group: "Build", dependsOn: compileDalvikLibs) {
-        description = "Creates jfxdvk.jar with all dalvik based classes."
-        archiveName = "jfxdvk.jar"
-        includeEmptyDirs = false
-        from("build/classes/dalvik")
-        include("javafxports/**/*")
-        include("com/oracle/**/*")
-        dependsOn(compileDalvikLibs)
-    }
-
-    jarDalvikLibs {
-        eachFile {
-                if (it.name.endsWith('.class')) {
-                    RandomAccessFile raf = new RandomAccessFile(it.file.path, "rw");
-                    raf.seek(7);
-                    raf.writeByte(0x32); //make it jdk6
-                    raf.close();
-                }
-            }
-    }
-
-    afterEvaluate {
-        addNative(project, "activity")
-        if (compileNativeText) {
-            addNative(project, "fontNativeFreetype")
-        }
-        tasks["javahDalvikGlass"].dependsOn(compileDalvikLibs)
-        tasks["javahDalvikActivity"].dependsOn(compileDalvikLibs)
-        tasks["native"].dependsOn("nativeActivity")
-        if (compileNativeText) {
-            tasks["native"].dependsOn("nativeFontNativeFreetype")
-        }
-        tasks["javahDalvikPrismSW"].enabled = false
-        tasks["ccDalvikPrismSW"].enabled = false;
-        tasks["linkDalvikPrismSW"].enabled = false;
-
-        sdkDalvik  {
-            dependsOn(jarDalvikLibs)
-            doLast {
-                def props = project.ext["DALVIK"]
-                copy {
-                    from(
-                         "${project("graphics").buildDir}/libs/activity/dalvik/${props.library(props.activity.lib)}"
-                    )
-                    into ("build/dalvik-sdk/${props.libDest}")
-                }
-                copy {
-                    from ("${project("graphics").buildDir}/libs/${props.jfxdvklib}")
-                    into ("build/dalvik-sdk/lib")
-                }
-/*
-                copy {
-                    from ("${project("compat").buildDir}/libs/compat.jar")
-                    into ("build/dalvik-sdk/lib")
-                }
-*/
-                if (compileNativeText) {
-                    copy {
-                        from ("${project("graphics").buildDir}/libs/fontNativeFreetype/dalvik")
-                        into ("build/dalvik-sdk/${props.libDest}")
-                    }
-                }
-            }
-        }
-    }
-}
-
-project(":controls") {
-
-    apply plugin: 'java'
-/*
-    compileJava {
-         options.bootClasspath="/home/johan/open-jfx/bitbucket/8u-dev-build/compat/build/libs/compat-1.0.0.jar:$sdk/platforms/$sdk_target/android.jar"
-     }
-*/
-
-
-    sourceSets.main.java.srcDir('src/android/java')
-/*
-    sourceSets.main.java {
-        exclude 'javafx/scene/control/Date*.java'
-        exclude 'com/sun/javafx/scene/control/skin/Date*.java'
-        exclude 'com/sun/javafx/scene/control/behavior/Date*.java'
-    }
-*/
-    task copyResources() << {
-        copy {
-            from ("src/android/resources")
-            into ("build/resources/dalvik")
-        }
-    }
-
-    assemble.dependsOn("copyResources","retroClass");
-
-    afterEvaluate {
-
-        jfxrtDalvik {
-            from ("${project("controls").buildDir}/classes/dalvik",
-                  "${project("controls").buildDir}/resources/dalvik")
-        }
-
-    }
-}
-
-allprojects {
-    afterEvaluate {
-        sdkDalvik {
-            doLast {
-                ant.jar(update: "true", destfile: "build/dalvik-sdk/lib/jfxrt.jar",
-                    basedir: "build/dalvik-sdk/lib", includes: "*.properties")
-            }
-        }
-    }
-}
-
 
 DALVIK.jfxrtJarExcludes = [
     "**/*.hlsl",
@@ -509,9 +252,11 @@ com.sun.javafx.gestures.rotate=true
 com.sun.javafx.gestures.scroll=true
 """
 def sysroot = "$ndk/platforms/$ndk_target/arch-arm"
+def ccSysroot = "$ndk/sysroot"
 
-def ccFlags = ["--sysroot=$sysroot","-std=c99", "-DANDROID", "-c", "-nostdlib",
-               "-DANDROID_NDK", "-DDALVIK_VM"]
+def ccFlags = ["--sysroot=$sysroot","-std=c99", "-DANDROID", 
+               "-I$ndk/sysroot/usr/include", "-c",
+               "-nostdlib", "-DANDROID_NDK", "-DDALVIK_VM"]
 
 def ccOptFlags = ["-fpic", "-ffunction-sections", "-funwind-tables","-fstack-protector",
                   "-Os", "-O2", "-fno-strict-aliasing", "-finline-limit=64", "-fomit-frame-pointer"]
@@ -519,7 +264,7 @@ def ccWarnFlags = ["-Wa,--noexecstack", "-Wno-psabi"]
 def ccArchFlags = ["-mthumb", "-msoft-float", "-D__ARM_ARCH_5__", "-D__ARM_ARCH_5T__", "-D__ARM_ARCH_5E__",
                    "-D__ARM_ARCH_5TE__", "-march=armv5te" , "-mtune=xscale"]
 def ccDebugFlags = [IS_DEBUG_NATIVE ? "-DDEBUG" : "-DNDEBUG"]
-def ccDefaultIncludeFlags = ["-I$ndk/platforms/$ndk_target/arch-arm/usr/include"]
+def ccDefaultIncludeFlags = ["-I$ccSysroot/usr/include", "-I$ccSysroot/usr/include/$TOOLCHAIN_TOOL"]
 
 def linkFlags = ["--sysroot=$sysroot",
                  "-Wl,--no-undefined", "-Wl,-z,noexecstack", "-lc", "-lm", "-shared",
