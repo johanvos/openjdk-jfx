@@ -185,8 +185,14 @@ else if (!assertDir(freetypeDir)) {
 }
 def compileNativeText = freetypeDir != null
 
-def compiler = file("$compilerHome/bin/${toolchainArchs[0]}-gcc").getAbsolutePath()
-def linker = file("$compilerHome/bin/${toolchainArchs[0]}-g++").getAbsolutePath()
+def compiler = file("$compilerHome/bin/$TOOLCHAIN_TOOL-gcc").getAbsolutePath()
+def linker = file("$compilerHome/bin/$TOOLCHAIN_TOOL-g++").getAbsolutePath()
+if ((compiler == null) || (!file(compiler).exists())) {
+    fail("No compiler found at $compilerHome/bin/${toolchainArchs[0]}-gcc");
+}
+if ((linker == null) || (!file(linker).exists())) {
+    fail("No linker found at $compilerHome/bin/${toolchainArchs[0]}-g++");
+}
 
 // Log the settings we're building with
 logger.quiet("ANDROID_SDK: $sdk")
