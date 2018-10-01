@@ -73,7 +73,6 @@ String getLatestToolchain(String ndk, String tch) {
     def matchFile = null
     file(cygpath("$ndk/toolchains")).eachFile() {file->
         def filename = file.getName()
-println("FILE = $filename, tch = $tch");
         if (filename.startsWith(tch)) {
             def p = filename - "$tch-"
             if (compareVersions(p, max) > 0) {
@@ -177,7 +176,10 @@ if (!DALVIK.canBuild) {
 }
 
 def freetypeDir = project.hasProperty("FREETYPE_DIR") ? "${FREETYPE_DIR}" : null
-if (!assertDir(freetypeDir)) {
+if (freetypeDir == null) {
+    logger.warn("FREETYPE_DIR not specified! Build continues without native text support.")
+}
+else if (!assertDir(freetypeDir)) {
     logger.warn("FREETYPE_DIR $freetypeDir doesn't exists! Build continues without native text support.")
     freetypeDir = null
 }
