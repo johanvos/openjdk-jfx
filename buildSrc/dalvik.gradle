@@ -593,6 +593,7 @@ project(":graphics") {
         into file("$rootProject.buildDir/dalvik-sdk/lib/");
     }
     project.task("sdk").dependsOn(copyJfxdvk, jarDalvikLibs)
+    tasks.getByName("jar").dependsOn(compileJavafxports)
 }
 
 }
