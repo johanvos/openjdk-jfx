@@ -52,6 +52,7 @@ static ANativeWindow *window;
 int32_t    width;
 int32_t    height;
 int32_t    format;
+jint       densityDpi;
 jfloat     density;
 
 const char      *android_getDataDir();
@@ -116,10 +117,11 @@ JNIEXPORT void JNICALL Java_javafxports_android_FXDalvikEntity__1setSurface
 /*
  * Class:     javafxports_android_FXDalvikEntity
  * Method:    _setDensity
- * Signature: (F)V
+ * Signature: (IF)V
  */
 JNIEXPORT void JNICALL Java_javafxports_android_FXDalvikEntity__1setDensity
-  (JNIEnv *env, jobject that, jfloat dens) {
+  (JNIEnv *env, jobject that, jint densDpi, jfloat dens) {
+    densityDpi = densDpi;
     density = dens;
 }
 
@@ -146,6 +148,10 @@ JNIEXPORT void JNICALL Java_javafxports_android_FXActivity__1setDataDir
 
 ANativeWindow *android_getNativeWindow() {
     return window;
+}
+
+jint *android_getDensityDpi() {
+    return &densityDpi;
 }
 
 jfloat *android_getDensity() {
