@@ -99,6 +99,10 @@ public class AndroidInputDeviceRegistry extends InputDeviceRegistry {
         processor.pushKeyEvent(keyState);
     }
 
+    public static void dispatchKeyEvent(int type, int key, char[] chars, int modifiers) {
+        instance.processor.dispatchKeyEvent(type, key, chars, modifiers);
+    }
+
     private AndroidInputDeviceRegistry() {
     }
 

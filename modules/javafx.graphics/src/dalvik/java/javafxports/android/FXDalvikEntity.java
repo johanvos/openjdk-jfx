@@ -28,7 +28,11 @@ package javafxports.android;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Rect;
+import android.graphics.SurfaceTexture;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.text.InputType;
 import android.util.Log;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
@@ -36,18 +40,28 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.TextureView;
+import android.view.TextureView.SurfaceTextureListener;
+import android.view.ViewTreeObserver.OnGlobalLayoutListener;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+
+import android.view.View;
 import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
 
-public class FXDalvikEntity implements SurfaceHolder.Callback,
-        SurfaceHolder.Callback2 {
+public class FXDalvikEntity implements SurfaceTextureListener, OnGlobalLayoutListener, SurfaceHolder.Callback, SurfaceHolder.Callback2 {
     private static final String ACTIVITY_LIB = "activity";
     private static final String META_DATA_LAUNCHER_CLASS = "launcher.class";
     private static final String DEFAULT_LAUNCHER_CLASS = "javafxports.android.DalvikLauncher";
     public static final String META_DATA_MAIN_CLASS = "main.class";
     private static final String META_DATA_PRELOADER_CLASS = "preloader.class";
     private static final String META_DATA_DEBUG_PORT = "debug.port";
+    private static final String META_DATA_TEXTUREVIEW = "textureview";
+    private static final String META_DATA_SWIPEKEYBOARD = "swipekeyboard";
+    private static final String META_DATA_RESTOREKEYBOARD = "restorekeyboard";
+    private static final String META_DATA_JAVA_ARGS = "java.args";
 
     private static final String APPLICATION_DEX_NAME = "Application_dex.jar";
     private static final String APPLICATION_RESOURCES_NAME = "Application_resources.jar";
@@ -56,50 +70,80 @@ public class FXDalvikEntity implements SurfaceHolder.Callback,
         private String launcherClassName;
     private String mainClassName;
     private String preloaderClassName;
-
+    
     private static final String TAG = "FXEntity";
     private SurfaceDetails surfaceDetails;
     private static Launcher launcher;
     private final Bundle metadata;
-    private final Activity activity;
-
+    private static Activity activity;
+    
     private static boolean glassHasStarted = false;
-    private Method onMultiTouchEventMethod;
-    private Method onKeyEventMethod;
-    private static Method onGlobalLayoutChangedMethod;
-    private Method onSurfaceChangedNativeMethod1;
-    private Method onSurfaceChangedNativeMethod2;
-    private Method onSurfaceRedrawNeededNativeMethod;
-    private Method onConfigurationChangedNativeMethod;
+    private static Method onMultiTouchEventMethod;
+    // private static Method onGlobalLayoutChangedMethod;
+    private static Method onSurfaceCreatedMethod;
+    private static Method onSurfaceChangedNativeMethod1;
+    private static Method onSurfaceChangedNativeMethod2;
+    private static Method onSurfaceRedrawNeededNativeMethod;
+    private static Method onConfigurationChangedNativeMethod;
     private static Method initializeMonocleMethod;
-
+    private static Method keyboardSizeMethod;
+    
     private static InputMethodManager imm;
-    private static InternalSurfaceView myView;
+    static View myView;
     private static CountDownLatch cdlEvLoopFinished;
 
+    private static float originalHeight;
+    public static float keyboardHeight = 0;
+
     private float density;
+    private SurfaceTexture surfaceTexture;
 
-    public FXDalvikEntity (Bundle metadata, Activity activity) {
+    private static final int ACTION_POINTER_STILL = -1;
+    boolean useTextureView = false;
+    boolean useSwipeKeyboard = false;
+    boolean useRestoreKeyboard = false;
+    private static long softInput = 0L;
+    private String[] javaArgs = new String[0];
+
+    public FXDalvikEntity (Bundle metadata, Activity fxActivity) {
         this.metadata = metadata;
-        this.activity = activity;
-
+        activity = fxActivity;
+        createJavaArgs();
+        useTextureView = metadata.containsKey(META_DATA_TEXTUREVIEW);
+        useSwipeKeyboard = metadata.containsKey(META_DATA_SWIPEKEYBOARD);
+        useRestoreKeyboard = metadata.containsKey(META_DATA_RESTOREKEYBOARD);
+        System.out.println ("usetextureview = "+useTextureView+", useswipekeyboard = "+useSwipeKeyboard);
         imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         jfxEventsLoop();
     }
 
-    public Activity getActivity() {
-        return this.activity;
+    private void createJavaArgs() {
+        String extraKey = metadata.getString(META_DATA_JAVA_ARGS);
+        if (extraKey != null && !extraKey.isEmpty()) {
+            Bundle b = activity.getIntent().getExtras();
+            if (b != null) {
+                String extraVal = b.getString(extraKey);
+                if (extraVal != null && !extraVal.isEmpty()) {
+                    this.javaArgs = new String[]{"--" + extraKey + "=" + extraVal};
+                    System.setProperty(extraKey, extraVal);
+                }
+            }
+        }
     }
-
+    
+    public static Activity getActivity() {
+        return activity;
+    }
+    
     public void getLauncherAndLaunchApplication() {
 
 
         launcherClassName = metadata.containsKey(META_DATA_LAUNCHER_CLASS) ?
                 metadata.getString(META_DATA_LAUNCHER_CLASS) : DEFAULT_LAUNCHER_CLASS;
-
+        
         mainClassName = metadata.containsKey(META_DATA_MAIN_CLASS) ?
                 metadata.getString(META_DATA_MAIN_CLASS) : null;
-
+        
         preloaderClassName = metadata.containsKey(META_DATA_PRELOADER_CLASS) ?
                 metadata.getString(META_DATA_PRELOADER_CLASS) : null;
         if (mainClassName == null || mainClassName.length() == 0) {
@@ -110,12 +154,12 @@ public class FXDalvikEntity implements SurfaceHolder.Callback,
         if (preloaderClassName != null && preloaderClassName.length() == 0) {
             preloaderClassName = null;
         }
-
+        
         //launch application
         try {
             Class<Launcher> clazz = (Class<Launcher>) Thread.currentThread().getContextClassLoader().loadClass(launcherClassName);
             launcher = clazz.newInstance();
-            launcher.launchApp(this, mainClassName, preloaderClassName);
+            launcher.launchApp(this, mainClassName, preloaderClassName, javaArgs);
 
         } catch (Exception ex) {
             throw new RuntimeException("Did not create correct launcher.", ex);
@@ -123,32 +167,152 @@ public class FXDalvikEntity implements SurfaceHolder.Callback,
     }
 
 
-    public SurfaceView createView () {
-        myView = new InternalSurfaceView(activity);
-        myView.getHolder().addCallback(this);
-        return myView;
+    public View createView () {
+        return useTextureView ? createTextureView() : createSurfaceView();
     }
 
-  @Override
-    public void surfaceCreated(SurfaceHolder holder) {
+    public View createTextureView() {
+        TextureView answer = new InternalTextureView(activity);
+        answer.setSurfaceTextureListener(this);
+        //myView.getHolder().addCallback(this);
+        answer.getViewTreeObserver().addOnGlobalLayoutListener(this);
+        myView = answer;
+        return answer;
+    }
+
+    public View createSurfaceView() {
+        SurfaceView answer = new InternalSurfaceView(activity);
+        answer.getHolder().addCallback(this);
+        answer.getViewTreeObserver().addOnGlobalLayoutListener(this);
+        myView = answer;
+        return answer;
+    }
+    
+    @Override
+    public void onSurfaceTextureAvailable(SurfaceTexture st, int width, int height) {
         Log.v(TAG, "Surface created.");
         DisplayMetrics metrics = new DisplayMetrics();
         activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
         Log.v(TAG, "metrics = "+metrics);
-        surfaceDetails = new SurfaceDetails(holder.getSurface(), metrics.density);
+        this.surfaceTexture = st;
+        Surface surface = new Surface(st);
+        surfaceDetails = new SurfaceDetails(surface, metrics.density);
         _setSurface(surfaceDetails.surface);
         density = metrics.density;
-        _setDensity(surfaceDetails.density);
+        _setDensity(metrics.densityDpi, metrics.density);
+        Rect currentBounds = new Rect();
+        myView.getRootView().getWindowVisibleDisplayFrame(currentBounds);
+        originalHeight = currentBounds.height() / density;
         if (launcher == null) {
             //surface ready now is time to launch javafx
             getLauncherAndLaunchApplication();
         } else {
+            try {
+                Log.v(TAG, "Surface created, application was already launched and we will recreate eglSurface now");
+                onSurfaceCreatedMethod.invoke(null);
+                Log.v(TAG, "Surface created, application was already launched and we will invoke native surface changed method: "+onSurfaceChangedNativeMethod1);
+                onSurfaceChangedNativeMethod1.invoke(null);
+                // com.sun.javafx.tk.Toolkit.getToolkit().resumeRenderer();
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onSurfaceChangedNative1 method by reflection", e);
+            }
+        }
+    }
+  
+    @Override
+    public void onSurfaceTextureSizeChanged(SurfaceTexture st, int width, int height) {
+        Log.v(TAG, String.format("Called Surface changed [%d, %d]", width, height));
+        Surface surface = new Surface(st);
+        surfaceDetails = new SurfaceDetails(surface, width, height);
+        _setSurface(surfaceDetails.surface);
+        if (glassHasStarted) {
+            try {
+                onSurfaceChangedNativeMethod2.invoke(null, surfaceDetails.format, surfaceDetails.width, surfaceDetails.height);
+                Thread.sleep(500); // we need to generate 2 pulses for the textureview to pick up
+                onSurfaceChangedNativeMethod2.invoke(null, surfaceDetails.format, surfaceDetails.width, surfaceDetails.height);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onSurfaceChangedNative2 method by reflection", e);
+            }
+        }
+        
+    }
+
+    @Override
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture st) {
+            Log.v(TAG, "Called Surface destroyed, we should now pause rendering");
+        // com.sun.javafx.tk.Toolkit.getToolkit().pauseRenderer();
+        surfaceDetails = new SurfaceDetails();
+        _setSurface(surfaceDetails.surface);
+        if (glassHasStarted) {
             try {
                 onSurfaceChangedNativeMethod1.invoke(null);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onSurfaceChangedNative1 method by reflection", e);
             }
         }
+        return true;
+    }
+
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture st) {
+        Log.v(TAG, "surfacetextureupdated...");
+       
+	return;
+	/*
+        Log.v(TAG, "Called Surface redraw needed");
+        if (st != surfaceTexture) {
+            Surface surface = new Surface(st);
+            Log.v(TAG, "Surface redraw needed and we have a new surface");
+            surfaceDetails = new SurfaceDetails(surface);
+            _setSurface(surfaceDetails.surface);
+        }
+        if (glassHasStarted) {
+            try {
+// this is dirty. We need to wait for at least 1 pulse.
+                 // Thread.currentThread().sleep(250);
+        Log.v(TAG, "Redraw...");
+                onSurfaceRedrawNeededNativeMethod.invoke(null);
+        Log.v(TAG, "Wait a while before doing this again...");
+                 Thread.currentThread().sleep(200);
+        Log.v(TAG, "Redraw again...");
+                onSurfaceRedrawNeededNativeMethod.invoke(null);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onSurfaceRedrawNeededNative method by reflection", e);
+            }
+        }
+	*/
+    }
+
+    private void storeDensity() {
+        DisplayMetrics metrics = new DisplayMetrics();
+        activity.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        density = metrics.density;
+        _setDensity(metrics.densityDpi, metrics.density);
+    }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
+        Log.v(TAG, "Surface created.");
+        surfaceDetails = new SurfaceDetails(holder.getSurface());
+        _setSurface(surfaceDetails.surface);
+        storeDensity();
+        Rect currentBounds = new Rect();
+        myView.getRootView().getWindowVisibleDisplayFrame(currentBounds);
+        originalHeight = currentBounds.height() / density;
+        if (launcher == null) {
+            //surface ready now is time to launch javafx
+            getLauncherAndLaunchApplication();
+        } else {
+            try {
+                onSurfaceCreatedMethod.invoke(null);
+                onSurfaceChangedNativeMethod1.invoke(null);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onSurfaceChangedNative1 method by reflection", e);
+            }
+        }
+       if (useRestoreKeyboard && (softInput > 0)) {
+           // com.sun.glass.ui.android.SoftwareKeyboard.delayShow();
+       }
     }
 
     @Override
@@ -162,6 +326,7 @@ public class FXDalvikEntity implements SurfaceHolder.Callback,
         }
         surfaceDetails = new SurfaceDetails(holder.getSurface(), format, width, height);
         _setSurface(surfaceDetails.surface);
+        storeDensity();
         if (glassHasStarted) {
             try {
                 onSurfaceChangedNativeMethod2.invoke(null, surfaceDetails.format, surfaceDetails.width, surfaceDetails.height);
@@ -170,6 +335,7 @@ public class FXDalvikEntity implements SurfaceHolder.Callback,
             }
         }
     }
+
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
@@ -191,6 +357,7 @@ public class FXDalvikEntity implements SurfaceHolder.Callback,
         if (holder.getSurface() != surfaceDetails.surface) {
             surfaceDetails = new SurfaceDetails(holder.getSurface());
             _setSurface(surfaceDetails.surface);
+            storeDensity();
         }
         if (glassHasStarted) {
             try {
@@ -207,20 +374,44 @@ public class FXDalvikEntity implements SurfaceHolder.Callback,
             }
         }
     }
+
+
+
+
+    @Override
+    public void onGlobalLayout() {
+        Rect currentBounds = new Rect();
+        myView.getRootView().getWindowVisibleDisplayFrame(currentBounds);
+        float newHeight = currentBounds.height()/density;
+        keyboardHeight = originalHeight - newHeight;
+        if (keyboardSizeMethod != null) {
+            try {
+                keyboardSizeMethod.invoke(null, keyboardHeight);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     protected void setInitializeMonocleMethod (Method v ) {
         initializeMonocleMethod  = v ;
     }
 
+    protected void setKeyboardSizeMethod (Method v ) {
+        keyboardSizeMethod  = v ;
+    }
+        
     protected void setOnMultiTouchEventMethod(Method onMultiTouchEventMethod) {
         this.onMultiTouchEventMethod = onMultiTouchEventMethod;
     }
 
-    protected void setOnKeyEventMethod(Method onKeyEventMethod) {
-        this.onKeyEventMethod = onKeyEventMethod;
-    }
+    // protected void setOnGlobalLayoutChangedMethod(Method method) {
+        // onGlobalLayoutChangedMethod = method;
+    // }
 
-    protected void setOnGlobalLayoutChangedMethod(Method method) {
-        onGlobalLayoutChangedMethod = method;
+    protected void setOnSurfaceCreatedMethod(Method method) {
+        onSurfaceCreatedMethod = method;
     }
 
     protected void setOnSurfaceChangedNativeMethod1(
@@ -242,8 +433,8 @@ public class FXDalvikEntity implements SurfaceHolder.Callback,
             Method onConfigurationChangedNativeMethod) {
         this.onConfigurationChangedNativeMethod = onConfigurationChangedNativeMethod;
     }
-
-
+    
+    
     public static void notify_glassHasStarted() {
         Log.v(TAG, "notify_glassHasStarted called in FXActivity. register device now.");
         glassHasStarted = true;
@@ -272,7 +463,6 @@ public class FXDalvikEntity implements SurfaceHolder.Callback,
         }).start();
     }
 
-private static long softInput = 0L;
     private static void notify_showIME() {
         Log.v(TAG, "Called notify_showIME");
         // myView.requestFocus();
@@ -308,20 +498,9 @@ private static long softInput = 0L;
 
     private native void _setSurface(Surface surface);
 
-    private native void _setDensity(float density);
+    private native void _setDensity(int densityDpi, float density);
 
-
-    class InternalSurfaceView extends SurfaceView {
-
-        public InternalSurfaceView(Context context) {
-            super(context);
-            setFocusableInTouchMode(true);
-        }
-
-        private static final int ACTION_POINTER_STILL = -1;
-
-        @Override
-        public boolean dispatchTouchEvent(MotionEvent event) {
+    private boolean internalDispatchTouchEvent(MotionEvent event) {
             if (!glassHasStarted) {
                 return false;
             }
@@ -342,13 +521,13 @@ private static long softInput = 0L;
                     for (int i = 0; i < pcount; i++) {
                         actions[i] = pointerIndex == i ? actionCode : ACTION_POINTER_STILL;
                         ids[i] = event.getPointerId(i);
-                        touchXs[i] = (int) (event.getX(i)/density);
-                        touchYs[i] = (int) (event.getY(i)/density);
+                        touchXs[i] = (int) (event.getX(i));
+                        touchYs[i] = (int) (event.getY(i));
                     }
                 } else if (actionCode == MotionEvent.ACTION_MOVE) {
                     for (int i = 0; i < pcount; i++) {
-                        touchXs[i] = (int) (event.getX(i)/density);
-                        touchYs[i] = (int) (event.getY(i)/density);
+                        touchXs[i] = (int) (event.getX(i));
+                        touchYs[i] = (int) (event.getY(i));
                         actions[i] = MotionEvent.ACTION_MOVE;
                         ids[i] = event.getPointerId(i);
                     }
@@ -357,16 +536,30 @@ private static long softInput = 0L;
                 //single touch
                 actions[0] = actionCode;
                 ids[0] = event.getPointerId(0);
-                touchXs[0] = (int) (event.getX()/density);
-                touchYs[0] = (int) (event.getY()/density);
+                touchXs[0] = (int) (event.getX());
+                touchYs[0] = (int) (event.getY());
             }
-            Log.e(TAG, "call native MultitouchEvent");
+            Log.e(TAG, "call native MultitouchEvent, density = "+density+", touchXs0 = "+touchXs[0]);
             try {
                 onMultiTouchEventMethod.invoke(null, pcount, actions, ids, touchXs, touchYs);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onMultiTouchEvent method by reflection", e);
             }
             return true;
+    }
+
+    
+    class InternalTextureView extends TextureView {
+
+        public InternalTextureView(Context context) {
+            super(context);
+            setFocusableInTouchMode(true);
+        }
+
+
+        @Override
+        public boolean dispatchTouchEvent(MotionEvent event) {
+            return internalDispatchTouchEvent(event);
         }
 
         @Override
@@ -374,16 +567,72 @@ private static long softInput = 0L;
             if (!glassHasStarted) {
                 return false;
             }
-            try {
-                onKeyEventMethod.invoke(null, event.getAction(), event.getKeyCode(), event.getCharacters());
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onKeyEventMethod method by reflection", e);
-            }
+            KeyEventProcessor.getInstance().process(event);
             return true;
         }
     }
 
+    class InternalSurfaceView extends SurfaceView {
+        public InternalSurfaceView(Context context) {
+            super(context);
+            setFocusableInTouchMode(true);
+        }
 
+
+        @Override
+        public boolean dispatchTouchEvent(MotionEvent event) {
+            return internalDispatchTouchEvent(event);
+        }
+
+        @Override
+        public boolean dispatchKeyEvent(final KeyEvent event) {
+            if (!glassHasStarted) {
+                return false;
+            }
+            KeyEventProcessor.getInstance().process(event);
+            return true;
+        }
+
+        @Override
+        public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
+            if (!useSwipeKeyboard) {
+                return super.onCreateInputConnection(outAttrs);
+            }
+//            if (!glassHasStarted) {
+//                return null;
+//            }
+            Log.w(TAG, "onCreateInputConnection called...!!");
+
+            outAttrs.actionLabel = null;
+            outAttrs.label = "Placeholder";
+            outAttrs.inputType = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_NORMAL;
+            // outAttrs.imeOptions = EditorInfo.IME_ACTION_NONE;
+
+            // return new BaseInputConnection(this, true);
+            FXInputConnection ic = new FXInputConnection(this, true);
+            return ic;
+        }
+
+        public void backSpace() {
+            KeyEvent k1 = new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL);
+            KeyEventProcessor.getInstance().process(k1);
+            KeyEvent k2 = new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_DEL);
+            KeyEventProcessor.getInstance().process(k2);
+        }
+
+        public void setText(CharSequence text) {
+            KeyEvent keyEvent = new KeyEvent(SystemClock.elapsedRealtimeNanos(), text.toString(), 0, KeyEvent.FLAG_SOFT_KEYBOARD);
+            Log.e(TAG, "TEXT setText will call with text: '" + text + "'");
+            KeyEventProcessor.getInstance().process(keyEvent);
+            Log.e(TAG, "TEXT setText called with text: '" + text + "'");
+        }
+
+    }
+
+    private void setSurface(Surface surface) {
+        _setSurface(surface);
+    }
+    
     class DeviceConfiguration {
 
         private static final int ORIENTATION_CHANGE = 1;
@@ -416,13 +665,13 @@ private static long softInput = 0L;
                 } catch (Exception e) {
                     throw new RuntimeException("Failed to invoke com.sun.glass.ui.android.DalvikInput.onConfigurationChangedNative method by reflection", e);
                 }
-
+       
             }
             change = 0;
         }
     }
 
-
+    
     class SurfaceDetails {
 
         Surface surface;
@@ -443,6 +692,12 @@ private static long softInput = 0L;
             this.density = density;
         }
 
+        SurfaceDetails(Surface surface, int width, int height) {
+            this.surface = surface;
+            this.width = width;
+            this.height = height;
+        }
+        
         SurfaceDetails(Surface surface, int format, int width, int height) {
             this.surface = surface;
             this.format = format;
