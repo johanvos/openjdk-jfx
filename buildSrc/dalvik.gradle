@@ -524,3 +524,66 @@ DALVIK.includeEGL = true
 DALVIK.includeGTK = true
 DALVIK.includeLens = true
 ext.IS_COMPILE_PANGO = false
+
+project(":graphics") {
+
+    apply plugin: "java"
+
+    sourceSets {
+        dalvik
+    }
+
+    afterEvaluate {
+        def generatedHeadersDir = "$buildDir/gensrc/headers/dalvik" as String
+        task("compileJavafxports", type: JavaCompile) { // , dependsOn: [project(':base').compileJava, project(':graphics').compileJava]) {
+            doFirst {
+                mkdir generatedHeadersDir
+            }
+
+            sourceCompatibility = 1.8
+            targetCompatibility = 1.8
+
+            options.bootClasspath = "$sdk/platforms/$sdk_target/android.jar"
+
+            classpath = configurations.compile
+            classpath += files("${project(':base').buildDir}/classes/java/main/javafx.base")
+            classpath += files("${project(':graphics').buildDir}/classes/java/main/javafx.graphics")
+
+            source = project.sourceSets.dalvik.java.srcDirs
+
+            destinationDir = project.sourceSets.dalvik.output.classesDir
+            options.compilerArgs.addAll([
+                    '-h', generatedHeadersDir,  // Note: this creates the native headers
+                    '-implicit:none'
+            ])
+        }
+/*
+    task compileDalvikLibs(type: JavaCompile, group: "Build", dependsOn: explodeAarDependencies) {
+        description = "Task compiles dalvik vm based libraries."
+        options.bootClasspath = "$sdk/platforms/$sdk_target/android.jar" + File.pathSeparator + configurations.androidCompile.asPath
+        classpath = files("build/classes/dalvik", "build/classes/main")
+        destinationDir = file("build/classes/dalvik")
+        dependencyCacheDir = file("build/dependency-cache")
+        source fileTree(dir: 'src/dalvik/java').matching { include '**' }
+    }
+*/
+
+    def jarDalvikLibs = project.task ("jarDalvikLibs", type: Jar, group: "Build", dependsOn: compileJavafxports) {
+        description = "Creates jfxdvk.jar with all dalvik based classes."
+        archiveName = "jfxdvk.jar"
+        includeEmptyDirs = false
+        from("$project.buildDir/classes/java/main/javafx.graphics/")
+        include("javafxports/**/*")
+        eachFile {
+            if (it.name.endsWith('.class')) {
+                RandomAccessFile raf = new RandomAccessFile(it.file.path, "rw");
+                raf.seek(7);
+                raf.writeByte(0x32); //make it jdk6
+                raf.close();
+            }
+        }
+    }
+    project.task("sdk").dependsOn(jarDalvikLibs)
+}
+
+}
