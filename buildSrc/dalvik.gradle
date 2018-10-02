@@ -286,7 +286,7 @@ DALVIK.activity.nativeSource = file("${project("graphics").projectDir}/src/dalvi
 DALVIK.activity.compiler = compiler
 DALVIK.activity.linker = linker
 DALVIK.activity.lib = "activity"
-DALVIK.activity.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
+DALVIK.activity.ccFlags = [ccFlags, "-I${project(":graphics").buildDir}/gensrc/headers/dalvik", ccWarnFlags, ccArchFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags].flatten()
 DALVIK.activity.linkFlags = [linkFlags, "-landroid", "-llog"].flatten()
 
@@ -526,12 +526,17 @@ DALVIK.includeLens = true
 ext.IS_COMPILE_PANGO = false
 
 project(":graphics") {
+    project.ext.buildModule = true
+    project.ext.includeSources = true
+    project.ext.moduleRuntime = true
+    project.ext.moduleName = "javafx.graphics"
 
     apply plugin: "java"
 
     sourceSets {
         dalvik
     }
+    addNative(project, "activity")
 
     afterEvaluate {
         def generatedHeadersDir = "$buildDir/gensrc/headers/dalvik" as String
@@ -572,7 +577,7 @@ project(":graphics") {
         description = "Creates jfxdvk.jar with all dalvik based classes."
         archiveName = "jfxdvk.jar"
         includeEmptyDirs = false
-        from("$project.buildDir/classes/java/main/javafx.graphics/")
+        from("$project.buildDir/classes/java/dalvik")
         include("javafxports/**/*")
         eachFile {
             if (it.name.endsWith('.class')) {
@@ -583,7 +588,11 @@ project(":graphics") {
             }
         }
     }
-    project.task("sdk").dependsOn(jarDalvikLibs)
+    def copyJfxdvk = project.task("copyJfxdvk", type: Copy, dependsOn: jarDalvikLibs) {
+        from file("$project.buildDir/libs/jfxdvk.jar")
+        into file("$rootProject.buildDir/dalvik-sdk/lib/");
+    }
+    project.task("sdk").dependsOn(copyJfxdvk, jarDalvikLibs)
 }
 
 }
