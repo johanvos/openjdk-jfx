@@ -28,7 +28,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.SurfaceView;
+import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import java.util.concurrent.CountDownLatch;
@@ -47,7 +47,6 @@ public class FXFragment extends Fragment {
         System.loadLibrary("activity");
     }
     private FXDalvikEntity fxDalvikEntity;
-    private SurfaceView mView;
 
     protected FXFragment() {
         activity = getActivity();
@@ -66,8 +65,8 @@ public class FXFragment extends Fragment {
         }
         metadata.putSerializable(FXDalvikEntity.META_DATA_MAIN_CLASS, fxAppClassName);
         fxDalvikEntity = new FXDalvikEntity(metadata, activity);
-        mView = fxDalvikEntity.createView();
-        return mView;
+        View answer = fxDalvikEntity.createView();
+        return answer;
     }
 
 }
