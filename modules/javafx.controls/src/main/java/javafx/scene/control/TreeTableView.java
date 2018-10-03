@@ -2437,7 +2437,7 @@ public class TreeTableView<S> extends Control {
             shiftSelection(0, treeTableView.isShowRoot() ? 1 : -1, null);
         };
 
-        private EventHandler<TreeItem.TreeModificationEvent<S>> treeItemListener = new EventHandler<>() {
+        private EventHandler<TreeItem.TreeModificationEvent<S>> treeItemListener = new EventHandler<TreeItem.TreeModificationEvent<S>>() {
             @Override public void handle(TreeItem.TreeModificationEvent<S> e) {
 
                 if (getSelectedIndex() == -1 && getSelectedItem() == null) return;
