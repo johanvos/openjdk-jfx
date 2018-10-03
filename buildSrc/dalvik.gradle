@@ -92,6 +92,8 @@ boolean assertDir(String dir) {
     return assertDir(file(dir))
 }
 
+apply from: 'buildSrc/java8.gradle'
+
 def closedDir = file("$projectDir/../rt-closed")
 
 def armArchs = ["armeabi", "armeabiv-7a"]
