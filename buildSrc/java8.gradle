@@ -1,0 +1,175 @@
+apply plugin: 'maven-publish'
+
+def java8Projects = [
+        project("base"),
+        project("controls"),
+        project("fxml"),
+        project("graphics"),
+        project("media"),
+//        project("web"),
+]
+
+def baseProject = project(":base");
+def graphicsProject = project(":graphics");
+
+subprojects {
+    if (!java8Projects.contains(project)) {
+        return
+    }
+
+    apply plugin: 'java'
+
+    project.task("compileJava8", type: JavaCompile, dependsOn: compileJava) {
+        description = "Compile all classes targeted to Java 8"
+
+        classpath = files("$baseProject.buildDir/classes8","$graphicsProject.buildDir/classes8")
+
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+
+        exclude 'module-info.java'
+
+        destinationDir = project.file("$project.buildDir/classes8")
+    }
+}
+
+project.afterEvaluate {
+    java8Projects.each { project ->
+        project.compileJava8.source = project.sourceSets.main.java.srcDirs
+
+        project.processResources.destinationDir = project.sourceSets.main.output.resourcesDir
+    }
+
+    project(":graphics") {
+        def processDecoraShaders = project.task("processDecora8Shaders",
+                dependsOn: [project.generateDecoraShaders],
+                type: Copy,
+                description: "Copy hlsl / frag shaders to build/resources/jsl-decora") {
+            from("$project.buildDir/hlsl/Decora") {
+                include "**/*.obj"
+            }
+            from("$project.buildDir/gensrc/jsl-decora") {
+                include("**/*.frag")
+            }
+            into project.compileJava8.destinationDir
+        }
+        def processPrismShaders = project.task("processPrism8Shaders",
+                dependsOn: [project.generatePrismShaders],
+                type: Copy,
+                description: "Copy hlsl / frag shaders to build/resources/jsl-prism") {
+            from("$project.buildDir/hlsl/Prism") {
+                include "**/*.obj"
+            }
+            from("$project.buildDir/gensrc/jsl-prism") {
+                include("**/*.frag")
+            }
+            into project.compileJava8.destinationDir
+        }
+
+        project.processShaders.dependsOn(processDecoraShaders, processPrismShaders)
+
+        task("compileFullJava8", type: JavaCompile, dependsOn: project(":graphics").processShaders) {
+            description = "Compile all of the graphics java classes - main and shaders"
+
+            // classpath = project(":graphics").configurations.compile
+            classpath = files("$baseProject.buildDir/classes8")
+            // options.bootClasspath = "$sdk/platforms/$sdk_target/android.jar"
+
+println("CP8: CP = $classpath\n\n\n\n\n");
+            sourceCompatibility = 1.8
+            targetCompatibility = 1.8
+
+            exclude 'module-info.java'
+
+            source = project(":graphics").sourceSets.main.java.srcDirs
+            source += "${project(":graphics").buildDir}/gensrc/java"
+            source += project(":graphics").sourceSets.shaders.output
+
+            destinationDir = project.file("${project(":graphics").buildDir}/classes8")
+            options.compilerArgs.addAll([
+                    '-h', "${project(":graphics").buildDir}/gensrc/headers/",  // Note: this creates the native headers
+                    '-implicit:none'
+            ])
+        }
+    }
+    project(":base").classes.dependsOn project(":base").compileJava8
+    project(":controls").classes.dependsOn project(":controls").compileJava8
+    project(":graphics").classes.dependsOn project(":graphics").compileFullJava8
+
+    project.task("bundleJavafxports", type: Jar, dependsOn: project(":graphics").compileJavafxports) {
+        destinationDir = file("$project.buildDir/dalvik2-modular-sdk/modules_libs/ext")
+        baseName = "jfxdvk"
+        extension = "jar"
+
+        includeEmptyDirs = false
+
+        from project(":graphics").compileJavafxports.destinationDir
+        // from project(":web").compileDalvikWebview.destinationDir
+    }
+
+    project.task("bundleJava8", type: Jar, dependsOn: sdk) {
+        destinationDir = file("$project.buildDir/dalvik2-modular-sdk/modules_libs/ext")
+        baseName = "jfxrt"
+        extension = "jar"
+
+        includeEmptyDirs = false
+
+        from("${rootProject.buildDir}/dalvik2-modular-sdk/modules_libs/javafx.base")
+        from("${rootProject.buildDir}/dalvik2-modular-sdk/modules_libs/javafx.graphics", {
+            include "**/*.so"
+            eachFile {
+                it.path = "lib/$TOOLCHAIN_LIB/$it.name"
+            }
+        })
+        from("${rootProject.buildDir}/dalvik2-modular-sdk/modules_libs/javafx.web", {
+            include "**/libwebview.so"
+            eachFile {
+                it.path = "lib/$TOOLCHAIN_LIB/$it.name"
+            }
+        })
+
+        java8Projects.each { project ->
+            from project.compileJava8.destinationDir
+            from project.sourceSets.main.output.resourcesDir
+
+            dependsOn project.compileJava8
+        }
+
+        // from project(":controls").sourceSets.dalvik.output.classesDir
+        // from project(":controls").sourceSets.dalvik.output.resourcesDir
+        // from project(":web").compileDalvikWebview.destinationDir
+    }
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId = 'org.javafxports'
+                artifactId = 'dalvik-sdk'
+                version = '9.0.1-SNAPSHOT'
+
+                artifact bundleJava8
+            }
+            jfxdvk(MavenPublication) {
+                groupId = 'org.javafxports'
+                artifactId = 'jfxdvk'
+                version = '9.0.1-SNAPSHOT'
+
+                artifact bundleJavafxports
+            }
+        }
+
+        repositories {
+            maven {
+                def repositoryUrl = project.hasProperty('repositoryUrl') ? project.getProperty('repositoryUrl') : 'http://nexus.gluonhq.com/nexus/content/repositories/snapshots/'
+                def repositoryUsername = project.hasProperty('repositoryUsername') ? project.getProperty('repositoryUsername') :  project.getProperty('gluonNexusUsername')
+                def repositoryPassword = project.hasProperty('repositoryPassword') ? project.getProperty('repositoryPassword') :  project.getProperty('gluonNexusPassword')
+
+                url repositoryUrl
+                credentials {
+                    username repositoryUsername
+                    password repositoryPassword
+                }
+            }
+        }
+    }
+}
