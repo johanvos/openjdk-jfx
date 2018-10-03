@@ -39,7 +39,8 @@ public class Logging {
     public static class ErrorLogger extends PlatformLogger {
 
         ErrorLogger() {
-            super(System.getLogger("javafx.beans"));
+            // super(System.getLogger("javafx.beans"));
+            super(java.util.logging.Logger.getLogger("javafx.beans"));
         }
 
         private static final ErrorLogger INSTANCE = new ErrorLogger();

@@ -43,12 +43,26 @@ import java.util.List;
 public class NativeLibLoader {
 
     private static final HashSet<String> loaded = new HashSet<String>();
+    static boolean hasStackWalker = false;
+    static {
+        try {
+            Class sw = Class.forName("java.lang.StackWalker");
+            if (sw != null) {
+                hasStackWalker = true;
+            }
+        } catch (Throwable t) {
+            System.err.println("No stackwalker");
+        }
+    }
 
     public static synchronized void loadLibrary(String libname) {
         if (!loaded.contains(libname)) {
-            StackWalker walker = AccessController.doPrivileged((PrivilegedAction<StackWalker>) () ->
-            StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE));
-            Class caller = walker.getCallerClass();
+            Class caller = NativeLibLoader.class;
+            if (hasStackWalker) {
+                StackWalker walker = AccessController.doPrivileged((PrivilegedAction<StackWalker>) () ->
+                StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE));
+                caller = walker.getCallerClass();
+            }
             loadLibraryInternal(libname, null, caller);
             loaded.add(libname);
         }
@@ -56,9 +70,12 @@ public class NativeLibLoader {
 
     public static synchronized void loadLibrary(String libname, List<String> dependencies) {
         if (!loaded.contains(libname)) {
-            StackWalker walker = AccessController.doPrivileged((PrivilegedAction<StackWalker>) () ->
-            StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE));
-            Class caller = walker.getCallerClass();
+            Class caller = NativeLibLoader.class;
+            if (hasStackWalker) {
+                StackWalker walker = AccessController.doPrivileged((PrivilegedAction<StackWalker>) () ->
+                StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE));
+                caller = walker.getCallerClass();
+            }
             loadLibraryInternal(libname, dependencies, caller);
             loaded.add(libname);
         }
