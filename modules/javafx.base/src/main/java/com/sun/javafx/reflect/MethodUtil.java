@@ -344,10 +344,13 @@ public final class MethodUtil extends SecureClassLoader {
         try {
             InputStream in = MethodUtil.class.getModule().getResourceAsStream(path);
             if (in != null) {
-                try (in) {
+                try {
                     byte[] b = in.readAllBytes();
                     return defineClass(name, b);
                 }
+		finally {
+		    in.close();
+	        }
             }
         } catch (IOException e) {
             throw new ClassNotFoundException(name, e);
