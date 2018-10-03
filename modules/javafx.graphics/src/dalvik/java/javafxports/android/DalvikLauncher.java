@@ -69,6 +69,7 @@ public class DalvikLauncher implements Launcher {
 
     @Override
     public void launchApp(FXDalvikEntity fxDalvikEntity, String mainClassName, String preloaderClassName, String[] args) {
+	System.out.println("[JVDBG] DalvikLauncher is about to launch "+mainClassName);
         this.fxDalvikEntity = fxDalvikEntity;
         this.activity = fxDalvikEntity.getActivity();
         this.preloaderClassName = preloaderClassName;
