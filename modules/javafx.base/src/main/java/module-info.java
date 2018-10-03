@@ -32,6 +32,7 @@
  */
 module javafx.base {
     requires java.desktop;
+    requires java.logging;
 
     exports javafx.beans;
     exports javafx.beans.binding;
