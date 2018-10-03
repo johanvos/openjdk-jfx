@@ -97,7 +97,7 @@ println("CP8: CP = $classpath\n\n\n\n\n");
     project(":graphics").classes.dependsOn project(":graphics").compileFullJava8
 
     project.task("bundleJavafxports", type: Jar, dependsOn: project(":graphics").compileJavafxports) {
-        destinationDir = file("$project.buildDir/dalvik2-modular-sdk/modules_libs/ext")
+        destinationDir = file("$project.buildDir/dalvik-sdk/lib")
         baseName = "jfxdvk"
         extension = "jar"
 
@@ -108,7 +108,7 @@ println("CP8: CP = $classpath\n\n\n\n\n");
     }
 
     project.task("bundleJava8", type: Jar, dependsOn: sdk) {
-        destinationDir = file("$project.buildDir/dalvik2-modular-sdk/modules_libs/ext")
+        destinationDir = file("$project.buildDir/dalvik-sdk/lib")
         baseName = "jfxrt"
         extension = "jar"
 
@@ -134,6 +134,10 @@ println("CP8: CP = $classpath\n\n\n\n\n");
 
             dependsOn project.compileJava8
         }
+        // from("$baseProject.buildDir/dalvik-module-lib") {
+            // include("javafx.platform.properties")
+        // }
+
 
         // from project(":controls").sourceSets.dalvik.output.classesDir
         // from project(":controls").sourceSets.dalvik.output.resourcesDir
