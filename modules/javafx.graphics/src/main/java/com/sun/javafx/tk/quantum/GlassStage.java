@@ -106,11 +106,14 @@ abstract class GlassStage implements TKStage {
     static AccessControlContext doIntersectionPrivilege(PrivilegedAction<AccessControlContext> action,
                                                        AccessControlContext stack,
                                                        AccessControlContext context) {
+        return AccessController.getContext();
+	    /*
         return AccessController.doPrivileged((PrivilegedAction<AccessControlContext>) () -> {
             return AccessController.doPrivilegedWithCombiner((PrivilegedAction<AccessControlContext>) () -> {
                 return AccessController.getContext();
             }, stack);
         },  context);
+	*/
     }
 
     public final void setSecurityContext(AccessControlContext ctx) {
