@@ -103,6 +103,10 @@ public class PlatformLogger { //implements System.Logger {
         return log;
     }
 
+    public String getName() {
+        return this.loggerProxy.getName();
+    }
+
 
     private final Logger loggerProxy;
     protected PlatformLogger(java.util.logging.Logger loggerProxy) {
