@@ -495,25 +495,25 @@ DALVIK.font.linkFlags = [linkFlags].flatten()
 DALVIK.font.lib = "javafx_font"
 
 if (compileNativeText) {
-    DALVIK.fontNativeFreetype = [:]
-    DALVIK.fontNativeFreetype.javahInclude = [
+    DALVIK.fontFreetype = [:]
+    DALVIK.fontFreetype.javahInclude = [
         "com/sun/javafx/font/freetype/OSFreetype.class"
     ]
-    DALVIK.fontNativeFreetype.nativeSource = [
+    DALVIK.fontFreetype.nativeSource = [
         file("${project("graphics").projectDir}/src/main/native-font/freetype.c")
     ]
-    DALVIK.fontNativeFreetype.compiler = compiler
-    DALVIK.fontNativeFreetype.linker = linker
-    DALVIK.fontNativeFreetype.lib = "javafx_font_freetype"
+    DALVIK.fontFreetype.compiler = compiler
+    DALVIK.fontFreetype.linker = linker
+    DALVIK.fontFreetype.lib = "javafx_font_freetype"
 
     ccFlags += ["-D_ENABLE_HARFBUZZ"]
 
-    DALVIK.fontNativeFreetype.ccFlags =
+    DALVIK.fontFreetype.ccFlags =
         [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
         ccDebugFlags, ccDefaultIncludeFlags,
         "-I$freetypeDir/include", "-I$freetypeDir/include/freetype2"].flatten()
 
-    DALVIK.fontNativeFreetype.linkFlags =
+    DALVIK.fontFreetype.linkFlags =
         [linkFlags, "-llog",
          "-L$freetypeDir/lib", "$freetypeDir/lib/libfreetype.a"].flatten()
 }
@@ -539,6 +539,9 @@ project(":graphics") {
         dalvik
     }
     addNative(project, "activity")
+    if (compileNativeText) {
+        addNative(project, "fontFreetype")
+    }
 
     afterEvaluate {
         def generatedHeadersDir = "$buildDir/gensrc/headers/dalvik" as String
