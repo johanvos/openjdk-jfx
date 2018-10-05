@@ -215,6 +215,7 @@ class ES2SwapChain implements ES2RenderTarget, Presentable, GraphicsResource {
             }
             w = pState.getRenderWidth();
             h = pState.getRenderHeight();
+System.out.println("[JVDBG] pState = "+pState+", w = "+w+", h = "+h);
             ResourceFactory factory = context.getResourceFactory();
             stableBackbuffer = factory.createRTTexture(w, h,
                                                        WrapMode.CLAMP_NOT_NEEDED,

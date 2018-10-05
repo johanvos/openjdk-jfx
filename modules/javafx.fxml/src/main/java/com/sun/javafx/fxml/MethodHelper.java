@@ -40,10 +40,12 @@ public class MethodHelper {
             = AccessController.doPrivileged((PrivilegedAction<Boolean>) ()
                     -> Boolean.getBoolean("sun.reflect.debugModuleAccessChecks"));
 
-    private static final Module trampolineModule = MethodUtil.getTrampolineModule();
+    // private static final Module trampolineModule = MethodUtil.getTrampolineModule();
 
     public static Object invoke(Method m, Object obj, Object[] params)
             throws InvocationTargetException, IllegalAccessException {
+        return m.invoke(obj, params);
+/*
 
         // Check that the class in question is in a package that is open to
         // this module (or exported unconditionally). If so, then we will open
@@ -81,6 +83,7 @@ public class MethodHelper {
         }
 
         return MethodUtil.invoke(m, obj, params);
+*/
     }
 
     // Utility class, do not instantiate

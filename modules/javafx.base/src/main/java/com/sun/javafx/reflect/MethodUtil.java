@@ -48,14 +48,18 @@ import com.sun.javafx.reflect.ReflectUtil;
 
 class Trampoline {
     static {
+System.out.println("TRAMPOLINE clinit");
         if (Trampoline.class.getClassLoader() == null) {
             throw new Error(
                 "Trampoline must not be defined by the bootstrap classloader");
         }
+/*
         if (Trampoline.class.getClassLoader() == ClassLoader.getPlatformClassLoader()) {
             throw new Error(
                 "Trampoline must not be defined by the platform classloader");
         }
+*/
+System.out.println("TRAMPOLINE clinit done");
     }
 
     private static void ensureInvocableMethod(Method m)
@@ -260,9 +264,9 @@ public final class MethodUtil extends SecureClassLoader {
     /*
      * Get the (unnamed) module of the trampoline class
      */
-    public static Module getTrampolineModule() {
-        return bounce.getDeclaringClass().getModule();
-    }
+    // public static Module getTrampolineModule() {
+        // return bounce.getDeclaringClass().getModule();
+    // }
 
     /*
      * Bounce through the trampoline.
@@ -297,6 +301,7 @@ public final class MethodUtil extends SecureClassLoader {
                 new PrivilegedExceptionAction<Method>() {
                     public Method run() throws Exception {
                         Class<?> t = getTrampolineClass();
+System.out.println("[JVDBG] in getTrampoline, getTrampolineClass returns "+t);
                         Class<?>[] types = {
                             Method.class, Object.class, Object[].class
                         };
@@ -342,7 +347,8 @@ public final class MethodUtil extends SecureClassLoader {
         }
         String path = name.replace('.', '/').concat(".class");
         try {
-            InputStream in = MethodUtil.class.getModule().getResourceAsStream(path);
+            // InputStream in = MethodUtil.class.getModule().getResourceAsStream(path);
+            InputStream in = MethodUtil.class.getResourceAsStream(path);
             if (in != null) {
                 try {
                     byte[] b = in.readAllBytes();
@@ -380,8 +386,10 @@ public final class MethodUtil extends SecureClassLoader {
 
     private static Class<?> getTrampolineClass() {
         try {
-            return Class.forName(TRAMPOLINE, true, new MethodUtil());
+            return Class.forName(TRAMPOLINE);// , true, new MethodUtil());
         } catch (ClassNotFoundException e) {
+System.out.println ("[JVDBG] could not get trampolineclass "+TRAMPOLINE);
+e.printStackTrace();
         }
         return null;
     }
