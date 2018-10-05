@@ -109,9 +109,9 @@ public class FXMLLoader {
         new RuntimePermission("getClassLoader");
 
     // Instance of StackWalker used to get caller class (must be private)
-    private static final StackWalker walker =
-        AccessController.doPrivileged((PrivilegedAction<StackWalker>) () ->
-            StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE));
+    // private static final StackWalker walker =
+        // AccessController.doPrivileged((PrivilegedAction<StackWalker>) () ->
+            // StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE));
 
     // Abstract base class for elements
     private abstract class Element {
@@ -2354,7 +2354,7 @@ public class FXMLLoader {
         if (classLoader == null) {
             final SecurityManager sm = System.getSecurityManager();
             final Class caller = (sm != null) ?
-                    walker.getCallerClass() :
+                    null : // walker.getCallerClass() :
                     null;
             return getDefaultClassLoader(caller);
         }
@@ -2433,7 +2433,7 @@ public class FXMLLoader {
      */
     public <T> T load() throws IOException {
         return loadImpl((System.getSecurityManager() != null)
-                            ? walker.getCallerClass()
+                            ? null //? walker.getCallerClass()
                             : null);
     }
 
@@ -2448,7 +2448,7 @@ public class FXMLLoader {
      */
     public <T> T load(InputStream inputStream) throws IOException {
         return loadImpl(inputStream, (System.getSecurityManager() != null)
-                                         ? walker.getCallerClass()
+                                         ? null //? walker.getCallerClass()
                                          : null);
     }
 
@@ -3069,7 +3069,7 @@ public class FXMLLoader {
     public static ClassLoader getDefaultClassLoader() {
         final SecurityManager sm = System.getSecurityManager();
         final Class caller = (sm != null) ?
-                walker.getCallerClass() :
+                null: //walker.getCallerClass() :
                 null;
         return getDefaultClassLoader(caller);
     }
@@ -3104,7 +3104,7 @@ public class FXMLLoader {
      */
     public static <T> T load(URL location) throws IOException {
         return loadImpl(location, (System.getSecurityManager() != null)
-                                      ? walker.getCallerClass()
+                                      ? null //walker.getCallerClass()
                                       : null);
     }
 
@@ -3127,7 +3127,7 @@ public class FXMLLoader {
                                      throws IOException {
         return loadImpl(location, resources,
                         (System.getSecurityManager() != null)
-                            ? walker.getCallerClass()
+                            ? null //walker.getCallerClass()
                             : null);
     }
 
@@ -3153,7 +3153,7 @@ public class FXMLLoader {
                                      throws IOException {
         return loadImpl(location, resources, builderFactory,
                         (System.getSecurityManager() != null)
-                            ? walker.getCallerClass()
+                            ? null //walker.getCallerClass()
                             : null);
     }
 
@@ -3183,7 +3183,7 @@ public class FXMLLoader {
                                      throws IOException {
         return loadImpl(location, resources, builderFactory, controllerFactory,
                         (System.getSecurityManager() != null)
-                            ? walker.getCallerClass()
+                            ? null //walker.getCallerClass()
                             : null);
     }
 
@@ -3217,7 +3217,7 @@ public class FXMLLoader {
         return loadImpl(location, resources, builderFactory, controllerFactory,
                         charset,
                         (System.getSecurityManager() != null)
-                            ? walker.getCallerClass()
+                            ? null //walker.getCallerClass()
                             : null);
     }
 
