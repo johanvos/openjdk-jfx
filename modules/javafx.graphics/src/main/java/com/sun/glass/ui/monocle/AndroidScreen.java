@@ -32,6 +32,7 @@ import java.nio.ByteBuffer;
 
 public class AndroidScreen implements NativeScreen {
 
+    private int dpi = -1;
     private float density = -1;
     public int getDepth() {
         return 24;
@@ -49,15 +50,17 @@ public class AndroidScreen implements NativeScreen {
      * Returns the pixel width of the screen.
      */
     public int getWidth() {
-        int answer = (int)(_getWidth()/getScale());
-        return answer;
+//        int answer = (int)(_getWidth()/getScale());
+//        return answer;
+        return _getWidth();
     }
 
     /**
      * Returns the pixel height of the screen.
      */
     public int getHeight() {
-        return (int)(_getHeight()/getScale());
+//        return (int)(_getHeight()/getScale());
+        return _getHeight();
     }
 
     /**

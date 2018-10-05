@@ -134,6 +134,14 @@ final class MonocleWindow extends Window {
         width = Math.max(width, minW);
         height = Math.max(height, minH);
 
+        float sx = getPlatformScaleX();
+        float sy = getPlatformScaleY();
+        x = Math.round( x / sx);
+        y = Math.round( y / sy);
+        if ( width > 0)   width  = Math.round( width / sx);
+        if ( height > 0)  height = Math.round( height / sy);
+
+
         notifyResizeAndMove(x, y, width, height);
     }
 
