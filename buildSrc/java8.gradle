@@ -6,11 +6,13 @@ def java8Projects = [
         project("fxml"),
         project("graphics"),
         project("media"),
-//        project("web"),
+        project("web"),
 ]
 
 def baseProject = project(":base");
 def graphicsProject = project(":graphics");
+def controlsProject = project(":controls");
+def mediaProject = project(":media");
 
 subprojects {
     if (!java8Projects.contains(project)) {
@@ -22,7 +24,10 @@ subprojects {
     project.task("compileJava8", type: JavaCompile, dependsOn: compileJava) {
         description = "Compile all classes targeted to Java 8"
 
-        classpath = files("$baseProject.buildDir/classes8","$graphicsProject.buildDir/classes8")
+        classpath = files("$baseProject.buildDir/classes8",
+                          "$graphicsProject.buildDir/classes8",
+                          "$mediaProject.buildDir/classes8",
+                          "$controlsProject.buildDir/classes8")
 
         sourceCompatibility = 1.8
         targetCompatibility = 1.8
@@ -75,7 +80,6 @@ project.afterEvaluate {
             classpath = files("$baseProject.buildDir/classes8")
             // options.bootClasspath = "$sdk/platforms/$sdk_target/android.jar"
 
-println("CP8: CP = $classpath\n\n\n\n\n");
             sourceCompatibility = 1.8
             targetCompatibility = 1.8
 
