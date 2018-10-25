@@ -972,6 +972,10 @@ final public class WebEngine {
         return page.executeScript(page.getMainFrame(), script);
     }
 
+    public long getJavaScriptHeapSize() {
+        return page.getJavaScriptHeapSize();
+    }
+
     private long getMainFrame() {
         return page.getMainFrame();
     }

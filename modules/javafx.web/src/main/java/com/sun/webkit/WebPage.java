@@ -1517,6 +1517,10 @@ public final class WebPage {
         }
     }
 
+    public long getJavaScriptHeapSize() {
+        return twkGetJavaScriptHeapSize();
+    }
+
     public long getMainFrame() {
         lockPage();
         try {
@@ -2578,6 +2582,7 @@ public final class WebPage {
     private native void twkSetZoomFactor(long pFrame, float zoomFactor, boolean textOnly);
 
     private native Object twkExecuteScript(long pFrame, String script);
+    private native long twkGetJavaScriptHeapSize();
 
     private native void twkReset(long pFrame);
 

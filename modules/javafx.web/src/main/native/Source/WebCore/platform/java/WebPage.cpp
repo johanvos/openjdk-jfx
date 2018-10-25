@@ -70,6 +70,7 @@
 #include <WebCore/Text.h>
 #include <WebCore/TextIterator.h>
 #include <WebCore/PageConfiguration.h>
+#include <WebCore/bindings/js/CommonVM.h>
 #include <JavaScriptCore/inspector/InspectorAgentBase.h>
 #include <JavaScriptCore/JSContextRefPrivate.h>
 #include <JavaScriptCore/JSContextRef.h>
@@ -1891,6 +1892,13 @@ JNIEXPORT jboolean JNICALL Java_com_sun_webkit_WebPage_twkProcessInputTextChange
         frame->editor().setComposition(composed, underlines, caretPosition, 0);
     }
     return JNI_TRUE;
+}
+
+JNIEXPORT jlong JNICALL Java_com_sun_webkit_WebPage_twkGetJavaScriptHeapSize
+    (JNIEnv* env, jobject self) {
+    auto& vm = commonVM();
+    long answer = vm.heap.size();
+    return (jlong)answer;
 }
 
 JNIEXPORT jboolean JNICALL Java_com_sun_webkit_WebPage_twkProcessCaretPositionChange
