@@ -15,7 +15,6 @@ Issue key|Summary
 [JDK-8204880](https://bugs.openjdk.java.net/browse/JDK-8204880)|Enhance object method calls
 [JDK-8207387](https://bugs.openjdk.java.net/browse/JDK-8207387)|WebView is not rendering html checkbox and radio buttons
 [JDK-8210386](https://bugs.openjdk.java.net/browse/JDK-8210386)|Clipping problems with complex affine transforms: negative scaling factors or small scaling factors
-
 [JDK-8203345](https://bugs.openjdk.java.net/browse/JDK-8203345)|Memory leak in VirtualFlow when screen reader is enabled|accessibility
 [JDK-8204336](https://bugs.openjdk.java.net/browse/JDK-8204336)|Platform.exit() throws ISE when a nested event loop is active|application-lifecycle
 
