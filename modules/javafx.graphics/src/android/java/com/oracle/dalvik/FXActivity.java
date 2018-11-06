@@ -120,9 +120,11 @@ public class FXActivity extends Activity implements SurfaceHolder.Callback,
         return instance;
     }
 
+    /*
     public static String getDataDir() {
         return appDataDir;
     }
+    */
 
     public static ViewGroup getViewGroup() {
         return mViewGroup;
