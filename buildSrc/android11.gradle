@@ -364,7 +364,6 @@ project(":graphics") {
         options.bootClasspath = "$sdk/platforms/$sdk_target/android.jar"
         sourceCompatibility = "1.8"
         targetCompatibility = "1.8"
-        // classpath = files("build/classes/dalvik", "build/classes/main", "$sdk/platforms/$sdk_target/android.jar")
         classpath = files("build/classes/android", "build/classes/main")
         destinationDir = file("build/classes/android")
         source fileTree(dir: 'src/android/java').matching { include '**' }
@@ -379,6 +378,14 @@ project(":graphics") {
         include("com/oracle/**/*")
         dependsOn(compileDalvikLibs)
     }
+    task copyJfxdvk(type: Copy, dependsOn: jarDalvikLibs) {
+            from "build/libs"
+            into "${rootProject.buildDir}/android11-sdk/lib"
+            include("*.jar")
+        }
+
+    project.task("sdk").dependsOn(copyJfxdvk);
+    // project.task("sdk").dependsOn(jarDalvikLibs);
     project.task("sdkAndroid11").dependsOn(jarDalvikLibs);
 
 }
