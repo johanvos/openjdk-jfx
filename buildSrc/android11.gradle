@@ -45,15 +45,57 @@ String getLatestPlatform(String path) {
     return "android-" + max
 }
 
-def sdk = project.hasProperty("ANDROID_SDK") ? "${ANDROID_SDK}" : null;
-def sdk_target = project.hasProperty("ANDROID_SDK_TARGET") ?  "${ANDROID_SDK_TARGET}" : getLatestPlatform(sdk);
+int compareVersions(String s1, String s2) {
+    def v1t = s1.tokenize(".")
+    def v2t = s2.tokenize(".")
+    for(int i = 0; i < v1t.size(); i++) {
+        if (i == v2t.size()) {
+            return 1
+        }
+        int n1 = v1t[i].isInteger() ? v1t[i].toInteger() : 0 
+        int n2 = v2t[i].isInteger() ? v2t[i].toInteger() : 0 
+        if (n1 == n2) {
+            continue
+        } else if (n1 > n2) {
+            return 1;
+        } else {
+            return -1
+        }
+    }   
+    return (v2t.size() > v1t.size()) ? -1 : 0 
+}
+
+String getLatestToolchain(String ndk, String tch) {
+    def max = "0.0"
+    def matchFile = null
+    file(cygpath("$ndk/toolchains")).eachFile() {file->
+        def filename = file.getName()
+        if (filename.startsWith(tch)) {
+            def p = filename - "$tch-"
+            if (compareVersions(p, max) > 0) {
+                max = p 
+                matchFile = file
+            }
+        }
+    }   
+    return matchFile.getAbsolutePath()
+}
+
+
+boolean assertDir(File dir) {
+    return dir != null && dir.exists() && dir.isDirectory() && dir.canRead();
+}
+
+boolean assertDir(String dir) {
+    return assertDir(file(dir))
+}
 
 
 
 // All desktop related packages should be built
-ANDROID11.compileSwing = true;
-ANDROID11.compileSWT = true;
-ANDROID11.compileFXPackager = true;
+ANDROID11.compileSwing = false;
+ANDROID11.compileSWT = false;
+ANDROID11.compileFXPackager = false;
 
 // Libraries end up in the lib/$OS_ARCH directory for Linux
 ANDROID11.libDest = "lib"
@@ -61,301 +103,236 @@ ANDROID11.libDest = "lib"
 // Lambda for naming the generated libs
 ANDROID11.library = { name -> return "lib${name}.so" as String }
 
-// A set of common parameters to use for both compiling and linking
-def commonFlags = [
-        "-fno-strict-aliasing", "-fPIC", "-fno-omit-frame-pointer", // optimization flags
-        "-Wextra", "-Wall", "-Wformat-security", "-Wno-unused", "-Wno-parentheses", "-Werror=implicit-function-declaration"] // warning flags
 
-if (!IS_64) {
-    commonFlags += "-m32"
+def sdk = project.hasProperty("ANDROID_SDK") ? project.getProperty("ANDROID_SDK") : null
+def ndk = project.hasProperty("ANDROID_NDK") ? project.getProperty("ANDROID_NDK") : null
+ANDROID11.canBuild = sdk != null && ndk != null
+if (!ANDROID11.canBuild) {
+    fail("Can't build Dalvik. Path to SDK or NDK was not set or is invalid!")
+}
+logger.info("SDK = $sdk and NDK = $ndk");
+ANDROID11.canBuild = assertDir(sdk) && assertDir(ndk)
+if (!ANDROID11.canBuild) {
+    if (!assertDir(sdk)) {
+        logger.error("Path to ANDROID_SDK is invalid! [$sdk]")
+    }
+    if (!assertDir(ndk)) {
+        logger.error("Path to ANDROID_NDK is invalid! [$ndk]")
+    }
+    fail("Cannot build, missing android tools")
 }
 
-// Specify the compilation parameters and link parameters
-def ccFlags = [
-        commonFlags, "-I$JDK_HOME/include", "-I$JDK_HOME/include/linux", "-c",
-        "-ffunction-sections", "-fdata-sections",
-        IS_DEBUG_NATIVE ? ["-ggdb", "-DVERBOSE"] : ["-O2", "-DNDEBUG"]].flatten()
-def ccFlagsGTK3 = ccFlags
-//ccFlags.addAll(["-Wnon-virtual-dtor", "-Woverloaded-virtual", "-std=c++0x"])
-def linkFlags = ["-static-libgcc", "-static-libstdc++", "-shared", commonFlags,
-                 "-Wl,--gc-sections"].flatten()
-
-if (IS_DEBUG_NATIVE) {
-    linkFlags += "-g"
+def sdk_target = project.hasProperty("ANDROID_SDK_TARGET") ?  project.getProperty("ANDROID_SDK_TARGET") : getLatestPlatform(sdk)
+if (!assertDir(file("$sdk/platforms/$sdk_target"))) {
+    sdk_target = getLatestPlatform(sdk)
+    logger.warn("Redefine ANDROID_SDK_TARGET to: [$sdk_target]")
 }
 
-def gtk2CCFlags = [  ];
-def gtk3CCFlags = [ "-Wno-deprecated-declarations" ];
-def gtk2LinkFlags = [ ];
-def gtk3LinkFlags = [ ];
-ANDROID11.buildGTK3 = true
+def ndk_target = project.hasProperty("ANDROID_NDK_TARGET") ? project.getProperty("ANDROID_NDK_TARGET") : getLatestPlatform(ndk)
+if (!assertDir(file("$ndk/platforms/$ndk_target"))) {
+    ndk_target = getLatestPlatform(ndk)
+    logger.warn("Redefine ANDROID_NDK_TARGET to: [$ndk_target]")
+}
 
-// Create $buildDir/linux_tools.properties file and load props from it
-setupTools("linux_gtk2",
-    { propFile ->
-        ByteArrayOutputStream results1 = new ByteArrayOutputStream();
-        exec {
-            commandLine("pkg-config", "--cflags", "gtk+-2.0", "gthread-2.0", "xtst")
-            setStandardOutput(results1);
-        }
-        propFile << "cflagsGTK2=" << results1.toString().trim() << "\n";
+ANDROID11.canBuild = sdk_target != null && ndk_target != null
+if (!ANDROID11.canBuild) {
+    fail("Can't determine sdk or ndk target platform!")
+}
 
-        ByteArrayOutputStream results3 = new ByteArrayOutputStream();
-        exec {
-            commandLine("pkg-config", "--libs", "gtk+-2.0", "gthread-2.0", "xtst")
-            setStandardOutput(results3);
-        }
-        propFile << "libsGTK2=" << results3.toString().trim()  << "\n";
-    },
-    { properties ->
-        def cflagsGTK2 = properties.getProperty("cflagsGTK2")
-        def libsGTK2 = properties.getProperty("libsGTK2")
-        if (cflagsGTK2 && libsGTK2) {
-            gtk2CCFlags.addAll(cflagsGTK2.split(" "))
-            gtk2LinkFlags.addAll(libsGTK2.split(" "))
-        } else {
-            throw new IllegalStateException("GTK2 development packages not found. If GTK2 packages are installed, please remove the build directory and try again.")
-        }
-    }
-)
 
-setupTools("linux_gtk3",
-    { propFile ->
-        ByteArrayOutputStream results2 = new ByteArrayOutputStream();
-        exec {
-            commandLine("pkg-config", "--cflags", "gtk+-3.0", "gthread-2.0", "xtst")
-            setStandardOutput(results2);
-            ignoreExitValue(true)
-        }
-        propFile << "cflagsGTK3=" << results2.toString().trim() << "\n";
+def platforms = [ "arm", "x86", "mips" ]
+def toolchainArchs = [ "arm": "arm-linux-androideabi", "x86": "x86", "mips": "mipsel-linux-android" ]
+def toolchainTools = [ "arm": "arm-linux-androideabi", "x86": "i686-linux-android", "mips": "mipsel-linux-android" ]
+def toolchainLibs = [ "arm": ["armeabi-v7a", "armeabi"], "x86": ["x86"], "mips": ["mips"] ]
 
-        ByteArrayOutputStream results4 = new ByteArrayOutputStream();
-        exec {
-            commandLine("pkg-config", "--libs", "gtk+-3.0", "gthread-2.0", "xtst")
-            setStandardOutput(results4);
-            ignoreExitValue(true)
-        }
-        propFile << "libsGTK3=" << results4.toString().trim()  << "\n";
+defineProperty("DALVIK_PLATFORM", platforms.get(0))
+defineProperty("TOOLCHAIN_ARCH", toolchainArchs[DALVIK_PLATFORM])
+defineProperty("TOOLCHAIN_TOOL", toolchainTools[DALVIK_PLATFORM])
+defineProperty("TOOLCHAIN_LIB", toolchainLibs[DALVIK_PLATFORM].get(0))
 
-    },
-    { properties ->
-        def ccflags =  properties.getProperty("cflagsGTK3")
-        def ldflags =  properties.getProperty("libsGTK3")
-        if (ccflags && ldflags) {
-            gtk3CCFlags.addAll(ccflags.split(" "))
-            gtk3LinkFlags.addAll(ldflags.split(" "))
-        } else {
-            logger.info("Warning: GTK3 development packages not found, not building GTK3 support");
-            ANDROID11.buildGTK3 = false
-        }
-    }
-)
+def toolchainHome = project.hasProperty("ANDROID_CROSS_TOOLS_VER") ?
+        "$ndk/toolchains/${ANDROID_CROSS_TOOLS_VER}" : getLatestToolchain(ndk, TOOLCHAIN_ARCH)
+if (!assertDir(toolchainHome)) {
+    toolchainHome = getLatestToolchain(ndk, toolchainArchs[DALVIK_PLATFORM])
+    logger.warn("Redefine toolchain to [$toolchainHome]")
+}
 
-def pangoCCFlags = ["-D_ENABLE_PANGO"];
-def pangoLinkFlags = [];
-setupTools("linux_pango_tools",
-    { propFile ->
-        ByteArrayOutputStream results = new ByteArrayOutputStream();
-        exec {
-            commandLine "pkg-config", "--cflags", "pangoft2"
-            standardOutput = results
-        }
-        propFile << "cflags=" << results.toString().trim() << "\n";
+def compilerHome = file("${toolchainHome}/prebuilt").listFiles()?.head()
+ANDROID11.canBuild = compilerHome != null
+if (!ANDROID11.canBuild) {
+    fail("Failed to access toolchain [$toolchainHome/prebuilt/$toolsPlatform]!")
+}
 
-        results = new ByteArrayOutputStream();
-        exec {
-            commandLine "pkg-config", "--libs", "pangoft2"
-            standardOutput = results
-        }
-        propFile << "libs=" << results.toString().trim();
-    },
-    { properties ->
-        def cflags = properties.getProperty("cflags")
-        def libs = properties.getProperty("libs")
-        if (cflags && libs) {
-            pangoCCFlags.addAll(cflags.split(" "))
-            pangoLinkFlags.addAll(libs.split(" "))
-        } else {
-            throw new IllegalStateException("Linux pango packages not found.\nIf pango packages are installed, please remove the build directory and try again.")
-        }
-    }
-)
+def freetypeDir = project.hasProperty("FREETYPE_DIR") ? project.getProperty("FREETYPE_DIR") : null
+if (!assertDir(freetypeDir)) {
+    logger.warn("FREETYPE_DIR $freetypeDir doesn't exists! Build continues without native text support.")
+    freetypeDir = null
+}
+def compileNativeText = freetypeDir != null
 
-def freetypeCCFlags = [ext.IS_COMPILE_PANGO ? "-D_ENABLE_PANGO" :
-                       ext.IS_COMPILE_HARFBUZZ ? "-D_ENABLE_HARFBUZZ" : ""]
-def freetypeLinkFlags = []
-setupTools("linux_freetype_tools",
-    { propFile ->
-        ByteArrayOutputStream results = new ByteArrayOutputStream();
-        exec {
-            commandLine "pkg-config", "--cflags", "freetype2"
-            standardOutput = results
-        }
-        propFile << "cflags=" << results.toString().trim() << "\n";
+def wearableVersion = "2.0.0"
 
-        results = new ByteArrayOutputStream();
-        exec {
-            commandLine "pkg-config", "--libs", "freetype2"
-            standardOutput = results
-        }
-        propFile << "libs=" << results.toString().trim();
-    },
-    { properties ->
-        def cflags = properties.getProperty("cflags")
-        def libs = properties.getProperty("libs")
-        if (cflags && libs) {
-            freetypeCCFlags.addAll(cflags.split(" "))
-            freetypeLinkFlags.addAll(libs.split(" "))
-        } else {
-            throw new IllegalStateException("Linux freetype packages not found.\nIf freetype pacakges are installed, please remove the build directory and try again.")
-        }
-    }
-)
+def compiler = file("$compilerHome/bin/$TOOLCHAIN_TOOL-gcc").getAbsolutePath()
+def linker = file("$compilerHome/bin/$TOOLCHAIN_TOOL-g++").getAbsolutePath()
 
-def compiler = IS_COMPILE_PARFAIT ? "parfait-gcc" : "gcc";
-def linker = IS_COMPILE_PARFAIT ? "parfait-g++" : "g++";
+def ccSysroot = "$ndk/sysroot"
+def ccCommonFlags = [ "--sysroot=$ccSysroot", "-std=c99", "-DANDROID", "-c", "-nostdlib", "-DANDROID_NDK", "-DDALVIK_VM" ]
+def ccOptFlags    = [ "-fpic", "-ffunction-sections", "-funwind-tables", "-fstack-protector", "-Os", "-O2", "-fno-strict-aliasing", "-finline-limit=64", "-fomit-frame-pointer" ]
+def ccWarnFlags   = [ "-Wa,--noexecstack", "-Wno-psabi" ]
+def ccArchFlags   = [
+        "armeabi": [ "-mthumb", "-msoft-float", "-D__ARM_ARCH_5__", "-D__ARM_ARCH_5T__", "-D__ARM_ARCH_5E__", "-D__ARM_ARCH_5TE__", "-march=armv5te" , "-mtune=xscale" ],
+        "armeabi-v7a": [ "-mthumb", "-mfloat-abi=softfp", "-mfpu=vfpv3-d16", "-march=armv7-a" ],
+        "x86": [ "-march=i686", "-mtune=intel", "-msse3", "-mfpmath=sse", "-m32" ],
+        "mips": []
+    ]
+def ccDebugFlags  = [ IS_DEBUG_NATIVE ? "-DDEBUG" : "-DNDEBUG" ]
+def ccDefaultIncludeFlags = [ "-I$ccSysroot/usr/include", "-I$ccSysroot/usr/include/$TOOLCHAIN_TOOL" ]
+def ccFlags       = [ ccCommonFlags, ccOptFlags, ccWarnFlags, ccArchFlags[TOOLCHAIN_LIB], ccDebugFlags, ccDefaultIncludeFlags ]
+
+def linkSysroot = "$ndk/platforms/$ndk_target/arch-$DALVIK_PLATFORM" as String
+def linkCommonFlags = [ "--sysroot=$linkSysroot", "-Wl,--no-undefined", "-Wl,-z,noexecstack", "-lc", "-lm", "-shared", "-L$linkSysroot/usr/lib" ]
+def linkArchFlags   = [
+        "armeabi": [],
+        "armeabi-v7a": [ "-march=armv7-a", "-Wl,--fix-cortex-a8" ],
+        "x86": [],
+        "mips": []
+]
+def linkFlags       = [ linkCommonFlags, linkArchFlags[TOOLCHAIN_LIB] ]
 
 ANDROID11.glass = [:]
-ANDROID11.glass.variants = ["glass", "glassgtk2"]
-if (ANDROID11.buildGTK3) {
-    logger.info("Building libglassgtk3")
-    ANDROID11.glass.variants += "glassgtk3"
-} else {
-    logger.warn("NOT Building libglassgtk3")
-}
+ANDROID11.glass.variants = ["monocle"]
+ext.IS_COMPILE_PANGO = false
+ext.COMPILE_SWING = false
 
-FileTree ft_gtk_launcher = fileTree("${project(":graphics").projectDir}/src/main/native-glass/gtk/") {
-    include("**/launcher.c")
-}
+ANDROID11.compileSwing = true
+ANDROID11.compileSWT = false
+ANDROID11.compileFXPackager = false
+ANDROID11.compileWebnodeNative = false
+ANDROID11.compileMediaNative = false
 
-FileTree ft_gtk = fileTree("${project(":graphics").projectDir}/src/main/native-glass/gtk/") {
-    exclude("**/launcher.c")
-}
+ANDROID11.includeLens = false
+ANDROID11.includeMonocle = true
+ANDROID11.includeEGL = true
+ANDROID11.includeSwing = false
+ANDROID11.includeSWT = false
 
-ANDROID11.glass.glass = [:]
-ANDROID11.glass.glass.nativeSource = ft_gtk_launcher.getFiles()
-ANDROID11.glass.glass.compiler = compiler
-ANDROID11.glass.glass.ccFlags = [ccFlags, gtk2CCFlags,  "-Werror"].flatten()
-ANDROID11.glass.glass.linker = linker
-ANDROID11.glass.glass.linkFlags = [linkFlags, "-lX11", "-ldl" ].flatten()
-ANDROID11.glass.glass.lib = "glass"
+ANDROID11.javafxPlatformDefault="monocle"
 
-ANDROID11.glass.glassgtk2 = [:]
-ANDROID11.glass.glassgtk2.nativeSource =  ft_gtk.getFiles()
-ANDROID11.glass.glassgtk2.compiler = compiler
-ANDROID11.glass.glassgtk2.ccFlags = [ccFlags, gtk2CCFlags, "-Werror"].flatten()
-ANDROID11.glass.glassgtk2.linker = linker
-ANDROID11.glass.glassgtk2.linkFlags = [linkFlags, gtk2LinkFlags ].flatten()
-ANDROID11.glass.glassgtk2.lib = "glassgtk2"
+ANDROID11.arch = TOOLCHAIN_LIB
+ANDROID11.libDest = "lib"
 
-ANDROID11.glass.glassgtk3 = [:]
-ANDROID11.glass.glassgtk3.nativeSource =  ft_gtk.getFiles()
-ANDROID11.glass.glassgtk3.compiler = compiler
-ANDROID11.glass.glassgtk3.ccFlags = [ccFlags, gtk3CCFlags, "-Werror"].flatten()
-ANDROID11.glass.glassgtk3.linker = linker
-ANDROID11.glass.glassgtk3.linkFlags = [linkFlags, gtk3LinkFlags ].flatten()
-ANDROID11.glass.glassgtk3.lib = "glassgtk3"
+ANDROID11.library = { name -> return "lib${name}.so" as String }
 
-ANDROID11.decora = [:]
-ANDROID11.decora.compiler = compiler
-ANDROID11.decora.ccFlags = [ccFlags, "-ffast-math"].flatten()
-ANDROID11.decora.linker = linker
-ANDROID11.decora.linkFlags = [linkFlags].flatten()
-ANDROID11.decora.lib = "decora_sse"
+ANDROID11.activity = [:]
+ANDROID11.activity.nativeSource = file("${project(":graphics").projectDir}/src/dalvik/native")
+ANDROID11.activity.compiler = compiler
+ANDROID11.activity.ccFlags = [ ccFlags, "-I${project(":graphics").buildDir}/gensrc/headers/dalvik" ].flatten()
+ANDROID11.activity.linker = linker
+ANDROID11.activity.linkFlags = [ linkFlags, "-landroid", "-llog" ].flatten()
+ANDROID11.activity.lib = "activity"
+
+ANDROID11.webview = [:]
+ANDROID11.webview.nativeSource = file("modules/javafx.web/src/android/native")
+ANDROID11.webview.compiler = compiler
+ANDROID11.webview.ccFlags = [ ccFlags, "-I${project(":web").buildDir}/gensrc/headers/dalvik" ].flatten()
+ANDROID11.webview.linker = linker
+ANDROID11.webview.linkFlags = [ linkFlags, "-ldl", "-llog" ].flatten()
+ANDROID11.webview.lib = "webview"
+ANDROID11.glass = [:]
+ANDROID11.glass.variants = ["monocle"]
+ANDROID11.glass.compiler = compiler
+ANDROID11.glass.ccFlags = [ ccFlags ].flatten()
+ANDROID11.glass.linker = linker
+ANDROID11.glass.linkFlags = [ linkFlags ].flatten()
+ANDROID11.glass.lib = "glass"
+
+ANDROID11.glass.monocle = [:]
+ANDROID11.glass.monocle.nativeSource = [
+        file("${project(":graphics").projectDir}/src/main/native-glass/monocle"),
+        file("${project(":graphics").projectDir}/src/main/native-glass/monocle/android"),
+        file("${project(":graphics").projectDir}/src/main/native-glass/monocle/util") ]
+ANDROID11.glass.monocle.compiler = compiler
+ANDROID11.glass.monocle.ccFlags = [ ccFlags, "-DISEGLFB", "-I", file("${project(":graphics").projectDir}/src/main/native-glass/monocle/"), "-I", file("${project(":graphics").projectDir}/src/dalvik/native/")].flatten()
+ANDROID11.glass.monocle.linker = linker
+ANDROID11.glass.monocle.linkFlags = [ linkFlags, "-ldl", "-llog", "-landroid", "-lGLESv2", "-lEGL" ].flatten()
+ANDROID11.glass.monocle.lib = "glass_monocle"
 
 ANDROID11.prism = [:]
 ANDROID11.prism.nativeSource = file("${project(":graphics").projectDir}/src/main/native-prism")
 ANDROID11.prism.compiler = compiler
-ANDROID11.prism.ccFlags = [ccFlags, "-DINLINE=inline"].flatten()
+ANDROID11.prism.ccFlags = [ ccFlags ].flatten()
 ANDROID11.prism.linker = linker
-ANDROID11.prism.linkFlags = [linkFlags].flatten()
+ANDROID11.prism.linkFlags = [ linkFlags ].flatten()
 ANDROID11.prism.lib = "prism_common"
 
 ANDROID11.prismSW = [:]
 ANDROID11.prismSW.nativeSource = file("${project(":graphics").projectDir}/src/main/native-prism-sw")
 ANDROID11.prismSW.compiler = compiler
-ANDROID11.prismSW.ccFlags = [ccFlags, "-DINLINE=inline"].flatten()
+ANDROID11.prismSW.ccFlags = [ ccFlags ].flatten()
 ANDROID11.prismSW.linker = linker
-ANDROID11.prismSW.linkFlags = [linkFlags].flatten()
+ANDROID11.prismSW.linkFlags = [ linkFlags ].flatten()
 ANDROID11.prismSW.lib = "prism_sw"
 
-ANDROID11.launcher = [:]
-ANDROID11.launcher.compiler = compiler
-ANDROID11.launcher.ccFlags = ["-Wextra", "-Wformat", "-Wformat-security", "-DJAVAARCH=\"$OS_ARCH\"", "-I$JDK_HOME/include", "-I$JDK_HOME/include/linux", "-c"]
-ANDROID11.launcher.linker = linker
-ANDROID11.launcher.linkFlags = ["-ldl"]
-if (!IS_64) {
-    ANDROID11.launcher.ccFlags += "-m32"
-    ANDROID11.launcher.linkFlags += "-m32"
-}
-
-ANDROID11.launcherlibrary = [:]
-ANDROID11.launcherlibrary.compiler = compiler
-ANDROID11.launcherlibrary.ccFlags = ["-Wextra", "-Wformat", "-Wformat-security", "-DJAVAARCH=\"$OS_ARCH\"", "-I$JDK_HOME/include", "-I$JDK_HOME/include/linux", "-c", "-fPIC", "-std=gnu++98", "-ffunction-sections", "-fdata-sections"]
-ANDROID11.launcherlibrary.linker = linker
-ANDROID11.launcherlibrary.linkFlags = ["-ldl", "-lpthread", "-shared", "-static-libgcc", "-static-libstdc++", "-Wl,--gc-sections"]
-if (!IS_64) {
-    ANDROID11.launcherlibrary.ccFlags += "-m32"
-    ANDROID11.launcherlibrary.linkFlags += "-m32"
-}
-
+ANDROID11.decora = [:]
+ANDROID11.decora.compiler = compiler
+ANDROID11.decora.ccFlags = [ ccFlags ].flatten()
+ANDROID11.decora.linker = linker
+ANDROID11.decora.linkFlags = [ linkFlags ].flatten()
+ANDROID11.decora.lib = "decora_sse"
 ANDROID11.iio = [:]
 ANDROID11.iio.nativeSource = [
-    file("${project("graphics").projectDir}/src/main/native-iio"),
-    file("${project("graphics").projectDir}/src/main/native-iio/libjpeg7")]
+        file("${project(":graphics").projectDir}/src/main/native-iio"),
+        file("${project(":graphics").projectDir}/src/main/native-iio/libjpeg7")]
 ANDROID11.iio.compiler = compiler
-ANDROID11.iio.ccFlags = [ccFlags].flatten()
+ANDROID11.iio.ccFlags = [ ccFlags ].flatten()
 ANDROID11.iio.linker = linker
-ANDROID11.iio.linkFlags = [linkFlags].flatten()
+ANDROID11.iio.linkFlags = [ linkFlags ].flatten()
 ANDROID11.iio.lib = "javafx_iio"
 
 ANDROID11.prismES2 = [:]
-ANDROID11.prismES2.nativeSource = [
-    file("${project("graphics").projectDir}/src/main/native-prism-es2"),
-    file("${project("graphics").projectDir}/src/main/native-prism-es2/GL"),
-    file("${project("graphics").projectDir}/src/main/native-prism-es2/x11")
-]
-ANDROID11.prismES2.compiler = compiler
-ANDROID11.prismES2.ccFlags = ["-DLINUX", ccFlags].flatten()
-ANDROID11.prismES2.linker = linker
-ANDROID11.prismES2.linkFlags = [linkFlags, "-lX11", "-lXxf86vm", "-lGL"].flatten()
-ANDROID11.prismES2.lib = "prism_es2"
+ANDROID11.prismES2.variants = ["monocle"]
 
-def closedDir = file("$projectDir/../rt-closed")
+ANDROID11.prismES2.monocle= [:]
+ANDROID11.prismES2.monocle.nativeSource = [
+        file("${project(":graphics").projectDir}/src/main/native-prism-es2"),
+        file("${project(":graphics").projectDir}/src/main/native-prism-es2/GL"),
+        file("${project(":graphics").projectDir}/src/main/native-prism-es2/eglWrapper"),
+        file("${project(":graphics").projectDir}/src/main/native-prism-es2/monocle")
+]
+ANDROID11.prismES2.monocle.compiler = compiler
+ANDROID11.prismES2.monocle.ccFlags = [ ccFlags, "-DIS_EGLFB" ].flatten()
+ANDROID11.prismES2.monocle.linker = linker
+ANDROID11.prismES2.monocle.linkFlags = [ linkFlags, "-ldl", "-llog", "-lGLESv2", "-lEGL" ].flatten()
+ANDROID11.prismES2.monocle.lib = "prism_es2_monocle"
+
 ANDROID11.font = [:]
+ANDROID11.font.nativeSource = [file("${project(":graphics").projectDir}/javafx-font-native/src")]
 ANDROID11.font.compiler = compiler
-ANDROID11.font.nativeSource = [file("${project("graphics").projectDir}/src/main/native-font")]
-ANDROID11.font.ccFlags = ["-DJFXFONT_PLUS", ccFlags].flatten()
+ANDROID11.font.ccFlags = [ ccFlags ].flatten()
 ANDROID11.font.linker = linker
-ANDROID11.font.linkFlags = [linkFlags].flatten()
+ANDROID11.font.linkFlags = [ linkFlags ].flatten()
 ANDROID11.font.lib = "javafx_font"
 
-ANDROID11.fontFreetype = [:]
-ANDROID11.fontFreetype.nativeSource = ["src/main/native-font/freetype.c"]
-ANDROID11.fontFreetype.compiler = compiler
-ANDROID11.fontFreetype.ccFlags = ["-DJFXFONT_PLUS", ccFlags, freetypeCCFlags].flatten()
-ANDROID11.fontFreetype.linker = linker
-ANDROID11.fontFreetype.linkFlags = [linkFlags, freetypeLinkFlags].flatten()
-ANDROID11.fontFreetype.lib = "javafx_font_freetype"
-
-ANDROID11.fontPango = [:]
-ANDROID11.fontPango.nativeSource = ["src/main/native-font/pango.c"]
-ANDROID11.fontPango.compiler = compiler
-ANDROID11.fontPango.ccFlags = ["-DJFXFONT_PLUS", ccFlags, pangoCCFlags].flatten()
-ANDROID11.fontPango.linker = linker
-ANDROID11.fontPango.linkFlags = [linkFlags, pangoLinkFlags].flatten()
-ANDROID11.fontPango.lib = "javafx_font_pango"
-
+if (compileNativeText) {
+    ANDROID11.fontFreetype = [:]
+    ANDROID11.fontFreetype.nativeSource = [file("${project(":graphics").projectDir}/src/main/native-font/freetype.c")]
+    ANDROID11.fontFreetype.compiler = compiler
+    ANDROID11.fontFreetype.ccFlags = [ccFlags, "-D_ENABLE_HARFBUZZ", "-I${project(":graphics").buildDir}/gensrc/headers/javafx.graphics", "-I$freetypeDir/include", "-I$freetypeDir/include/freetype2"].flatten()
+    ANDROID11.fontFreetype.linker = linker
+    ANDROID11.fontFreetype.linkFlags = [linkFlags, "-llog", "-L$freetypeDir/lib", "$freetypeDir/lib/libfreetype.a"].flatten()
+    ANDROID11.fontFreetype.lib = "javafx_font_freetype"
+}
 ANDROID11.media = [:]
 ANDROID11.media.compiler = compiler
 ANDROID11.media.linker = linker
-ANDROID11.media.ar = "ar"
+ANDROID11.media.ar = "$compilerHome/bin/$TOOLCHAIN_TOOL-ar"
 
-ANDROID11.webkit = [:]
-ANDROID11.webkit.compiler = compiler
-ANDROID11.webkit.linker = linker
-ANDROID11.webkit.ccFlags = commonFlags.flatten()
-ANDROID11.webkit.linkFlags = linkFlags.flatten()
+project.ext.defaultModuleSourcePath =
+        cygpath(rootProject.projectDir.path + '/modules/*/src/main/java') +
+                File.pathSeparator  +
+                cygpath(rootProject.projectDir.path + '/modules/*/build/gensrc/{java,jsl-decora,jsl-prism}')
+
+
 
 project(":graphics") {
 
@@ -385,7 +362,6 @@ project(":graphics") {
         }
 
     project.task("sdk").dependsOn(copyJfxdvk);
-    // project.task("sdk").dependsOn(jarDalvikLibs);
     project.task("sdkAndroid11").dependsOn(jarDalvikLibs);
 
 }
