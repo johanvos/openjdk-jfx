@@ -97,12 +97,6 @@ ANDROID11.compileSwing = false;
 ANDROID11.compileSWT = false;
 ANDROID11.compileFXPackager = false;
 
-// Libraries end up in the lib/$OS_ARCH directory for Linux
-ANDROID11.libDest = "lib"
-
-// Lambda for naming the generated libs
-ANDROID11.library = { name -> return "lib${name}.so" as String }
-
 
 def sdk = project.hasProperty("ANDROID_SDK") ? project.getProperty("ANDROID_SDK") : null
 def ndk = project.hasProperty("ANDROID_NDK") ? project.getProperty("ANDROID_NDK") : null
@@ -149,6 +143,12 @@ defineProperty("DALVIK_PLATFORM", platforms.get(0))
 defineProperty("TOOLCHAIN_ARCH", toolchainArchs[DALVIK_PLATFORM])
 defineProperty("TOOLCHAIN_TOOL", toolchainTools[DALVIK_PLATFORM])
 defineProperty("TOOLCHAIN_LIB", toolchainLibs[DALVIK_PLATFORM].get(0))
+// Libraries end up in the lib/$OS_ARCH directory for Linux
+ANDROID11.libDest = "lib/$TOOLCHAIN_LIB"
+
+// Lambda for naming the generated libs
+ANDROID11.library = { name -> return "mylib${name}.so" as String }
+
 
 def toolchainHome = project.hasProperty("ANDROID_CROSS_TOOLS_VER") ?
         "$ndk/toolchains/${ANDROID_CROSS_TOOLS_VER}" : getLatestToolchain(ndk, TOOLCHAIN_ARCH)
@@ -219,7 +219,6 @@ ANDROID11.includeSWT = false
 ANDROID11.javafxPlatformDefault="monocle"
 
 ANDROID11.arch = TOOLCHAIN_LIB
-ANDROID11.libDest = "lib"
 
 ANDROID11.library = { name -> return "lib${name}.so" as String }
 
