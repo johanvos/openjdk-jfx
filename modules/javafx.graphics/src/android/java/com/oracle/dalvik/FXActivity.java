@@ -50,6 +50,7 @@ public class FXActivity extends Activity implements SurfaceHolder.Callback,
     private static final String TAG     = "FXActivity";
 
     private static final String GLASS_LENS_ANDROID_LIB      = "glass_lens_android";
+    private static final String GLASS_MONOCLE_LIB           = "glass_monocle";
     private static final String META_DATA_LAUNCHER_CLASS    = "launcher.class";
     private static final String DEFAULT_LAUNCHER_CLASS      = "com.oracle.dalvik.JavaSELauncher";
 
@@ -81,7 +82,7 @@ public class FXActivity extends Activity implements SurfaceHolder.Callback,
         instance = this;
         appDataDir = getApplicationInfo().dataDir;
         Log.v(TAG, "Loading glass native library.");
-        System.loadLibrary(GLASS_LENS_ANDROID_LIB);
+        System.loadLibrary(GLASS_MONOCLE_LIB);
     }
 
     private Bundle getMetadata() {
