@@ -66,7 +66,7 @@ public class JavaSELauncher implements Launcher, NativePipeReader.OnTextReceived
         appDataDir = activity.getApplicationInfo().dataDir;
         storageDir = appDataDir + "/storage";
         installJVMIfNeeded();
-        System.loadLibrary(ANDROID_WEBVIEW_LIB);
+        // System.loadLibrary(ANDROID_WEBVIEW_LIB);
     }
 
     public void onTextReceived(String text) {

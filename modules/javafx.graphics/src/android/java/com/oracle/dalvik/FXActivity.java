@@ -50,7 +50,7 @@ public class FXActivity extends Activity implements SurfaceHolder.Callback,
     private static final String TAG     = "FXActivity";
 
     private static final String GLASS_LENS_ANDROID_LIB      = "glass_lens_android";
-    private static final String GLASS_MONOCLE_LIB           = "glass_monocle";
+    private static final String GLASS_MONOCLE_LIB           = "glass_monocle_android";
     private static final String META_DATA_LAUNCHER_CLASS    = "launcher.class";
     private static final String DEFAULT_LAUNCHER_CLASS      = "com.oracle.dalvik.JavaSELauncher";
 
@@ -121,11 +121,9 @@ public class FXActivity extends Activity implements SurfaceHolder.Callback,
         return instance;
     }
 
-    /*
-    public static String getDataDir() {
+    public static String getAppDataDir() {
         return appDataDir;
     }
-    */
 
     public static ViewGroup getViewGroup() {
         return mViewGroup;
