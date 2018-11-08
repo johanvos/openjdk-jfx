@@ -222,6 +222,42 @@ ANDROID11.arch = TOOLCHAIN_LIB
 
 ANDROID11.library = { name -> return "lib${name}.so" as String }
 
+ANDROID11.surface = [:]
+ANDROID11.surface.javahInclude = [
+    "com/sun/glass/events/*",
+    "com/sun/glass/ui/android/*"
+]
+ANDROID11.surface.nativeSource = [
+    file("modules/javafx.graphics/src/main/native-glass/monocle/android11")
+]
+ANDROID11.surface.compiler = compiler
+ANDROID11.surface.linker = linker
+ANDROID11.surface.lib = "glass_monocle_android"
+ANDROID11.surface.ccFlags = [ccFlags, "-I${project(":graphics").buildDir}/gensrc/headers/, -Isrc/main/native-glass/monocle"].flatten()
+ANDROID11.surface.linkFlags = [linkFlags, "-ldl", "-landroid", "-llog"].flatten()
+
+ANDROID11.vmlauncher = [:]
+ANDROID11.vmlauncher.classpath = files("$sdk/platforms/$sdk_target/android.jar",
+                                     "modules/javafx.graphics/build/classes/android")
+
+ANDROID11.vmlauncher.javahSource = files("modules/javafx.graphics/build/classes/android")
+ANDROID11.vmlauncher.javahClasspath = files("modules/javafx.graphics/build/classes/android",
+                                          "$sdk/platforms/$sdk_target/android.jar")
+ANDROID11.vmlauncher.javahInclude = [
+    "com/oracle/dalvik/*"
+]
+ANDROID11.vmlauncher.nativeSource = [
+    file("modules/javafx.graphics/src/android/native/VMLauncher.c"),
+    file("modules/javafx.graphics/src/android/native/NativePipeReader.c"),
+    file("modules/javafx.graphics/src/android/native/DalvikProxySelector.c")
+]
+ANDROID11.vmlauncher.compiler = compiler
+ANDROID11.vmlauncher.linker = linker
+ANDROID11.vmlauncher.lib = "vmlauncher"
+ANDROID11.vmlauncher.ccFlags = [ccFlags].flatten()
+ANDROID11.vmlauncher.linkFlags = [linkFlags, "-llog"].flatten()
+
+
 ANDROID11.activity = [:]
 ANDROID11.activity.nativeSource = file("${project(":graphics").projectDir}/src/dalvik/native")
 ANDROID11.activity.compiler = compiler
@@ -333,6 +369,7 @@ project.ext.defaultModuleSourcePath =
 
 
 
+
 project(":graphics") {
 
     task compileDalvikLibs(type: JavaCompile, group: "Build") {
@@ -343,6 +380,10 @@ project(":graphics") {
         classpath = files("build/classes/android", "build/classes/main")
         destinationDir = file("build/classes/android")
         source fileTree(dir: 'src/android/java').matching { include '**' }
+   options.compilerArgs.addAll([
+            '-h', "$buildDir/gensrc/headers/javafx.graphics"  // Note: this creates the native headers
+            ] )
+
     }
 
     task jarDalvikLibs(type: Jar, group: "Build", dependsOn: compileDalvikLibs) {
@@ -355,13 +396,24 @@ project(":graphics") {
         dependsOn(compileDalvikLibs)
     }
     task copyJfxdvk(type: Copy, dependsOn: jarDalvikLibs) {
-            from "build/libs"
-            into "${rootProject.buildDir}/android11-sdk/lib"
-            include("*.jar")
-        }
+        from "build/libs"
+        into "${rootProject.buildDir}/android11-sdk/lib"
+        include("*.jar")
+    }
+    task copySurfaceLib(type: Copy, dependsOn: jarDalvikLibs) {
+        from "build/libs/surface/android11/"
+        into "${rootProject.buildDir}/android11-sdk/lib/armeabi-v7a"
+        include("*.so")
+    }
 
-    project.task("sdk").dependsOn(copyJfxdvk);
-    project.task("sdkAndroid11").dependsOn(jarDalvikLibs);
+    afterEvaluate {
+  //def sdkTask = project.getRootProject().sdk;
+        addNative(project, "surface")
+        addNative(project, "vmlauncher")
+        //sdkTask.dependsOn(copySurfaceLib);
+    project.ccAndroid11Vmlauncher.dependsOn(jarDalvikLibs);
+     //sdkTask.dependsOn(copyJfxdvk);
+    }
 
 }
 
