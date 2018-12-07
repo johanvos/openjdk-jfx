@@ -79,11 +79,13 @@ public class JavaSELauncher implements Launcher, NativePipeReader.OnTextReceived
 
     private class InstallerTask extends AsyncTask<Void, Void, Void> {
         protected Void doInBackground(Void... args) {
-           Log.i(TAG, "Installing JVM");
+           Log.i(TAG, "NOT Installing JVM");
+/*
             AppDataInstaller installer =
                 new AppDataInstaller(storageDir,
                     activity.getApplicationContext().getAssets());
             installer.install();
+*/
             return null;
         }
 

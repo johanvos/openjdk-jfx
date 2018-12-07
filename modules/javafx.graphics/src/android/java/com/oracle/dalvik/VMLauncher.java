@@ -61,12 +61,20 @@ public class VMLauncher extends Thread {
 
     private static void loadNativeLibraries() {
         try {
-            System.load(sJavaHome + "/lib/" + getJvmArch() + "/minimal/libjvm.so");
+System.out.println("loading libjvm.so...");
+            System.loadLibrary("jvm");
+System.out.println("DONE loading libjvm.so...");
+            // System.load(sJavaHome + "/lib/" + getJvmArch() + "/minimal/libjvm.so");
         } catch(UnsatisfiedLinkError e) {
+e.printStackTrace();
             //try vm in debug mode
-            System.load(sJavaHome + "/lib/" + getJvmArch() + "/client/libjvm.so");
+            // System.loadLibrary("client/libjvm.so");
+            // System.load(sJavaHome + "/lib/" + getJvmArch() + "/client/libjvm.so");
         }
-        System.load(sJavaHome + "/lib/" + getJvmArch() + "/jli/libjli.so");
+System.out.println("loading libjli.so...");
+            System.loadLibrary("jli");
+System.out.println("DONE loading libjli.so...");
+        // System.load(sJavaHome + "/lib/" + getJvmArch() + "/jli/libjli.so");
     }
 
     private static String getCmdLine() {

@@ -81,7 +81,7 @@ public class FXActivity extends Activity implements SurfaceHolder.Callback,
         setContentView(mViewGroup);
         instance = this;
         appDataDir = getApplicationInfo().dataDir;
-        Log.v(TAG, "Loading glass native library.");
+        Log.v(TAG, "Loading glass-monocle native library.");
         System.loadLibrary(GLASS_MONOCLE_LIB);
     }
 
