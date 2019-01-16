@@ -3,7 +3,7 @@
 ## Introduction
 
 These notes document the JavaFX 11.0.2 update release. As such, they complement
-the [JavaFX 11 Release Notes](https://github.com/javafxports/openjdk-jfx/blob/jfx-11/doc-files/release-notes-11.md) and the [JavaFX 11.0.1 Release Notes](https://github.com/javafxports/openjdk-jfx/blob/jfx-11/doc-files/release-notes-11.0.1.md].
+the [JavaFX 11 Release Notes](https://github.com/javafxports/openjdk-jfx/blob/jfx-11/doc-files/release-notes-11.md) and the [JavaFX 11.0.1 Release Notes](https://github.com/javafxports/openjdk-jfx/blob/jfx-11/doc-files/release-notes-11.0.1.md).
 
 ## List of Fixed Issues
 
@@ -20,8 +20,7 @@ Issue key|Summary
 [JDK-8211399](https://bugs.openjdk.java.net/browse/JDK-8211399)| libxslt fails to build with glibc 2.26
 [JDK-8203884](https://bugs.openjdk.java.net/browse/JDK-8203884)| Update libjpeg to version 9c
 [JDK-8214035](https://bugs.openjdk.java.net/browse/JDK-8214035)| Unable to render cmyk jpeg image
-[JDK-8211113](https://bugs.openjdk.java.net/browse/JDK-8211113)| Better marking of positions
-[JDK-8211184](https://bugs.openjdk.java.net/browse/JDK-8211184)| Improve JPEG processing
-[JDK-8214810](https://bugs.openjdk.java.net/browse/JDK-8214810)| Update to build scripts
-[JDK-8194321] (not public)|Update FX installer
+[JDK-8211113] (not public)| Better marking of positions
+[JDK-8211184] (not public)| Improve JPEG processing
+[JDK-8214810] (not public)| Update to build scripts
 
