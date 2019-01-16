@@ -3,7 +3,11 @@
 ## Introduction
 
 These notes document the JavaFX 11.0.2 update release. As such, they complement
+<<<<<<< HEAD
 the [JavaFX 11 Release Notes](https://github.com/javafxports/openjdk-jfx/blob/jfx-11/doc-files/release-notes-11.md) and the [JavaFX 11.0.1 Release Notes](https://github.com/javafxports/openjdk-jfx/blob/jfx-11/doc-files/release-notes-11.0.1.md).
+=======
+the [JavaFX 11 Release Notes](https://github.com/javafxports/openjdk-jfx/blob/jfx-11/doc-files/release-notes-11.md) and the [JavaFX 11.0.1 Release Notes](https://github.com/javafxports/openjdk-jfx/blob/jfx-11/doc-files/release-notes-11.0.1.md].
+>>>>>>> add release notes for 11.0.2
 
 ## List of Fixed Issues
 
@@ -23,4 +27,3 @@ Issue key|Summary
 [JDK-8211113] (not public)| Better marking of positions
 [JDK-8211184] (not public)| Improve JPEG processing
 [JDK-8214810] (not public)| Update to build scripts
-
