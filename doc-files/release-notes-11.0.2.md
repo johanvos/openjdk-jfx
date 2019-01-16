@@ -3,11 +3,7 @@
 ## Introduction
 
 These notes document the JavaFX 11.0.2 update release. As such, they complement
-<<<<<<< HEAD
 the [JavaFX 11 Release Notes](https://github.com/javafxports/openjdk-jfx/blob/jfx-11/doc-files/release-notes-11.md) and the [JavaFX 11.0.1 Release Notes](https://github.com/javafxports/openjdk-jfx/blob/jfx-11/doc-files/release-notes-11.0.1.md).
-=======
-the [JavaFX 11 Release Notes](https://github.com/javafxports/openjdk-jfx/blob/jfx-11/doc-files/release-notes-11.md) and the [JavaFX 11.0.1 Release Notes](https://github.com/javafxports/openjdk-jfx/blob/jfx-11/doc-files/release-notes-11.0.1.md].
->>>>>>> add release notes for 11.0.2
 
 ## List of Fixed Issues
 
