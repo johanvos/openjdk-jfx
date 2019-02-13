@@ -674,7 +674,29 @@ public class LauncherImpl {
     private static void launchApplication1(final Class<? extends Application> appClass,
             final Class<? extends Preloader> preloaderClass,
             final String[] args) throws Exception {
+/*
+System.err.println("launchapp1");
+    Thread t = new Thread() {
+        @Override public void run() {
+             try {
+                System.err.println("RUN CONSTRUCTOR");
+                            Constructor<? extends Application> myc = appClass.getConstructor();
+                           Object o = myc.newInstance();
+                System.err.println("did RUN CONSTwRUCTOR, o = "+o);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    };
+    t.start();
+    }
+    private static void dontlaunchApplication1(final Class<? extends Application> appClass,
+            final Class<? extends Preloader> preloaderClass,
+            final String[] args) throws Exception {
+*/
 
+                        Constructor<? extends Application> myc = appClass.getConstructor();
+                        System.out.println("MI = " + myc.newInstance());
         startToolkit();
 
         if (savedMainCcl != null) {
@@ -724,6 +746,7 @@ public class LauncherImpl {
 
         try {
             final AtomicReference<Preloader> pldr = new AtomicReference<>();
+/*
             if (preloaderClass != null) {
                 // Construct an instance of the preloader on the FX thread, then
                 // call its init method on this (launcher) thread. Then call
@@ -741,6 +764,7 @@ public class LauncherImpl {
                     }
                 });
             }
+*/
             currentPreloader = pldr.get();
 
             // Call init method unless exit called or error detected

@@ -244,7 +244,7 @@ public class NativeLibLoader {
                 DigestInputStream dis = new DigestInputStream(is, MessageDigest.getInstance("MD5"));
                 dis.getMessageDigest().reset();
                 byte[] buffer = new byte[4096];
-                while (dis.read(buffer) != -1) { /* empty loop body is intentional */ }
+                while (dis.read(buffer) != -1) {  }
                 isHash = dis.getMessageDigest().digest();
                 is.close();
                 is = caller.getResourceAsStream(name); // mark/reset not supported, we have to reread
@@ -276,7 +276,7 @@ public class NativeLibLoader {
                     final DigestInputStream dis = new DigestInputStream(stream, MessageDigest.getInstance("MD5")); ) {
                     dis.getMessageDigest().reset();
                     byte[] buffer = new byte[4096];
-                    while (dis.read(buffer) != -1) { /* empty loop body is intentional */ }
+                    while (dis.read(buffer) != -1) {  }
                     return dis.getMessageDigest().digest();
                 }
 
