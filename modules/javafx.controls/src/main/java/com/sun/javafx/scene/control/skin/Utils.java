@@ -95,7 +95,14 @@ public class Utils {
      *
      * Note: This code assumes that TextBoundsType#VISUAL is never used by controls.
      * */
-    static final TextLayout layout = Toolkit.getToolkit().getTextLayoutFactory().createLayout();
+    static TextLayout layout = null;
+
+    static TextLayout layout() {
+        if (layout == null) {
+            layout = Toolkit.getToolkit().getTextLayoutFactory().createLayout();
+        }
+        return layout;
+    }
 
     public static double getAscent(Font font, TextBoundsType boundsType) {
         layout.setContent("", FontHelper.getNativeFont(font));

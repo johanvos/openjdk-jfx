@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import com.sun.javafx.tk.Toolkit;
+// import com.sun.javafx.tk.Toolkit;
 import javafx.util.Callback;
 
 /**
@@ -59,11 +59,12 @@ public class Settings {
     }
 
     private static synchronized Settings getInstance() {
-        Map<Object, Object> contextMap = Toolkit.getToolkit().getContextMap();
-        Settings instance = (Settings) contextMap.get(SETTINGS_KEY);
+        // Map<Object, Object> contextMap = Toolkit.getToolkit().getContextMap();
+        // Settings instance = (Settings) contextMap.get(SETTINGS_KEY);
+        Settings instance = null;
         if (instance == null) {
             instance = new Settings();
-            contextMap.put(SETTINGS_KEY, instance);
+            // contextMap.put(SETTINGS_KEY, instance);
         }
         return instance;
     }

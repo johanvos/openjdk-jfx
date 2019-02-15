@@ -133,6 +133,7 @@ final class QuantumRenderer extends ThreadPoolExecutor  {
         final AtomicInteger threadNumber = new AtomicInteger(0);
 
         @Override public Thread newThread(Runnable r) {
+Thread.dumpStack();
             final PipelineRunnable pipeline = new PipelineRunnable(r);
             _renderer =
                 AccessController.doPrivileged((PrivilegedAction<Thread>) () -> {

@@ -45,6 +45,8 @@ public class NativeLibLoader {
     private static final HashSet<String> loaded = new HashSet<String>();
 
     public static synchronized void loadLibrary(String libname) {
+System.err.println(Thread.currentThread()+" loadLibrary called for "+libname);
+Thread.dumpStack();
         if (!loaded.contains(libname)) {
             StackWalker walker = AccessController.doPrivileged((PrivilegedAction<StackWalker>) () ->
             StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE));

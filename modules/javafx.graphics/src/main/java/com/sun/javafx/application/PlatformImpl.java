@@ -170,6 +170,7 @@ public class PlatformImpl {
      */
     public static void startup(final Runnable r, boolean preventDuplicateCalls) {
 
+System.err.println("[JVDBG] startup");
         // NOTE: if we ever support re-launching an application and/or
         // launching a second application in the same VM/classloader
         // this will need to be changed.
@@ -233,6 +234,10 @@ public class PlatformImpl {
             return null;
         });
 
+// if (1 < 2) {
+// System.err.println("[JVDBG] enough started, return");
+// return;
+// }
         if (DEBUG) {
             System.err.println("PlatformImpl::startup : applicationType = "
                     + applicationType);
@@ -248,6 +253,8 @@ public class PlatformImpl {
             });
         }
 
+System.err.println("[JVDBG] startup 2, break now");
+if (1<2) return;
         // Create Toolkit listener and register it with the Toolkit.
         // Call notifyFinishListeners when we get notified.
         toolkitListener = new TKListener() {
@@ -312,6 +319,7 @@ public class PlatformImpl {
             System.err.println("addExportsToFXCanvas: class = " + fxCanvasClass);
         }
         Object thisModule = ModuleHelper.getModule(PlatformImpl.class);
+/*
         Object javafxSwtModule = ModuleHelper.getModule(fxCanvasClass);
         for (String pkg : swtNeededPackages) {
             if (DEBUG) {
@@ -320,6 +328,7 @@ public class PlatformImpl {
             }
             ModuleHelper.addExports(thisModule, pkg, javafxSwtModule);
         }
+*/
     }
 
     // FXCanvas-specific initialization
@@ -346,6 +355,7 @@ public class PlatformImpl {
         Optional<StackWalker.StackFrame> frame = walker.walk(
                 s -> s.filter(classFilter).findFirst());
 
+System.err.println("survived stackwalker");
         if (frame.isPresent()) {
             Class<?> caller = frame.get().getDeclaringClass();
             if (DEBUG) {

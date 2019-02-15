@@ -141,6 +141,7 @@ public class LauncherImpl {
         if (preloaderClass == null) {
             String preloaderByProperty = AccessController.doPrivileged((PrivilegedAction<String>) () ->
                     System.getProperty("javafx.preloader"));
+/*
             if (preloaderByProperty != null) {
                 try {
                     preloaderClass = (Class<? extends Preloader>) Class.forName(preloaderByProperty,
@@ -151,6 +152,7 @@ public class LauncherImpl {
                     e.printStackTrace();
                 }
             }
+*/
         }
 
         launchApplication(appClass, preloaderClass, args);
@@ -648,17 +650,20 @@ public class LauncherImpl {
     }
 
     private static void startToolkit() throws InterruptedException {
+System.err.println("[JVDBG] Launcher, startToolkit 0");
         if (toolkitStarted.getAndSet(true)) {
             return;
         }
-
         final CountDownLatch startupLatch = new CountDownLatch(1);
+System.err.println("[JVDBG] Launcher, startToolkit 1");
 
         // Note, this method is called on the FX Application Thread
         PlatformImpl.startup(() -> startupLatch.countDown());
+System.err.println("[JVDBG] Launcher, startToolkit 2");
 
         // Wait for FX platform to start
         startupLatch.await();
+System.err.println("[JVDBG] Launcher, startToolkit 3");
     }
 
     private static volatile boolean error = false;
@@ -674,8 +679,9 @@ public class LauncherImpl {
     private static void launchApplication1(final Class<? extends Application> appClass,
             final Class<? extends Preloader> preloaderClass,
             final String[] args) throws Exception {
+System.err.println(Thread.currentThread()+" launchapp1");
+Thread.dumpStack();
 /*
-System.err.println("launchapp1");
     Thread t = new Thread() {
         @Override public void run() {
              try {
@@ -698,6 +704,7 @@ System.err.println("launchapp1");
                         Constructor<? extends Application> myc = appClass.getConstructor();
                         System.out.println("MI = " + myc.newInstance());
         startToolkit();
+if (1 < 2) return;
 
         if (savedMainCcl != null) {
             /*

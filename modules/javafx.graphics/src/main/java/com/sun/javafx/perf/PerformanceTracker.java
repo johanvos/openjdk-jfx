@@ -46,7 +46,8 @@ public abstract class PerformanceTracker {
      * be circular (this class may be referenced before the toolkit is initialized).
      */
     public static boolean isLoggingEnabled() {
-        return Toolkit.getToolkit().getPerformanceTracker().perfLoggingEnabled;
+return true;
+        // return Toolkit.getToolkit().getPerformanceTracker().perfLoggingEnabled;
     }
 
     public static abstract class SceneAccessor {
@@ -97,7 +98,8 @@ public abstract class PerformanceTracker {
      * Log an event with given description.
      */
     public static void logEvent(String desc) {
-        Toolkit.getToolkit().getPerformanceTracker().doLogEvent(desc);
+System.err.println("[JVDBG PT] logEvent: "+desc);
+        // Toolkit.getToolkit().getPerformanceTracker().doLogEvent(desc);
     }
 
     /*

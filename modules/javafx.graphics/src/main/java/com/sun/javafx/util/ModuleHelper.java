@@ -31,9 +31,9 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 public class ModuleHelper {
-    private static final Method getModuleMethod;
-    private static final Method addReadsMethod;
-    private static final Method addExportsMethod;
+    private static Method getModuleMethod = null;
+    private static Method addReadsMethod = null;
+    private static Method addExportsMethod = null;
 
     private static final boolean verbose;
 
@@ -55,9 +55,9 @@ public class ModuleHelper {
         } catch (NoSuchMethodException e) {
             // ignore
         }
-        getModuleMethod = mGetModule;
-        addReadsMethod = mAddReads;
-        addExportsMethod = mAddExports;
+        // getModuleMethod = mGetModule;
+        // addReadsMethod = mAddReads;
+        // addExportsMethod = mAddExports;
         if (verbose) {
             System.err.println("getModuleMethod = " + getModuleMethod);
             System.err.println("addReadsMethod = " + addReadsMethod);
