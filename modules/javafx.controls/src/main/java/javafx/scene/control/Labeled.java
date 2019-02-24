@@ -377,7 +377,7 @@ public abstract class Labeled extends Control {
 
                 @Override
                 public CssMetaData<Labeled,Font> getCssMetaData() {
-                    return StyleableProperties.FONT;
+                    return StyleableProperties.FONT();
                 }
 
                 @Override
@@ -832,8 +832,9 @@ public abstract class Labeled extends Control {
     }
 
     private static class StyleableProperties {
-        private static final FontCssMetaData<Labeled> FONT =
-            new FontCssMetaData<Labeled>("-fx-font", Font.getDefault()) {
+        private static FontCssMetaData<Labeled> myFONT = null;
+        private static void postClinit() {
+            myFONT = new FontCssMetaData<Labeled>("-fx-font", Font.getDefault()) {
 
             @Override
             public boolean isSettable(Labeled n) {
@@ -845,6 +846,12 @@ public abstract class Labeled extends Control {
                 return (StyleableProperty<Font>)(WritableValue<Font>)n.fontProperty();
             }
         };
+        }
+
+        private static FontCssMetaData<Labeled> FONT() {
+            postClinit();
+            return myFONT;
+        }
 
         private static final CssMetaData<Labeled,Pos> ALIGNMENT =
                 new CssMetaData<Labeled,Pos>("-fx-alignment",
@@ -1038,7 +1045,7 @@ public abstract class Labeled extends Control {
             final List<CssMetaData<? extends Styleable, ?>> styleables =
                 new ArrayList<CssMetaData<? extends Styleable, ?>>(Control.getClassCssMetaData());
             Collections.addAll(styleables,
-                FONT,
+                // FONT,
                 ALIGNMENT,
                 TEXT_ALIGNMENT,
                 TEXT_FILL,
