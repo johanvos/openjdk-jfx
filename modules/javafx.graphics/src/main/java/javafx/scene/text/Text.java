@@ -567,7 +567,7 @@ public class Text extends Shape {
                 @Override public Object getBean() { return Text.this; }
                 @Override public String getName() { return "font"; }
                 @Override public CssMetaData<Text,Font> getCssMetaData() {
-                    return StyleableProperties.FONT;
+                    return StyleableProperties.FONT();
                 }
                 @Override public void invalidated() {
                     needsFullTextLayout();
@@ -1264,7 +1264,16 @@ public class Text extends Shape {
      */
      private static class StyleableProperties {
 
-         private static final CssMetaData<Text,Font> FONT =
+         // private static final CssMetaData<Text,Font> FONT =
+            // new FontCssMetaData<Text>("-fx-font", Font.getDefault()) {
+         private static CssMetaData<Text,Font> myFONT = null;
+         private static final CssMetaData<Text,Font> FONT() {
+             postClinit();
+             return myFONT;
+         }
+
+         private static void postClinit() {
+            myFONT =
             new FontCssMetaData<Text>("-fx-font", Font.getDefault()) {
 
             @Override
@@ -1277,6 +1286,7 @@ public class Text extends Shape {
                 return (StyleableProperty<Font>)node.fontProperty();
             }
          };
+         }
 
          private static final CssMetaData<Text,Boolean> UNDERLINE =
             new CssMetaData<Text,Boolean>("-fx-underline",
@@ -1410,7 +1420,7 @@ public class Text extends Shape {
          static {
             final List<CssMetaData<? extends Styleable, ?>> styleables =
                 new ArrayList<CssMetaData<? extends Styleable, ?>>(Shape.getClassCssMetaData());
-            styleables.add(FONT);
+            // styleables.add(FONT);
             styleables.add(UNDERLINE);
             styleables.add(STRIKETHROUGH);
             styleables.add(TEXT_ALIGNMENT);

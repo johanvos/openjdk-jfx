@@ -224,6 +224,8 @@ public abstract class Application {
      * method, start method, or stop method.
      */
     public static void launch(Class<? extends Application> appClass, String... args) {
+System.err.println("[JVDBG] javafx.application.Application.launch, appClass = "+appClass+
+", args = "+args.length);
         LauncherImpl.launchApplication(appClass, args);
     }
 
@@ -293,6 +295,7 @@ public abstract class Application {
                                Thread.currentThread().getContextClassLoader());
             if (Application.class.isAssignableFrom(theClass)) {
                 Class<? extends Application> appClass = theClass;
+System.err.println("[JVDBG] Application will now call LI.launcApp");
                 LauncherImpl.launchApplication(appClass, args);
             } else {
                 throw new RuntimeException("Error: " + theClass

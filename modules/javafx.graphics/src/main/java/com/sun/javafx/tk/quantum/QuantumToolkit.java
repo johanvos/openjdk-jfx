@@ -216,6 +216,10 @@ public final class QuantumToolkit extends Toolkit {
     private final PerformanceTracker perfTracker = new PerformanceTrackerImpl();
 
     @Override public boolean init() {
+        return true;
+    }
+
+    public boolean postInit() {
         /*
          * Glass Mac, X11 need Application.setDeviceDetails to happen prior to Glass Application.Run
          */
@@ -248,6 +252,7 @@ public final class QuantumToolkit extends Toolkit {
      *                            functionality after the toolkit has been initialized.
      */
     @Override public void startup(final Runnable userStartupRunnable) {
+        postInit();
         // Save the context class loader of the launcher thread
         ccl = Thread.currentThread().getContextClassLoader();
 
@@ -1159,6 +1164,9 @@ public final class QuantumToolkit extends Toolkit {
 
     @Override
     public boolean isSupported(ConditionalFeature feature) {
+        System.err.println("[JVDBG] need to add qt.isSupported");
+        return true;
+/*
         switch (feature) {
             case SCENE3D:
                 return GraphicsPipeline.getPipeline().is3DSupported();
@@ -1185,6 +1193,7 @@ public final class QuantumToolkit extends Toolkit {
             default:
                 return false;
         }
+*/
     }
 
     @Override

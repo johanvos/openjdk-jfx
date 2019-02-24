@@ -38,9 +38,9 @@ public class ModuleHelper {
     private static final boolean verbose;
 
     static {
-        verbose = AccessController.doPrivileged((PrivilegedAction<Boolean>) () ->
-                Boolean.getBoolean("javafx.verbose"));
-
+        // verbose = AccessController.doPrivileged((PrivilegedAction<Boolean>) () ->
+                // Boolean.getBoolean("javafx.verbose"));
+verbose = true;
         if (verbose) {
             System.err.println("" + ModuleHelper.class.getName() + " : <clinit>");
         }
@@ -55,11 +55,11 @@ public class ModuleHelper {
         } catch (NoSuchMethodException e) {
             // ignore
         }
-        // getModuleMethod = mGetModule;
+        getModuleMethod = mGetModule;
         // addReadsMethod = mAddReads;
         // addExportsMethod = mAddExports;
         if (verbose) {
-            System.err.println("getModuleMethod = " + getModuleMethod);
+            System.err.println("getModuleMethod = " + getModuleMethod+" instead of "+mGetModule);
             System.err.println("addReadsMethod = " + addReadsMethod);
             System.err.println("addExportsMethod = " + addExportsMethod);
         }

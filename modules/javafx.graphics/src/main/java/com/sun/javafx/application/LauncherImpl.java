@@ -141,7 +141,6 @@ public class LauncherImpl {
         if (preloaderClass == null) {
             String preloaderByProperty = AccessController.doPrivileged((PrivilegedAction<String>) () ->
                     System.getProperty("javafx.preloader"));
-/*
             if (preloaderByProperty != null) {
                 try {
                     preloaderClass = (Class<? extends Preloader>) Class.forName(preloaderByProperty,
@@ -152,7 +151,6 @@ public class LauncherImpl {
                     e.printStackTrace();
                 }
             }
-*/
         }
 
         launchApplication(appClass, preloaderClass, args);
@@ -704,7 +702,6 @@ Thread.dumpStack();
                         Constructor<? extends Application> myc = appClass.getConstructor();
                         System.out.println("MI = " + myc.newInstance());
         startToolkit();
-if (1 < 2) return;
 
         if (savedMainCcl != null) {
             /*
@@ -753,7 +750,6 @@ if (1 < 2) return;
 
         try {
             final AtomicReference<Preloader> pldr = new AtomicReference<>();
-/*
             if (preloaderClass != null) {
                 // Construct an instance of the preloader on the FX thread, then
                 // call its init method on this (launcher) thread. Then call
@@ -771,7 +767,6 @@ if (1 < 2) return;
                     }
                 });
             }
-*/
             currentPreloader = pldr.get();
 
             // Call init method unless exit called or error detected

@@ -84,7 +84,7 @@ public class PopupControl extends PopupWindow implements Skinnable, Styleable {
       */
     public static final double USE_COMPUTED_SIZE = -1;
 
-    static {
+    static void postClinit() {
         // Ensures that the default application user agent stylesheet is loaded
         if (Application.getUserAgentStylesheet() == null) {
             PlatformImpl.setDefaultPlatformUserAgentStylesheet();
@@ -113,6 +113,7 @@ public class PopupControl extends PopupWindow implements Skinnable, Styleable {
      */
     public PopupControl() {
         super();
+        postClinit();
         this.bridge = new CSSBridge();
         setAnchorLocation(AnchorLocation.CONTENT_TOP_LEFT);
         PopupWindowHelper.getContent(this).add(bridge);
