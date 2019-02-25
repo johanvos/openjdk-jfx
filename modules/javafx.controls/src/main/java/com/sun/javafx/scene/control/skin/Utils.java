@@ -95,7 +95,7 @@ public class Utils {
      *
      * Note: This code assumes that TextBoundsType#VISUAL is never used by controls.
      * */
-    static TextLayout layout = null;
+    static TextLayout layout = Toolkit.getToolkit().getTextLayoutFactory().createLayout();
 
     static TextLayout layout() {
         if (layout == null) {

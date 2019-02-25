@@ -42,6 +42,11 @@ public abstract class Application {
     private final static String DEFAULT_NAME = "java";
     protected String name = DEFAULT_NAME;
 
+    public static com.sun.glass.ui.Screen[] dummyScreens;
+    static {
+        System.err.println("initialize scrreen[]");
+        dummyScreens = new com.sun.glass.ui.Screen[1];
+    }
     public static class EventHandler {
         // currently used only on Mac OS X
         public void handleWillFinishLaunchingAction(Application app, long time) {
@@ -94,6 +99,7 @@ public abstract class Application {
 
     private static boolean loaded = false;
     private static Application application;
+    public static boolean applicationRunning = false;
     private static Thread eventThread;
     private static final boolean disableThreadChecks =
         AccessController.doPrivileged((PrivilegedAction<Boolean>) () -> {
@@ -138,10 +144,16 @@ public abstract class Application {
 
     // May be called on any thread.
     public static void run(final Runnable launchable) {
-        if (application != null) {
+        // if (application != null) {
+        if (applicationRunning) {
             throw new IllegalStateException("Application is already running");
         }
-        application = PlatformFactory.getPlatformFactory().createApplication();
+        if (application == null) {
+System.err.println("[JVDBG] Will create application now");
+            application = PlatformFactory.getPlatformFactory().createApplication();
+System.err.println("[JVDBG] Did create application now");
+        }
+        applicationRunning = true;
         // each concrete Application should set the app name using its own platform mechanism:
         // on Mac OS X - use NSBundle info, which can be overriden by -Xdock:name
         // on Windows - TODO
