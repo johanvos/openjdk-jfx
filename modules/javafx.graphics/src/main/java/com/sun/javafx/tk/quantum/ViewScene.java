@@ -70,6 +70,7 @@ class ViewScene extends GlassScene {
     @Override
     public void setStage(GlassStage stage) {
         super.setStage(stage);
+Thread.dumpStack();
         if (stage != null) {
             WindowStage wstage  = (WindowStage)stage;
             if (wstage.needsUpdateWindow() || GraphicsPipeline.getPipeline().isUploading()) {

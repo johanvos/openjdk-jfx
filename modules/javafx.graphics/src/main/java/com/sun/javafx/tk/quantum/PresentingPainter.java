@@ -49,8 +49,16 @@ final class PresentingPainter extends ViewPainter {
         boolean errored = false;
 
         try {
-System.err.println("PRESENTINGPAINTER RUN BLOCKED FOR NOW");
-if (1<2) return;
+String tname = Thread.currentThread().getName();
+System.err.println("PRESENTINGPAINTER RUN on thread "+tname);
+if (!com.sun.glass.ui.Application.applicationRunning) {
+System.err.println("GLASS NOT STARTED, ignore");
+return;
+}
+if (!tname.startsWith("Quantum")) {
+System.err.println("not on quantum thread, ignore");
+return;
+}
             valid = validateStageGraphics();
             if (!valid) {
                 if (QuantumToolkit.verbose) {
