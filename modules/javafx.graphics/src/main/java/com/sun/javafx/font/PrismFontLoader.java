@@ -25,6 +25,7 @@
 
 package com.sun.javafx.font;
 
+import com.sun.prism.GraphicsPipeline;
 import com.sun.javafx.scene.text.FontHelper;
 import javafx.scene.text.*;
 import com.sun.javafx.tk.*;
@@ -265,13 +266,18 @@ public class PrismFontLoader extends FontLoader {
             return installedFontFactory;
         }
         try {
+            GraphicsPipeline pipeline = com.sun.prism.GraphicsPipeline.getPipeline();
+            installedFontFactory = pipeline.getFontFactory();
+/*
             Class plc = Class.forName("com.sun.prism.GraphicsPipeline");
             Method gpm = plc.getMethod("getPipeline", (Class[])null);
             Object plo = gpm.invoke(null);
             Method gfm = plc.getMethod("getFontFactory", (Class[])null);
             Object ffo = gfm.invoke(plo);
             installedFontFactory = (FontFactory)ffo;
+*/
         } catch (Exception e) {
+e.printStackTrace();
         }
         return installedFontFactory;
     }

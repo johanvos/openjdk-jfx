@@ -74,6 +74,8 @@ final class UploadingPainter extends ViewPainter implements Runnable {
     }
 
     @Override public void run() {
+System.err.println("UPLOADINGPAINTER RUN, block for now");
+/*
         renderLock.lock();
 
         boolean errored = false;
@@ -162,7 +164,6 @@ final class UploadingPainter extends ViewPainter implements Runnable {
                 bits.put(rawbits, 0, outWidth * outHeight);
             } else {
                 if (!rtt.readPixels(bits)) {
-                    /* device lost */
                     sceneState.getScene().entireSceneNeedsRepaint();
                     disposeRTTexture();
                     pix = null;
@@ -174,7 +175,6 @@ final class UploadingPainter extends ViewPainter implements Runnable {
             }
 
             if (pix != null) {
-                /* transparent pixels created and ready for upload */
                 // Copy references, which are volatile, used by upload. Thus
                 // ensure they still exist once event queue is consumed.
                 pixelSource.enqueuePixels(pix);
@@ -202,6 +202,7 @@ final class UploadingPainter extends ViewPainter implements Runnable {
 
             renderLock.unlock();
         }
+*/
     }
 
     private RTTexture resolveRenderTarget(Graphics g, int width, int height) {

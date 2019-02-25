@@ -37,7 +37,9 @@ public class FTFactory extends PrismFontFactory {
     static boolean LCD_SUPPORT;
 
     public static PrismFontFactory getFactory() {
+System.err.println("[JVDBG] GF");
         PrismFontFactory factory = null;
+try {
         long[] ptr = new long[1];
         int error = OSFreetype.FT_Init_FreeType(ptr);
         long library = ptr[0];
@@ -61,6 +63,9 @@ public class FTFactory extends PrismFontFactory {
                 System.err.println("Freetype2 Failed (error " + error + ")");
             }
         }
+} catch (Exception e) {
+e.printStackTrace();
+}
         return factory;
     }
 

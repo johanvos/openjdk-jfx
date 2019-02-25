@@ -49,6 +49,8 @@ final class PresentingPainter extends ViewPainter {
         boolean errored = false;
 
         try {
+System.err.println("PRESENTINGPAINTER RUN BLOCKED FOR NOW");
+if (1<2) return;
             valid = validateStageGraphics();
             if (!valid) {
                 if (QuantumToolkit.verbose) {

@@ -254,7 +254,7 @@ System.err.println("[JVDBG] startup");
         }
 
 System.err.println("[JVDBG] startup 2, break now");
-if (1<2) return;
+// if (1<2) return;
         // Create Toolkit listener and register it with the Toolkit.
         // Call notifyFinishListeners when we get notified.
         toolkitListener = new TKListener() {

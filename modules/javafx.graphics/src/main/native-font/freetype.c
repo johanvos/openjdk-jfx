@@ -437,6 +437,7 @@ JNIEXPORT jint JNICALL OS_NATIVE(FT_1Done_1FreeType)
 JNIEXPORT jint JNICALL OS_NATIVE(FT_1Init_1FreeType)
     (JNIEnv *env, jclass that, jlongArray arg0)
 {
+fprintf(stderr, "[JVDBG] Native FT_Init_FreeType\n");
     jlong *lparg0=NULL;
     jint rc = 0;
     if (arg0) if ((lparg0 = (*env)->GetLongArrayElements(env, arg0, NULL)) == NULL) goto fail;

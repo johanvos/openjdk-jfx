@@ -203,10 +203,14 @@ public abstract class PrismFontFactory implements FontFactory {
 
     private static synchronized PrismFontFactory getFontFactory(String factoryClass) {
         try {
-            Class<?> clazz = Class.forName(factoryClass);
-            Method mid = clazz.getMethod("getFactory", (Class[])null);
-            return (PrismFontFactory)mid.invoke(null);
+            // Class<?> clazz = Class.forName(factoryClass);
+PrismFontFactory answer = com.sun.javafx.font.freetype.FTFactory.getFactory();
+return answer;
+            // Class<?> clazz = Class.forName("com.sun.javafx.font.freetype.FTFactory");
+            // Method mid = clazz.getMethod("getFactory", (Class[])null);
+            // return (PrismFontFactory)mid.invoke(null);
         } catch (Throwable t) {
+t.printStackTrace();
             if (debugFonts) {
                 System.err.println("Loading font factory failed "+ factoryClass);
             }

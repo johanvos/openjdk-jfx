@@ -58,7 +58,7 @@ final class EmbeddedScene extends GlassScene implements EmbeddedSceneInterface {
     // TODO: synchronize access to embedder from ET and RT
     private HostInterface host;
 
-    private UploadingPainter        painter;
+    // private UploadingPainter        painter;
     private PaintRenderJob          paintRenderJob;
     private float                   renderScaleX;
     private float                   renderScaleY;
@@ -80,8 +80,8 @@ final class EmbeddedScene extends GlassScene implements EmbeddedSceneInterface {
         this.embeddedDnD = new EmbeddedSceneDnD(this);
 
         PaintCollector collector = PaintCollector.getInstance();
-        painter = new UploadingPainter(this);
-        paintRenderJob = new PaintRenderJob(this, collector.getRendered(), painter);
+        // painter = new UploadingPainter(this);
+        // paintRenderJob = new PaintRenderJob(this, collector.getRendered(), painter);
 
         int nativeFormat = Pixels.getNativeFormat();
         ByteOrder byteorder = ByteOrder.nativeOrder();
@@ -106,7 +106,7 @@ final class EmbeddedScene extends GlassScene implements EmbeddedSceneInterface {
             host.setEmbeddedScene(null);
             host = null;
             updateSceneState();
-            painter = null;
+            // painter = null;
             paintRenderJob = null;
             texBits = null;
             return null;
@@ -128,7 +128,7 @@ final class EmbeddedScene extends GlassScene implements EmbeddedSceneInterface {
 
     @Override public void setRoot(NGNode root) {
         super.setRoot(root);
-        painter.setRoot(root);
+        // painter.setRoot(root);
     }
 
     @Override

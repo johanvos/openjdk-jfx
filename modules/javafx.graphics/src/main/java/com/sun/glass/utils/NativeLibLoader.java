@@ -46,14 +46,14 @@ public class NativeLibLoader {
 
     public static synchronized void loadLibrary(String libname) {
 System.err.println(Thread.currentThread()+" loadLibrary called for "+libname);
-Thread.dumpStack();
-        if (!loaded.contains(libname)) {
-            StackWalker walker = AccessController.doPrivileged((PrivilegedAction<StackWalker>) () ->
-            StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE));
-            Class caller = walker.getCallerClass();
-            loadLibraryInternal(libname, null, caller);
-            loaded.add(libname);
-        }
+// Thread.dumpStack();
+        // if (!loaded.contains(libname)) {
+            // StackWalker walker = AccessController.doPrivileged((PrivilegedAction<StackWalker>) () ->
+            // StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE));
+            // Class caller = walker.getCallerClass();
+            loadLibraryInternal(libname, null, null);
+            // loaded.add(libname);
+        // }
     }
 
     public static synchronized void loadLibrary(String libname, List<String> dependencies) {
@@ -66,7 +66,7 @@ Thread.dumpStack();
         }
     }
 
-    private static boolean verbose = false;
+    private static boolean verbose = true;
 
     private static boolean usingModules = false;
     private static File libDir = null;
@@ -75,7 +75,7 @@ Thread.dumpStack();
 
     static {
         AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
-            verbose = Boolean.getBoolean("javafx.verbose");
+            verbose = true; //Boolean.getBoolean("javafx.verbose");
             return null;
         });
     }
@@ -352,12 +352,17 @@ Thread.dumpStack();
             File libFile = new File(libDir, libPrefix + libraryName + libSuffix);
             String libFileName = libFile.getCanonicalPath();
             try {
+                if (verbose) {
+                    System.err.println("Trying to load " + libFile.getAbsolutePath()
+                            + " from relative path");
+                }
                 System.load(libFileName);
                 if (verbose) {
                     System.err.println("Loaded " + libFile.getAbsolutePath()
                             + " from relative path");
                 }
             } catch(UnsatisfiedLinkError ex) {
+ex.printStackTrace();
                 throw ex;
             }
         } catch (Exception e) {

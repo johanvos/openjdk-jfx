@@ -99,6 +99,7 @@ public class Utils {
 
     static TextLayout layout() {
         if (layout == null) {
+Thread.dumpStack();
             layout = Toolkit.getToolkit().getTextLayoutFactory().createLayout();
         }
         return layout;
@@ -131,6 +132,7 @@ public class Utils {
     }
 
     public static double computeTextWidth(Font font, String text, double wrappingWidth) {
+System.err.println("computeTextWith for font "+font+", layout = "+layout);
         layout.setContent(text != null ? text : "", FontHelper.getNativeFont(font));
         layout.setWrapWidth((float)wrappingWidth);
         return layout.getBounds().getWidth();

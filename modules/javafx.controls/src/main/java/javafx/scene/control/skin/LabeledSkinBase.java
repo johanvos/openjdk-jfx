@@ -776,6 +776,7 @@ public abstract class LabeledSkinBase<C extends Labeled> extends SkinBase<C> {
         double minTextWidth = 0;
 
         final Font font = text.getFont();
+System.err.println("labeledskinbase, font = "+font);
         OverrunStyle truncationStyle = labeled.getTextOverrun();
         String ellipsisString = labeled.getEllipsisString();
         final String string = labeled.getText();

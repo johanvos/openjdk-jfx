@@ -147,6 +147,12 @@ public abstract class GraphicsPipeline {
     private static GraphicsPipeline installedPipeline;
 
     public static GraphicsPipeline createPipeline() {
+System.err.println("[JVDBG] GP createPipeline");
+if (PrismSettings.verbose) {
+System.err.println("PVON");
+} else {
+System.err.println("PVOFF");
+}
         if (PrismSettings.tryOrder.isEmpty()) {
             // if no pipelines specified just return null
             if (PrismSettings.verbose) {
@@ -160,6 +166,7 @@ public abstract class GraphicsPipeline {
                                             installedPipeline);
         }
         for (String prefix : PrismSettings.tryOrder) {
+System.err.println("TRY "+prefix);
             // Warn if j2d pipeline is specified
             if ("j2d".equals(prefix)) {
                 System.err.println(
@@ -179,16 +186,20 @@ public abstract class GraphicsPipeline {
             }
 
             String className =
-                "com.sun.prism."+prefix+"."+prefix.toUpperCase()+"Pipeline";
+                "com.sun.prism.es2.ES2Pipeline";
+                // "com.sun.prism."+prefix+"."+prefix.toUpperCase()+"Pipeline";
             try {
                 if (PrismSettings.verbose) {
                     System.out.println("Prism pipeline name = " + className);
                 }
+     System.err.println("Prism pipeline name = " + className);
                 Class klass = Class.forName(className);
                 if (PrismSettings.verbose) {
                     System.out.println("(X) Got class = " + klass);
                 }
-                Method m = klass.getMethod("getInstance", (Class[])null);
+     System.err.println("(X) Got class = " + klass);
+                // Method m = klass.getMethod("getInstance", (Class[])null);
+                Method m = klass.getMethod("getInstance");
                 GraphicsPipeline newPipeline = (GraphicsPipeline)
                     m.invoke(null, (Object[])null);
                 if (newPipeline != null && newPipeline.init()) {
@@ -208,11 +219,11 @@ public abstract class GraphicsPipeline {
                                        " initializing pipeline "+ className);
                 }
             } catch (Throwable t) {
-                if (PrismSettings.verbose) {
+                // if (PrismSettings.verbose) {
                     System.err.println("GraphicsPipeline.createPipeline " +
                                        "failed for " + className);
                     t.printStackTrace();
-                }
+                // }
             }
         }
         StringBuffer sBuf = new StringBuffer("Graphics Device initialization failed for :  ");
