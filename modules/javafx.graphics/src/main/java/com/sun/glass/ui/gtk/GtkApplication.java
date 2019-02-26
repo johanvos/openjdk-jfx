@@ -105,10 +105,6 @@ final class GtkApplication extends Application implements
             forcedGtkVersion = 0;
         }
 
-        AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
-            Application.loadNativeLibrary();
-            return null;
-        });
     }
 
     public static  int screen = -1;
@@ -143,6 +139,10 @@ final class GtkApplication extends Application implements
     }
 
     GtkApplication() {
+        AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+            Application.loadNativeLibrary();
+            return null;
+        });
 
         final int gtkVersion = forcedGtkVersion == 0 ?
             AccessController.doPrivileged((PrivilegedAction<Integer>) () -> {

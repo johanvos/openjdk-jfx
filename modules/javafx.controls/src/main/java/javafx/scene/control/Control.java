@@ -94,9 +94,15 @@ public abstract class Control extends Region implements Skinnable {
             }
         });
 
-        // Ensures that the default application user agent stylesheet is loaded
-        if (Application.getUserAgentStylesheet() == null) {
-            PlatformImpl.setDefaultPlatformUserAgentStylesheet();
+    }
+
+    static boolean postClinitDone = false;
+    static void postClinit () {
+        if (!postClinitDone) {
+            if (Application.getUserAgentStylesheet() == null) {
+                PlatformImpl.setDefaultPlatformUserAgentStylesheet();
+            }
+            postClinitDone = true;
         }
     }
 
@@ -429,6 +435,7 @@ public abstract class Control extends Region implements Skinnable {
      *  Create a new Control.
      */
     protected Control() {
+        postClinit();
         // focusTraversable is styleable through css. Calling setFocusTraversable
         // makes it look to css like the user set the value and css will not
         // override. Initializing focusTraversable by calling applyStyle

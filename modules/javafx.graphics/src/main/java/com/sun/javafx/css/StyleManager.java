@@ -1126,9 +1126,11 @@ final public class StyleManager {
                         errors.add(error);
                     }
                     if (getLogger().isLoggable(Level.WARNING)) {
-                        getLogger().warning(
-                            String.format("Resource \"%s\" not found.", fname)
-                        );
+// java.util.logging uses unsupported stackwalker
+                        System.err.println("Warning: Resource not found: "+fname);
+                        // getLogger().warning(
+                            // String.format("Resource \"%s\" not found.", fname)
+                        // );
                     }
                 }
 

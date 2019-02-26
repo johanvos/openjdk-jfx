@@ -45,13 +45,16 @@ public class NativeLibLoader {
     private static final HashSet<String> loaded = new HashSet<String>();
 
     public static synchronized void loadLibrary(String libname) {
-        if (!loaded.contains(libname)) {
-            StackWalker walker = AccessController.doPrivileged((PrivilegedAction<StackWalker>) () ->
-            StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE));
-            Class caller = walker.getCallerClass();
-            loadLibraryInternal(libname, null, caller);
-            loaded.add(libname);
-        }
+System.err.println("Load library "+libname);
+// some libs are also loaded at build time, we have to reload them
+        // if (!loaded.contains(libname)) {
+// stackwalker not yet supported
+            // StackWalker walker = AccessController.doPrivileged((PrivilegedAction<StackWalker>) () ->
+            // StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE));
+            // Class caller = walker.getCallerClass();
+            loadLibraryInternal(libname, null, null);
+            // loaded.add(libname);
+        // }
     }
 
     public static synchronized void loadLibrary(String libname, List<String> dependencies) {

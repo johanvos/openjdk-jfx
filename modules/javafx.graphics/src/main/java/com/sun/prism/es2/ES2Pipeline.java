@@ -38,15 +38,16 @@ import java.util.HashMap;
 
 public class ES2Pipeline extends GraphicsPipeline {
 
-    public static final GLFactory glFactory;
-    public static final GLPixelFormat.Attributes
+    public static GLFactory glFactory;
+    public static GLPixelFormat.Attributes
             pixelFormatAttributes = new GLPixelFormat.Attributes();
-    static final boolean msaa;
-    static final boolean npotSupported;
+    static boolean msaa;
+    static boolean npotSupported;
     private static boolean es2Enabled;
     private static boolean isEglfb = false;
 
-    static {
+    // don't load native libraries at build time
+    static void postClinit() {
         AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
             String libName = "prism_es2";
 
@@ -97,10 +98,13 @@ public class ES2Pipeline extends GraphicsPipeline {
 
     }
     private static Thread creator;
-    private static final ES2Pipeline theInstance;
+    private static ES2Pipeline theInstance;
     private static ES2ResourceFactory factories[];
 
     public static ES2Pipeline getInstance() {
+        if (theInstance == null) {
+           postClinit(); // do we need to synchronize?
+        }
         return theInstance;
     }
 
