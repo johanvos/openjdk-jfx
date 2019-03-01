@@ -897,6 +897,7 @@ final public class StyleManager {
             }
 
             // else, url does have a scheme
+System.err.println("URI = "+uri);
             return uri.toURL();
 
         } catch (MalformedURLException malf) {
@@ -912,6 +913,7 @@ final public class StyleManager {
     static byte[] calculateCheckSum(String fname) {
 
         if (fname == null || fname.isEmpty()) return new byte[0];
+if (1 < 2) return new byte[0];
 
         try {
             final URL url = getURL(fname);

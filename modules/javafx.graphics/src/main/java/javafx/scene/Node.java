@@ -8906,6 +8906,9 @@ public abstract class Node implements EventTarget, Styleable {
     public String getTypeSelector() {
 
         final Class<?> clazz = getClass();
+        String a1 =  clazz.getSimpleName();
+        return a1; // fails if inner class
+/*
         final Package pkg = clazz.getPackage();
 
         // package could be null. not likely, but could be.
@@ -8918,6 +8921,7 @@ public abstract class Node implements EventTarget, Styleable {
         final int pos = (0 < plen && plen < clen) ? plen + 1 : 0;
 
         return clazz.getName().substring(pos);
+*/
     }
 
     /**
