@@ -46,6 +46,15 @@ static volatile jobject glassClassLoader = NULL;
  */
 + (jclass)ClassForName:(char*)className withEnv:(JNIEnv*)env
 {
+    int i = 0;
+    while(className[i]!='\0') {
+        if (className[i] == '/') {
+            className[i] = '.';
+        }
+        i++;
+    }
+    return (*env)->FindClass(env, className);
+/*
     static jclass classCls = NULL;
     if (classCls == NULL)
     {
@@ -89,6 +98,7 @@ static volatile jobject glassClassLoader = NULL;
     (*env)->DeleteLocalRef(env, classNameStr);
 
     return foundClass;
+*/
 }
 
 + (jclass)ApplicationClass
