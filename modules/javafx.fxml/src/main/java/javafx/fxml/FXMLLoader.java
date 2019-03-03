@@ -3492,6 +3492,7 @@ public class FXMLLoader {
         private void addAccessibleMethods(final Class<?> type,
                                           final int allowedMemberAccess) {
             final boolean isPublicType = Modifier.isPublic(type.getModifiers());
+System.err.println("FXMLLoader will addAccessibleMethods for "+type);
 
             final Method[] methods = type.getDeclaredMethods();
             for (int i = 0; i < methods.length; ++i) {

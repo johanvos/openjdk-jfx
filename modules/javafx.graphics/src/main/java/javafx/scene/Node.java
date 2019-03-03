@@ -8904,8 +8904,10 @@ public abstract class Node implements EventTarget, Styleable {
      */
     @Override
     public String getTypeSelector() {
-
         final Class<?> clazz = getClass();
+return clazz.getSimpleName();
+/*
+
         final Package pkg = clazz.getPackage();
 
         // package could be null. not likely, but could be.
@@ -8917,7 +8919,13 @@ public abstract class Node implements EventTarget, Styleable {
         final int clen = clazz.getName().length();
         final int pos = (0 < plen && plen < clen) ? plen + 1 : 0;
 
-        return clazz.getName().substring(pos);
+        String answer =  clazz.getName().substring(pos);
+String mine = clazz.getSimpleName();
+System.err.println("typeselector could be ");
+System.err.println(answer);
+System.err.println(mine);
+return answer;
+*/
     }
 
     /**

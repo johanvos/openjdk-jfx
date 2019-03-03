@@ -370,6 +370,7 @@ public abstract class Renderer {
             }
 
             r = RendererFactory.createRenderer(fctx);
+System.err.println("RENDERER = "+r);
             if (r == null) {
                 throw new RuntimeException("Error creating a Renderer");
             } else {

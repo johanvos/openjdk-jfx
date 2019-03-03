@@ -128,12 +128,14 @@ public class PlatformLogger implements System.Logger {
 
     @Override
     public void log(System.Logger.Level level, ResourceBundle bundle, String format, Object... params) {
-        loggerProxy.log(level, bundle, format, params);
+System.err.println("LOG "+format);
+        // loggerProxy.log(level, bundle, format, params);
     }
 
     @Override
     public void log(System.Logger.Level level, ResourceBundle bundle, String msg, Throwable thrown) {
-        loggerProxy.log(level, bundle, msg, thrown);
+System.err.println("LOG "+msg);
+        // loggerProxy.log(level, bundle, msg, thrown);
     }
 
     // ------------------------------------------------------------------------
@@ -159,17 +161,20 @@ public class PlatformLogger implements System.Logger {
      */
     public void severe(String msg) {
         if (!loggingEnabled) return;
-        loggerProxy.log(System.Logger.Level.ERROR, msg, (Object[])null);
+System.err.println("SEVERE: "+msg);
+        // loggerProxy.log(System.Logger.Level.ERROR, msg, (Object[])null);
     }
 
     public void severe(String msg, Throwable t) {
         if (!loggingEnabled) return;
-        loggerProxy.log(System.Logger.Level.ERROR, msg, t);
+System.err.println("SEVERE: "+msg);
+        // loggerProxy.log(System.Logger.Level.ERROR, msg, t);
     }
 
     public void severe(String msg, Object... params) {
         if (!loggingEnabled) return;
-        loggerProxy.log(System.Logger.Level.ERROR, msg, params);
+System.err.println("SEVERE: "+msg);
+        // loggerProxy.log(System.Logger.Level.ERROR, msg, params);
     }
 
     /**
@@ -178,17 +183,20 @@ public class PlatformLogger implements System.Logger {
      */
     public void warning(String msg) {
         if (!loggingEnabled) return;
-        loggerProxy.log(System.Logger.Level.WARNING, msg, (Object[])null);
+System.err.println("WARNING: "+msg);
+        // loggerProxy.log(System.Logger.Level.WARNING, msg, (Object[])null);
     }
 
     public void warning(String msg, Throwable t) {
         if (!loggingEnabled) return;
-        loggerProxy.log(System.Logger.Level.WARNING, msg, t);
+System.err.println("WARNING: "+msg);
+        // loggerProxy.log(System.Logger.Level.WARNING, msg, t);
     }
 
     public void warning(String msg, Object... params) {
         if (!loggingEnabled) return;
-        loggerProxy.log(System.Logger.Level.WARNING, msg, params);
+System.err.println("WARNING: "+msg);
+        // loggerProxy.log(System.Logger.Level.WARNING, msg, params);
     }
 
     /**
@@ -197,17 +205,20 @@ public class PlatformLogger implements System.Logger {
      */
     public void info(String msg) {
         if (!loggingEnabled) return;
-        loggerProxy.log(System.Logger.Level.INFO, msg, (Object[])null);
+System.err.println("INFO: "+msg);
+        // loggerProxy.log(System.Logger.Level.INFO, msg, (Object[])null);
     }
 
     public void info(String msg, Throwable t) {
         if (!loggingEnabled) return;
-        loggerProxy.log(System.Logger.Level.INFO, msg, t);
+System.err.println("INFO: "+msg);
+        // loggerProxy.log(System.Logger.Level.INFO, msg, t);
     }
 
     public void info(String msg, Object... params) {
         if (!loggingEnabled) return;
-        loggerProxy.log(System.Logger.Level.INFO, msg, params);
+System.err.println("INFO: "+msg);
+        // loggerProxy.log(System.Logger.Level.INFO, msg, params);
     }
 
     /**

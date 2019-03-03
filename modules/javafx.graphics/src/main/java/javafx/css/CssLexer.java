@@ -730,6 +730,7 @@ final class CssLexer {
     private int readChar() throws IOException {
 
         int c = reader.read();
+// System.err.println("READCHAR: "+c);
 
         // only reset line and pos counters after having read a NL since
         // a NL token is created after the readChar
@@ -747,6 +748,7 @@ final class CssLexer {
     }
 
     Token nextToken() {
+// System.err.println("[CL] nt, token = "+token);
 
         Token tok = null;
         if (token != null) {
@@ -793,6 +795,7 @@ final class CssLexer {
                     currentState = newState;
                     text.append((char)ch);
                     ch = readChar();
+// System.err.println("CH = "+ch);
                     continue;
 
                 } else {

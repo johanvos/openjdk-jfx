@@ -3963,7 +3963,7 @@ final public class CssParser {
                                 line, pos);
                     ParseError error = createError(msg);
                     if (LOGGER.isLoggable(Level.WARNING)) {
-                        LOGGER.warning(error.toString());
+                        // LOGGER.warning(error.toString());
                     }
                     reportError(error);
                 currentToken = null;
@@ -4748,6 +4748,7 @@ final public class CssParser {
             StylesheetParsingError(String url, String message) {
                 super(message);
                 this.url = url;
+Thread.dumpStack();
             }
 
             String getURL() {

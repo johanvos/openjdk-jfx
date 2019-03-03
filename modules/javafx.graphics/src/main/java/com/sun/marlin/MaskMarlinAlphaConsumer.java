@@ -158,6 +158,7 @@ public final class MaskMarlinAlphaConsumer implements MarlinAlphaConsumer {
     {
 //            System.out.println("setting row "+(pix_y - y)+
 //                               " out of "+width+" x "+height);
+if (1<2) return;
 
         final byte[] out = this.alphas;
         final int w = width;

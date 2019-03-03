@@ -1513,23 +1513,32 @@ public final class DRenderer implements DMarlinRenderer, MarlinConst {
                    final boolean useBlockFlags,
                    final MarlinAlphaConsumer ac)
     {
+System.err.println("[JVDBG] copyAARow");
+System.err.println("[JVDBG] arlength = "+alphaRow.length);
+System.err.println("pix_y = "+pix_y+", pix_from = "+pix_from+", pix_to = "+pix_to+" ubf = "+useBlockFlags);
+System.err.println("mac = "+ac);
         if (DO_MONITORS) {
             rdrCtx.stats.mon_rdr_copyAARow.start();
         }
         if (DO_STATS) {
             rdrCtx.stats.stat_cache_rowAA.add(pix_to - pix_from);
         }
+System.err.println("[JVDBG] copyAARow 1");
 
         if (useBlockFlags) {
+System.err.println("[JVDBG] copyAARow 2");
             if (DO_STATS) {
                 rdrCtx.stats.hist_tile_generator_encoding.add(1);
             }
             ac.setAndClearRelativeAlphas(blkFlags, alphaRow, pix_y, pix_from, pix_to);
         } else {
+System.err.println("[JVDBG] copyAARow 3");
             if (DO_STATS) {
                 rdrCtx.stats.hist_tile_generator_encoding.add(0);
             }
+System.err.println("[JVDBG] copyAARow 4");
             ac.setAndClearRelativeAlphas(alphaRow, pix_y, pix_from, pix_to);
+System.err.println("[JVDBG] copyAARow 5");
         }
         if (DO_MONITORS) {
             rdrCtx.stats.mon_rdr_copyAARow.stop();
