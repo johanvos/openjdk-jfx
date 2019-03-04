@@ -919,7 +919,7 @@ System.err.println("URI = "+uri);
     static byte[] calculateCheckSum(String fname) {
 
         if (fname == null || fname.isEmpty()) return new byte[0];
-if (1<2) return new byte[0];
+if (1 < 2) return new byte[0];
 
         try {
 System.err.println("calculcatechecksum, fname = "+fname);

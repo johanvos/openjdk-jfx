@@ -39,7 +39,7 @@ import java.security.PrivilegedAction;
 final class MacApplication extends Application implements InvokeLaterDispatcher.InvokeLaterSubmitter {
 
     private native static void _initIDs(boolean disableSyncRendering);
-    static {
+    static void postClinit() {
         AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
             Application.loadNativeLibrary();
             return null;
@@ -56,6 +56,7 @@ final class MacApplication extends Application implements InvokeLaterDispatcher.
     private final InvokeLaterDispatcher invokeLaterDispatcher;
 
     MacApplication() {
+        postClinit();
         // Embedded in SWT, with shared event thread
         boolean isEventThread = AccessController
                 .doPrivileged((PrivilegedAction<Boolean>) () -> Boolean.getBoolean("javafx.embed.isEventThread"));
