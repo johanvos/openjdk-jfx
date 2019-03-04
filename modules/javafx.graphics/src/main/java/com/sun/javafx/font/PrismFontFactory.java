@@ -1455,6 +1455,7 @@ public abstract class PrismFontFactory implements FontFactory {
             }
             return loadEmbeddedFont0(name, fontStream, size, register, loadAll);
         } catch (InterruptedException e) {
+e.printStackTrace();
             // Interrupted while waiting to acquire a permit.
             return null;
         } finally {
@@ -1509,6 +1510,7 @@ public abstract class PrismFontFactory implements FontFactory {
              */
             addFileCloserHook();
         } catch (Exception e) {
+e.printStackTrace();
             fontWriter.deleteFile();
         } finally {
             /* If the data isn't a valid font, so that registering it

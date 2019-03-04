@@ -459,6 +459,7 @@ public final class Font {
         try {
             url = new URL(urlStr); // null string arg. is caught here.
         } catch (Exception e) {
+e.printStackTrace();
             return null;
         }
         if (size <= 0) {
@@ -480,6 +481,7 @@ public final class Font {
                     sm.checkPermission(filePermission);
                 }
             } catch (Exception e) {
+e.printStackTrace();
                 return null;
             }
             return
@@ -494,6 +496,7 @@ public final class Font {
             fonts =
                Toolkit.getToolkit().getFontLoader().loadFont(in, size, loadAll);
         } catch (Exception e) {
+e.printStackTrace();
             return null;
         } finally {
             try {
@@ -501,6 +504,7 @@ public final class Font {
                     in.close();
                 }
             } catch (Exception e) {
+e.printStackTrace();
             }
         }
         return fonts;

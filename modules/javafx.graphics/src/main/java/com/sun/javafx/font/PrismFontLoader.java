@@ -105,6 +105,7 @@ public class PrismFontLoader extends FontLoader {
                                      boolean loadAll) {
 
         FontFactory factory = getFontFactoryFromPipeline();
+System.err.println("PRISM: loadFont, factory = "+factory);
         PGFont[] fonts =
             factory.loadEmbeddedFont(null, in, (float)size, true, loadAll);
         return createFonts(fonts);

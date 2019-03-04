@@ -35,13 +35,16 @@ import com.sun.javafx.text.GlyphLayout;
 import com.sun.javafx.text.TextRun;
 
 class PangoGlyphLayout extends GlyphLayout {
-    private static final long fontmap;
+    private static long fontmap = -1;
 
-    static {
-        fontmap = OSPango.pango_ft2_font_map_new();
+    static void postClinit() {
+        if (fontmap == -1) {
+            fontmap = OSPango.pango_ft2_font_map_new();
+        }
     }
 
     private int getSlot(PGFont font, PangoGlyphString glyphString) {
+        postClinit();
         CompositeFontResource fr = (CompositeFontResource)font.getFontResource();
         long fallbackFont = glyphString.font;
         long fallbackFd = OSPango.pango_font_describe(fallbackFont);
@@ -69,6 +72,7 @@ class PangoGlyphLayout extends GlyphLayout {
     }
 
     private boolean check(long checkValue, String message, long context, long desc, long attrList) {
+        postClinit();
         if (checkValue != 0) return false;
         if (message != null && PrismFontFactory.debugFonts) {
             System.err.println(message);
@@ -82,6 +86,7 @@ class PangoGlyphLayout extends GlyphLayout {
 
     private long str = 0L;
     public void layout(TextRun run, PGFont font, FontStrike strike, char[] text) {
+        postClinit();
 
         /* Create the pango font and attribute list */
         FontResource fr = font.getFontResource();
@@ -199,6 +204,7 @@ class PangoGlyphLayout extends GlyphLayout {
     @Override
     public void dispose() {
         super.dispose();
+        postClinit();
         if (str != 0L) {
             OSPango.g_free(str);
             str = 0L;
