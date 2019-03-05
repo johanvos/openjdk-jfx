@@ -25,6 +25,8 @@
 
 #import "GlassMacros.h"
 #import "GlassHelper.h"
+#include <stdio.h>
+#include <string.h>
 
 @implementation GlassHelper
 
@@ -46,14 +48,21 @@ static volatile jobject glassClassLoader = NULL;
  */
 + (jclass)ClassForName:(char*)className withEnv:(JNIEnv*)env
 {
+fprintf(stderr, "ClassForName Needed For %s\n", className);
     int i = 0;
-    while(className[i]!='\0') {
-        if (className[i] == '/') {
-            className[i] = '.';
+
+    char targetName[200];
+    while(*className!='\0') {
+        targetName[i] = *className;
+        if (*className == '.') {
+            targetName[i] = '/';
         }
         i++;
+        className++;
     }
-    return (*env)->FindClass(env, className);
+    targetName[i] = '\0';
+    fprintf(stderr, "classForName convertneeded for %s\n", targetName);
+    return (*env)->FindClass(env, targetName);
 /*
     static jclass classCls = NULL;
     if (classCls == NULL)
