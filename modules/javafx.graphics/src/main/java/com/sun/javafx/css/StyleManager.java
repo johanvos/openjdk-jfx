@@ -855,13 +855,10 @@ final public class StyleManager {
 
         if (str == null || str.trim().isEmpty()) return null;
 
-System.err.println("STYLEMANAGER, getURL for "+str);
-// Thread.dumpStack();
 
         try {
 
             URI uri =  new URI(str.trim());
-System.err.println("STYLEMANAGER, getURL for "+str+" results in "+uri);
 
             // if url doesn't have a scheme
             if (uri.isAbsolute() == false) {
@@ -872,7 +869,6 @@ System.err.println("STYLEMANAGER, getURL for "+str+" results in "+uri);
                         (str.endsWith(".css") || str.endsWith(".bss"))) {
 
                     try {
-System.err.println("[JVDBG] use skinUtilsClassname");
                         ClassLoader cl = StyleManager.class.getClassLoader();
                         Class<?> clz = Class.forName(skinUtilsClassName, true, cl);
                         Method m_getResource = clz.getMethod("getResource", String.class);
@@ -885,7 +881,6 @@ System.err.println("[JVDBG] use skinUtilsClassname");
                         return null;
                     }
                 }
-System.err.println("[JVDBG] dontuse skinUtilsClassname");
 
                 final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
                 final String path = uri.getPath();
@@ -903,7 +898,6 @@ System.err.println("[JVDBG] dontuse skinUtilsClassname");
             }
 
             // else, url does have a scheme
-System.err.println("URI = "+uri);
             return uri.toURL();
 
         } catch (MalformedURLException malf) {
@@ -919,10 +913,7 @@ System.err.println("URI = "+uri);
     static byte[] calculateCheckSum(String fname) {
 
         if (fname == null || fname.isEmpty()) return new byte[0];
-if (1 < 2) return new byte[0];
-
         try {
-System.err.println("calculcatechecksum, fname = "+fname);
             final URL url = getURL(fname);
 
             // We only care about stylesheets from file: URLs.
@@ -1071,7 +1062,6 @@ System.err.println("calculcatechecksum, fname = "+fname);
 
 
     private static Stylesheet loadStylesheetUnPrivileged(final String fname) {
-System.err.println("[JVDBG] loadstylesheetunprivileged for "+fname);
 
         synchronized (styleLock) {
             Boolean parse = AccessController.doPrivileged((PrivilegedAction<Boolean>) () -> {
@@ -1083,7 +1073,6 @@ System.err.println("[JVDBG] loadstylesheetunprivileged for "+fname);
                 return (!fname.endsWith(".bss") && bss != null) ?
                     !Boolean.valueOf(bss) : Boolean.FALSE;
             });
-System.err.println("[JVDBG] parse = "+parse);
 
             try {
                 final String ext = (parse) ? (".css") : (".bss");
@@ -1096,38 +1085,29 @@ System.err.println("[JVDBG] parse = "+parse);
                 } else {
                     final String name = fname.substring(0, fname.length() - 4);
 
-System.err.println("[JVDBG] step 1, name = "+name+" and ext = "+ext);
                     url = getURL(name+ext);
-System.err.println("[JVDBG] step 2, url = "+url);
                     if (url == null && (parse = !parse)) {
                         // If we failed to get the URL for the .bss file,
                         // fall back to the .css file.
                         // Note that 'parse' is toggled in the test.
-System.err.println("[JVDBG] step 2a, url = "+url);
                         url = getURL(name+".css");
-System.err.println("[JVDBG] step 2b, url = "+url);
                     }
 
                     if ((url != null) && !parse) {
 
                         try {
                             // RT-36332: if loadBinary throws an IOException, make sure to try .css
-System.err.println("[JVDBG] step 3, url = "+url);
                             stylesheet = Stylesheet.loadBinary(url);
-System.err.println("[JVDBG] step 4, url = "+url);
                         } catch (IOException ioe) {
-System.err.println("[JVDBG] IOEXception:\n-------");
+System.err.println("[JVDBG] IOEXception trying to download stylesheet at "+url);
                             stylesheet = null;
-System.err.println("[JVDBG] that was IOEXception:\n-------");
                         }
 
                         if (stylesheet == null && (parse = !parse)) {
-System.err.println("[JVDBG] step 5, url = "+url);
                             // If we failed to load the .bss file,
                             // fall back to the .css file.
                             // Note that 'parse' is toggled in the test.
                             url = getURL(fname);
-System.err.println("[JVDBG] step 5b, url = "+url);
                         }
                     }
                 }
@@ -1135,13 +1115,10 @@ System.err.println("[JVDBG] step 5b, url = "+url);
                 // either we failed to load the .bss file, or parse
                 // was set to true.
                 if ((url != null) && parse) {
-System.err.println("[JVDBG] step 6a, url = "+url);
                     stylesheet = new CssParser().parse(url);
-System.err.println("[JVDBG] step 6b, url = "+url);
                 }
 
                 if (stylesheet == null) {
-System.err.println("[JVDBG] step 7, stylesheet still null");
                     if (errors != null) {
                         CssParser.ParseError error =
                             new CssParser.ParseError(
@@ -1269,7 +1246,6 @@ ioe.printStackTrace();
                 }
 
                 if (n==0) {
-System.err.println("fname = "+fname);
                     _setDefaultUserAgentStylesheet(fname);
                 } else {
                     _addUserAgentStylesheet(fname);
@@ -1422,7 +1398,6 @@ System.err.println("fname = "+fname);
             final Stylesheet ua_stylesheet = loadStylesheet(fname);
 
             if (ua_stylesheet == null) return false;
-System.err.println("ua_stylesheet loaded for "+fname+" returns stylesheet with url = "+ua_stylesheet.getUrl());
 
             ua_stylesheet.setOrigin(StyleOrigin.USER_AGENT);
             final StylesheetContainer sc = new StylesheetContainer(fname, ua_stylesheet);
