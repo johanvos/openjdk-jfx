@@ -643,6 +643,11 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_mac_MacWindow__1initIDs
 {
     LOG("Java_com_sun_glass_ui_mac_MacWindow__1initIDs");
 
+    if (jWindowParentClass == NULL) {
+        jclass cls = [GlassHelper ClassForName:"com.sun.glass.ui.Window" withEnv:env];
+        jWindowParentClass = (*env)->NewGlobalRef(env, jClass);
+    }
+
     if (jWindowClass == NULL)
     {
         jWindowClass = (*env)->NewGlobalRef(env, jClass);
@@ -677,37 +682,37 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_mac_MacWindow__1initIDs
 
     if (jWindowNotifyMove == NULL)
     {
-        jWindowNotifyMove = (*env)->GetMethodID(env, jWindowClass, "notifyMove", "(IIZ)V");
+        jWindowNotifyMove = (*env)->GetMethodID(env, jWindowParentClass, "notifyMove", "(IIZ)V");
         if ((*env)->ExceptionCheck(env)) return;
     }
 
     if (jWindowNotifyResize == NULL)
     {
-        jWindowNotifyResize = (*env)->GetMethodID(env, jWindowClass, "notifyResize", "(III)V");
+        jWindowNotifyResize = (*env)->GetMethodID(env, jWindowParentClass, "notifyResize", "(III)V");
         if ((*env)->ExceptionCheck(env)) return;
     }
 
     if (jWindowNotifyMoveToAnotherScreen == NULL)
     {
-        jWindowNotifyMoveToAnotherScreen = (*env)->GetMethodID(env, jWindowClass, "notifyMoveToAnotherScreen", "(Lcom/sun/glass/ui/Screen;)V");
+        jWindowNotifyMoveToAnotherScreen = (*env)->GetMethodID(env, jWindowParentClass, "notifyMoveToAnotherScreen", "(Lcom/sun/glass/ui/Screen;)V");
         if ((*env)->ExceptionCheck(env)) return;
     }
 
     if (jWindowNotifyScaleChanged == NULL)
     {
-        jWindowNotifyScaleChanged = (*env)->GetMethodID(env, jWindowClass, "notifyScaleChanged", "(FFFF)V");
+        jWindowNotifyScaleChanged = (*env)->GetMethodID(env, jWindowParentClass, "notifyScaleChanged", "(FFFF)V");
         if ((*env)->ExceptionCheck(env)) return;
     }
 
     if (jWindowNotifyClose == NULL)
     {
-        jWindowNotifyClose = (*env)->GetMethodID(env, jWindowClass, "notifyClose", "()V");
+        jWindowNotifyClose = (*env)->GetMethodID(env, jWindowParentClass, "notifyClose", "()V");
         if ((*env)->ExceptionCheck(env)) return;
     }
 
     if (jWindowNotifyFocus == NULL)
     {
-        jWindowNotifyFocus = (*env)->GetMethodID(env, jWindowClass, "notifyFocus", "(I)V");
+        jWindowNotifyFocus = (*env)->GetMethodID(env, jWindowParentClass, "notifyFocus", "(I)V");
         if ((*env)->ExceptionCheck(env)) return;
     }
 

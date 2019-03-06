@@ -131,7 +131,7 @@ final class MacWindow extends Window {
         super.notifyResize(type, width, height);
     }
 
-    protected void notifyMove(final int x, final int y, boolean isMaximized) {
+    public  void notifyMove(final int x, final int y, boolean isMaximized) {
         if (isMaximized() != isMaximized && !isMinimized()) {
             setState(isMaximized ? State.MAXIMIZED : State.NORMAL);
             handleWindowEvent(System.nanoTime(),

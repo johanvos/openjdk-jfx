@@ -127,11 +127,11 @@ class CTGlyph implements Glyph {
         long space;
         int bpc = 8, bpr, flags;
         if (lcd) {
-            space = RGB_COLORSPACE;
+            space = OS.CGColorSpaceCreateDeviceRGB();
             bpr = width * 4;
             flags = OS.kCGBitmapByteOrder32Host | OS.kCGImageAlphaPremultipliedFirst;
         } else {
-            space = GRAY_COLORSPACE;
+            space = OS.CGColorSpaceCreateDeviceGray();
             bpr = width;
             flags = OS.kCGImageAlphaNone;
         }

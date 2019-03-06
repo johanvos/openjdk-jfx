@@ -64,7 +64,7 @@ jstring createJavaString(JNIEnv *env, CFStringRef stringRef)
     CFStringGetCharacters(stringRef, CFRangeMake(0, length), buffer);
     jstring jStr = (*env)->NewString(env, (jchar *)buffer, length);
     if (checkAndClearException(env) || !jStr) {
-        fprintf(stderr, "createJavaString error: JNI exception or jStr == NULL");
+        fprintf(stderr, "createJavaString error: JNI exception or jStr == NULL\n");
         return NULL;
     }
     return jStr;

@@ -36,6 +36,7 @@ extern JNIEnv *jEnv;
 
 extern jclass jApplicationClass;
 extern jclass jWindowClass;
+extern jclass jWindowParentClass;
 extern jclass jViewClass;
 
 extern jclass jScreenClass;
