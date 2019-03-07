@@ -52,7 +52,11 @@ System.err.println("Load library "+libname);
             // StackWalker walker = AccessController.doPrivileged((PrivilegedAction<StackWalker>) () ->
             // StackWalker.getInstance(StackWalker.Option.RETAIN_CLASS_REFERENCE));
             // Class caller = walker.getCallerClass();
+try {
             loadLibraryInternal(libname, null, null);
+} catch (Throwable e) {
+System.err.println("After all tries, we got an exception that we will ignore (at buildtime only!!): "+e);
+}
             // loaded.add(libname);
         // }
     }
@@ -150,12 +154,14 @@ System.err.println("Load library "+libname);
 
             // Finally we will use System.loadLibrary.
             try {
+System.err.println("LOADLIB named "+libraryName+" and os = "+System.getProperty("targetos.name")+", call System.loadLibrary now");
                 System.loadLibrary(libraryName);
                 if (verbose) {
                     System.err.println("System.loadLibrary("
                             + libraryName + ") succeeded");
                 }
             } catch (UnsatisfiedLinkError ex2) {
+System.err.println("That failed due to "+ex2);
                 // if the library is available in the jar, copy it to cache and load it from there
                 if (loadLibraryFromResource(libraryName, dependencies, caller)) {
                     return;
@@ -164,7 +170,7 @@ System.err.println("Load library "+libname);
                 //is recognized by existence of JNI_OnLoad_libraryname() C function.
                 //If libraryname contains hyphen, it needs to be translated
                 //to underscore to form valid C function indentifier.
-                if ("iOS".equals(System.getProperty("os.name"))
+                if ("iOS".equals(System.getProperty("targetos.name"))
                         && libraryName.contains("-")) {
                     libraryName = libraryName.replace("-", "_");
                     try {
