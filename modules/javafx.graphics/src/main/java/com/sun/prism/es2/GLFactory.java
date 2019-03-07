@@ -39,7 +39,7 @@ abstract class GLFactory {
     private static native String nGetGLRenderer(long nativeCtxInfo);
     private static native String nGetGLVersion(long nativeCtxInfo);
 
-    private static final GLFactory platformFactory;
+    private static GLFactory platformFactory;
 
     /* Note: We are only storing the string information of a driver in this
      * object. We are assuming a system with a single or homogeneous GPUs.
@@ -60,6 +60,10 @@ abstract class GLFactory {
      * Instantiate singleton factories if available, the OS native ones.
      */
     static {
+        computeFactory();
+    }
+
+    private static void computeFactory() {
 
         final String factoryClassName;
         if (PlatformUtil.isUnix()) {
@@ -73,10 +77,10 @@ abstract class GLFactory {
                 factoryClassName = "com.sun.prism.es2.X11GLFactory";
         } else if (PlatformUtil.isWindows()) {
             factoryClassName = "com.sun.prism.es2.WinGLFactory";
-        } else if (PlatformUtil.isMac()) {
-            factoryClassName = "com.sun.prism.es2.MacGLFactory";
         } else if (PlatformUtil.isIOS()) {
             factoryClassName = "com.sun.prism.es2.IOSGLFactory";
+        } else if (PlatformUtil.isMac()) {
+            factoryClassName = "com.sun.prism.es2.MacGLFactory";
         } else if (PlatformUtil.isAndroid()) {
             if ("eglfb".equals(PlatformUtil.getEmbeddedType())) {
                 factoryClassName = "com.sun.prism.es2.EGLFBGLFactory";
@@ -121,6 +125,10 @@ abstract class GLFactory {
      * Returns the sole GLFactory instance.
      */
     static GLFactory getFactory() throws RuntimeException {
+        if (platformFactory == null) {
+System.err.println("platfromFactory was null");
+        computeFactory();
+        }
         if (null != platformFactory) {
             return platformFactory;
         }

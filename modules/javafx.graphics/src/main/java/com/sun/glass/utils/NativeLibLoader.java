@@ -224,7 +224,7 @@ System.err.println("That failed due to "+ex2);
             // we should only be here if the resource exists in the module, but
             // for some reasons it can't be loaded.
             System.err.println("Loading library " + libraryName + " from resource failed: " + t);
-            t.printStackTrace();
+            // t.printStackTrace();
         }
         return false;
     }

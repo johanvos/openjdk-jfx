@@ -39,12 +39,18 @@ final class Platform {
     static private String type = null;
 
     static public synchronized String determinePlatform() {
+System.err.println("DETERMINEPLATFORM, type = "+type);
+type = null;
         if (type == null) {
 
             // Provide for a runtime override, allowing EGL for example
             String userPlatform =
                 AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty("glass.platform"));
 
+            if ("ios".equals(System.getProperty("os.target"))) {
+                userPlatform = "ios";
+            }
+System.err.println("PLATFORM = "+userPlatform);
             if (userPlatform != null) {
                 if (userPlatform.equals("macosx"))
                    type = MAC;

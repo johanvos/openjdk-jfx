@@ -174,6 +174,8 @@ public class PlatformUtil {
      * Returns true if the operating system is iOS
      */
     public static boolean isIOS(){
+        String target = System.getProperty("os.target");
+        if ("ios".equals(target)) return true;
         return IOS;
     }
 
