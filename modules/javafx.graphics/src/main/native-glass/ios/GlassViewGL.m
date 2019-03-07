@@ -49,7 +49,7 @@ static EAGLContext * ctx = nil;
 
 
 - (id)initWithFrame:(CGRect)frame withClientContext:(EAGLContext*)clientEAGLContext withJProperties:(jobject)jproperties {
-
+fprintf(stderr, "INITWITHFRAME\n");
     self = [super initWithFrame:frame];
     if (self) {
 
@@ -104,6 +104,7 @@ static EAGLContext * ctx = nil;
         GLASS_LOG("Created GLView - context %@, renderbuffer is %d , framebuffer is %d",
                      ctx, renderBuffer, frameBuffer);
 
+fprintf(stderr, "done INITWITHFRAME\n");
     }
     return self;
 }

@@ -37,6 +37,7 @@
 JNIEXPORT void JNICALL Java_com_sun_glass_ui_ios_IosGestureSupport__1initIDs
 (JNIEnv *env, jclass jClass)
 {
+fprintf(stderr, "IOSGESTUREINITIDS");
     GLASS_LOG("Java_com_sun_glass_ui_ios_IosGestureSupport__1initIDs");
 
     // Initialize  methods IDs of java IosGestureSupport callbacks.

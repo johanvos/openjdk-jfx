@@ -106,10 +106,10 @@ public abstract class Application {
     protected static synchronized void loadNativeLibrary(final String libname) {
         // load the native library of the specified libname.
         // the platform default by convention is "glass", all others should have a suffix, ie glass-x11
-        if (!loaded) {
+        // if (!loaded) {
             com.sun.glass.utils.NativeLibLoader.loadLibrary(libname);
             loaded = true;
-        }
+        // }
     }
 
     // May be called on any thread.
@@ -445,6 +445,8 @@ public abstract class Application {
 
     // Called from native, when a JNI exception has occurred
     public static void reportException(Throwable t) {
+System.err.println("APP: reportException called!");
+t.printStackTrace();
         Thread currentThread = Thread.currentThread();
         Thread.UncaughtExceptionHandler handler =
                 currentThread.getUncaughtExceptionHandler();

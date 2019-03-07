@@ -43,6 +43,14 @@ final class IosGestureSupport {
 
     private final static boolean isDirect = true;
 
+    static boolean loaded = false;
+    public static void postClinit() {
+        if (!loaded) {
+            _initIDs();
+            loaded = true;
+        }
+    }
+
     private final static GestureSupport gestures = new GestureSupport(false);
     private final static TouchInputSupport touches =
             new TouchInputSupport(gestures.createTouchCountListener(), false);

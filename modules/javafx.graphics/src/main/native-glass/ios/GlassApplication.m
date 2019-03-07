@@ -56,6 +56,7 @@ jclass mat_jScreenClass = NULL;
 jclass mat_jViewClass = NULL;
 
 jclass jApplicationClass = NULL;
+jclass jApplicationParentClass = NULL;
 jmethodID jApplicationReportException = 0;
 
 jmethodID mat_jViewNotifyResize = 0;
@@ -116,12 +117,15 @@ static jobject nestedLoopReturnValue = NULL;
 JNIEXPORT jint JNICALL
 JNI_OnLoad_glass(JavaVM *vm, void *reserved)
 {
+fprintf(stderr, "ONGLASS LOADED\n");
 #ifdef JNI_VERSION_1_8
     //min. returned JNI_VERSION required by JDK8 for builtin libraries
     JNIEnv *env;
     if ((*vm)->GetEnv(vm, (void **)&env, JNI_VERSION_1_8) != JNI_OK) {
         return JNI_VERSION_1_4;
     }
+fprintf(stderr, "was j = %p e = %p\n", jEnv, env);
+jEnv = env;
     return JNI_VERSION_1_8;
 #else
     return JNI_VERSION_1_4;
@@ -173,6 +177,22 @@ jboolean setContextClassLoader(JNIEnv *env, jobject contextClassLoader)
  */
 jclass classForName(JNIEnv *env, char *className)
 {
+fprintf(stderr, "ClassForName Needed For %s\n", className);
+    int i = 0;
+
+    char targetName[200];
+    while(*className!='\0') {
+        targetName[i] = *className;
+        if (*className == '.') {
+            targetName[i] = '/';
+        }
+        i++;
+        className++;
+    }
+    targetName[i] = '\0';
+    fprintf(stderr, "classForName convertneeded for %s\n", targetName);
+    return (*env)->FindClass(env, targetName);
+/*
     jclass threadCls = (*env)->FindClass(env, "java/lang/Thread");
     if ((*env)->ExceptionCheck(env) || threadCls == NULL) {
         return NULL;
@@ -216,6 +236,7 @@ jclass classForName(JNIEnv *env, char *className)
         return NULL;
     }
     return theCls;
+*/
 }
 
 
@@ -637,6 +658,7 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_ios_IosApplication__1initIDs
     assert(pthread_key_create(&GlassThreadDataKey, NULL) == 0);
 
     jApplicationClass = (*env)->NewGlobalRef(env, jClass);
+    jApplicationParentClass = (*env)->FindClass(env, "com/sun/glass/ui/Application");
     jApplicationReportException = (*env)->GetStaticMethodID(env, jClass, "reportException", "(Ljava/lang/Throwable;)V");
 
     mat_jIntegerClass = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "java/lang/Integer"));
@@ -655,6 +677,7 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_ios_IosApplication__1initIDs
     mat_jBooleanValueMethod = (*env)->GetMethodID(env, mat_jBooleanClass, "booleanValue", "()Z");
     mat_jIntegerValueMethod = (*env)->GetMethodID(env, mat_jIntegerClass, "intValue", "()I");
     mat_jLongValueMethod = (*env)->GetMethodID(env, mat_jLongClass, "longValue", "()J");
+    GLASS_CHECK_EXCEPTION(env);
 
     jRunnableRun = (*env)->GetMethodID(env, (*env)->FindClass(env, "java/lang/Runnable"), "run", "()V");
 

@@ -38,6 +38,22 @@
  */
 + (jclass)ClassForName:(char*)className withEnv:(JNIEnv*)env
 {
+fprintf(stderr, "ClassForName Needed For %s\n", className);
+    int i = 0;
+
+    char targetName[200];
+    while(*className!='\0') {
+        targetName[i] = *className;
+        if (*className == '.') {
+            targetName[i] = '/';
+        }
+        i++;
+        className++;
+    }
+    targetName[i] = '\0';
+    fprintf(stderr, "classForName convertneeded for %s\n", targetName);
+    return (*env)->FindClass(env, targetName);
+/*
     static jclass threadCls = NULL;
     if (threadCls == NULL)
     {
@@ -116,6 +132,7 @@
 
     // possibly we can cache values in Dictionary
     return (*env)->CallStaticObjectMethod(env, classCls, forNameMID, classNameStr, JNI_TRUE, contextClassLoader);
+*/
 }
 
 // Returns java glass application class
