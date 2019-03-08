@@ -186,7 +186,7 @@ IOS.decora.arm64.lib = "decora_sse_${archArm64}"
 
 IOS.prism = [:]
 IOS.prism.lib = "prism_common"
-IOS.prism.javahInclude = ["com/sun/prism/es2/**/*", "com/sun/prism/impl/**/*", "com/sun/prism/PresentableState*"]
+IOS.prism.javahInclude = ["com/sun/prism/impl/**/*", "com/sun/prism/PresentableState*"]
 IOS.prism.variants = ["arm", "arm64", "x86", "x86_64"];
 
 IOS.prism.arm = [:]
