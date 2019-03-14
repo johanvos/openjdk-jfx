@@ -48,9 +48,13 @@ final class MacWindow extends Window {
 
     protected MacWindow(Window owner, Screen screen, int styleMask) {
         super(owner, screen, styleMask);
+        // force call to init class
+        MacGestureSupport.postClinit();
     }
     protected MacWindow(long parent) {
         super(parent);
+        // force call to init class
+        MacGestureSupport.postClinit();
     }
 
     @Override native protected long _createWindow(long ownerPtr, long screenPtr, int mask);

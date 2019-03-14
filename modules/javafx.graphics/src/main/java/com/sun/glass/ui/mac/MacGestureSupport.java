@@ -28,14 +28,23 @@ import com.sun.glass.ui.TouchInputSupport;
 import com.sun.glass.ui.GestureSupport;
 import com.sun.glass.ui.Application;
 import com.sun.glass.ui.View;
+import javafx.application.Platform;
+
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 final class MacGestureSupport {
 
+    private static boolean inited;
+
     private native static void _initIDs();
-    static {
-        _initIDs();
+    // don't load native libraries at build time
+    static void postClinit() {
+        if (! inited) {
+            System.out.println("Init MacGestureSupport");
+            _initIDs();
+            inited = true;
+        }
     }
 
     private final static int GESTURE_ROTATE = 100;
@@ -59,6 +68,7 @@ final class MacGestureSupport {
 
     public static void notifyBeginTouchEvent(View view, int modifiers,
                                              int touchEventCount) {
+
         touches.notifyBeginTouchEvent(view, modifiers, isDirect, touchEventCount);
     }
 

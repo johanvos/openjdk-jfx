@@ -39,6 +39,7 @@ import java.security.PrivilegedAction;
 
 public class NativePiscesRasterizer implements ShapeRasterizer {
     private static MaskData emptyData = MaskData.create(new byte[1], 0, 0, 1, 1);
+    private static boolean inited;
 
     private static final byte SEG_MOVETO  = PathIterator.SEG_MOVETO;
     private static final byte SEG_LINETO  = PathIterator.SEG_LINETO;
@@ -66,7 +67,8 @@ public class NativePiscesRasterizer implements ShapeRasterizer {
                                            double myx, double myy, double myt,
                                            int bounds[], byte mask[]);
 
-    static {
+    // don't load native libraries at build time
+    static void postClinit() {
         AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
             String libName = "prism_common";
 
@@ -86,6 +88,10 @@ public class NativePiscesRasterizer implements ShapeRasterizer {
                                 RectBounds xformBounds, BaseTransform xform,
                                 boolean close, boolean antialiasedShape)
     {
+        if (! inited) {
+            postClinit();
+            inited = true;
+        }
 
         if (firstTimeAASetting || (lastAntialiasedShape != antialiasedShape)) {
             int subpixelLgPositions = antialiasedShape ? 3 : 0;

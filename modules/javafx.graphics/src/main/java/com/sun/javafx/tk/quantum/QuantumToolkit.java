@@ -1207,8 +1207,6 @@ public final class QuantumToolkit extends Toolkit {
 
     @Override
     public boolean isSupported(ConditionalFeature feature) {
-        return true;
-/*
         switch (feature) {
             case SCENE3D:
                 return GraphicsPipeline.getPipeline().is3DSupported();
@@ -1235,7 +1233,6 @@ public final class QuantumToolkit extends Toolkit {
             default:
                 return false;
         }
-*/
     }
 
     @Override
