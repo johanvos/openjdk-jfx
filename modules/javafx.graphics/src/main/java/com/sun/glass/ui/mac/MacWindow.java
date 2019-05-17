@@ -48,6 +48,7 @@ final class MacWindow extends Window {
 
     protected MacWindow(Window owner, Screen screen, int styleMask) {
         super(owner, screen, styleMask);
+        new MacGestureSupport();
     }
     protected MacWindow(long parent) {
         super(parent);
