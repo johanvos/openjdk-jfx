@@ -121,7 +121,14 @@ is_display_valid() {
 JavaVM* javaVM;
 
 JNIEXPORT jint JNICALL
-JNI_OnLoad(JavaVM *jvm, void *reserved)
+JNI_OnLoad_dooh(JavaVM *jvm, void *reserved)
+{
+return 0;
+}
+
+extern "C" {
+JNIEXPORT jint JNICALL
+JNI_OnLoad_glassgtk3(JavaVM *jvm, void *reserved)
 {
     (void)reserved;
 
@@ -322,6 +329,7 @@ JNI_OnLoad(JavaVM *jvm, void *reserved)
     if (env->ExceptionCheck()) return JNI_ERR;
 
     return JNI_VERSION_1_6;
+}
 }
 
 void
