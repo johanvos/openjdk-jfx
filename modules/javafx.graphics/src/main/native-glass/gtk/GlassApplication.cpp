@@ -120,7 +120,7 @@ JNIEXPORT jint JNICALL Java_com_sun_glass_ui_gtk_GtkApplication__1initGTK
  * Method:    _queryLibrary
  * Signature: Signature: (IZ)I
  */
-JNIEXPORT jint JNICALL Java_com_sun_glass_ui_gtk_GtkApplication__1queryLibrary
+JNIEXPORT jint JNICALL Java_com_sun_glass_ui_gtk_GtkApplication__1queryLibraryNO
   (JNIEnv *env, jclass clazz, jint suggestedVersion, jboolean verbose)
 {
     // If we are being called, then the launcher is
