@@ -126,4 +126,10 @@ public interface TKStageListener {
      * stage), or via a call to {@link TKStage#ungrabFocus}.
      */
     public void focusUngrab();
+
+    /**
+     * Called when software keyboard is shown or hidden on top of the stage.
+     * Usefull to move the scene in order to keep the input controls visible
+     */
+    public void softKeyboard();
 }

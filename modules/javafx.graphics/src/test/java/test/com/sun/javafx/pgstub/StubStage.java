@@ -34,6 +34,7 @@ import com.sun.javafx.tk.FocusCause;
 import com.sun.javafx.tk.TKScene;
 import com.sun.javafx.tk.TKStage;
 import com.sun.javafx.tk.TKStageListener;
+import javafx.scene.paint.Color;
 
 /**
  * @author Richard Bair
@@ -285,14 +286,33 @@ public class StubStage implements TKStage {
 
     @Override
     public void requestInput(String text, int type, double width, double height,
-                                double Mxx, double Mxy, double Mxz, double Mxt,
-                                double Myx, double Myy, double Myz, double Myt,
-                                double Mzx, double Mzy, double Mzz, double Mzt) {
+                             double Mxx, double Mxy, double Mxz, double Mxt,
+                             double Myx, double Myy, double Myz, double Myt,
+                             double Mzx, double Mzy, double Mzz, double Mzt,
+                             double fontSize, Color fontColor, Color backgroundColor) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void updateBounds(double width, double height,
+                     double Mxx, double Mxy, double Mxz, double Mxt,
+                     double Myx, double Myy, double Myz, double Myt,
+                     double Mzx, double Mzy, double Mzz, double Mzt) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void releaseInput() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void updateInput(String text) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public int getKeyboardHeight() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -394,6 +414,11 @@ public class StubStage implements TKStage {
         @Override
         public void focusUngrab() {
             process(listener1 -> listener1.focusUngrab());
+        }
+
+        @Override
+        public void softKeyboard() {
+            process(listener1 -> listener1.softKeyboard());
         }
 
         private void process(final Notification notification) {

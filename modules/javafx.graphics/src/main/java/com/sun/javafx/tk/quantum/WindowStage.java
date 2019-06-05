@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 import javafx.scene.input.KeyCombination;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -949,18 +950,41 @@ class WindowStage extends GlassStage {
 
     @Override
     public void requestInput(String text, int type, double width, double height,
-                        double Mxx, double Mxy, double Mxz, double Mxt,
-                        double Myx, double Myy, double Myz, double Myt,
-                        double Mzx, double Mzy, double Mzz, double Mzt) {
+                             double Mxx, double Mxy, double Mxz, double Mxt,
+                             double Myx, double Myy, double Myz, double Myt,
+                             double Mzx, double Mzy, double Mzz, double Mzt,
+                             double fontSize, Color fontColor, Color backgroundColor) {
         platformWindow.requestInput(text, type, width, height,
                                     Mxx, Mxy, Mxz, Mxt,
                                     Myx, Myy, Myz, Myt,
-                                    Mzx, Mzy, Mzz, Mzt);
+                                    Mzx, Mzy, Mzz, Mzt,
+                                    fontSize, fontColor, backgroundColor);
+    }
+
+    @Override
+    public void updateBounds(double width, double height,
+                             double Mxx, double Mxy, double Mxz, double Mxt,
+                             double Myx, double Myy, double Myz, double Myt,
+                             double Mzx, double Mzy, double Mzz, double Mzt) {
+        platformWindow.updateBounds(width, height,
+                Mxx, Mxy, Mxz, Mxt,
+                Myx, Myy, Myz, Myt,
+                Mzx, Mzy, Mzz, Mzt);
+    }
+
+    @Override
+    public void updateInput(String text) {
+        platformWindow.updateInput(text);
     }
 
     @Override
     public void releaseInput() {
         platformWindow.releaseInput();
+    }
+
+    @Override
+    public int getKeyboardHeight() {
+        return platformWindow.getKeyboardHeight();
     }
 
     @Override public void setRTL(boolean b) {

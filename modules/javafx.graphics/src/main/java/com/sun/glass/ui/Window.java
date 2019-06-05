@@ -27,6 +27,7 @@ package com.sun.glass.ui;
 import com.sun.glass.events.MouseEvent;
 import com.sun.glass.events.WindowEvent;
 import com.sun.prism.impl.PrismSettings;
+import javafx.scene.paint.Color;
 
 import java.lang.annotation.Native;
 
@@ -220,6 +221,8 @@ public abstract class Window {
     private float renderScaleX = 1.0f;
     private float renderScaleY = 1.0f;
     private boolean appletMode = false;
+
+    private int keyboardHeight = 0;
 
     // This is a workaround for RT-15970: as for embedded windows we don't
     // receive any MOVE notifications from the native platform, we poll
@@ -1343,6 +1346,11 @@ public abstract class Window {
         this.delegatePtr = ptr;
     }
 
+    protected void notifyKeyboardHeight(final int h) {
+        this.keyboardHeight = h;
+        handleWindowEvent(System.nanoTime(), WindowEvent.SOFT_KEYBOARD);
+    }
+
     // *****************************************************
     // window event handlers
     // *****************************************************
@@ -1446,6 +1454,14 @@ public abstract class Window {
             return this.helper.handleMouseEvent(type, button, x, y, xAbs, yAbs);
         }
         return false;
+    }
+
+    /**
+     *
+     * @return the native software keyboard height (0 when it is not visible)
+     */
+    public final int getKeyboardHeight() {
+        return keyboardHeight;
     }
 
     @Override
@@ -1633,14 +1649,47 @@ public abstract class Window {
      * @param M standard transformation matrix for drawing the native text component derived from JavaFX component
      */
     public void requestInput(String text, int type, double width, double height,
-                                double Mxx, double Mxy, double Mxz, double Mxt,
-                                double Myx, double Myy, double Myz, double Myt,
-                                double Mzx, double Mzy, double Mzz, double Mzt) {
+                             double Mxx, double Mxy, double Mxz, double Mxt,
+                             double Myx, double Myy, double Myz, double Myt,
+                             double Mzx, double Mzy, double Mzz, double Mzt,
+                             double fontSize, Color fontColor, Color backgroundColor) {
         Application.checkEventThread();
         _requestInput(this.ptr, text, type, width, height,
                         Mxx, Mxy, Mxz, Mxt,
                         Myx, Myy, Myz, Myt,
+                        Mzx, Mzy, Mzz, Mzt,
+                        fontSize, fontColor.toString(), backgroundColor.toString());
+    }
+
+    /**
+     * Updates the bounds of the native text input for the text component
+     * contained by this Window. Native text input component is drawn on the place
+     * of JavaFX component to cover it completely and to provide native text editing
+     * techniques.
+     *
+     * @param width width of JavaFX text input component
+     * @param height height of JavaFX text input component
+     * @param M standard transformation matrix for drawing the native text component derived from JavaFX component
+     */
+    public void updateBounds(double width, double height,
+                        double Mxx, double Mxy, double Mxz, double Mxt,
+                        double Myx, double Myy, double Myz, double Myt,
+                        double Mzx, double Mzy, double Mzz, double Mzt) {
+        Application.checkEventThread();
+        _updateBounds(this.ptr, width, height,
+                        Mxx, Mxy, Mxz, Mxt,
+                        Myx, Myy, Myz, Myt,
                         Mzx, Mzy, Mzz, Mzt);
+    }
+
+    /**
+     * While native text input component is visible, if any change is made in the
+     * text property of the JavaFX text component, update the native component.
+     * @param text text to be shown in the native text input component
+     */
+    public void updateInput(String text) {
+           Application.checkEventThread();
+           _updateInput(this.ptr, text);
     }
 
     /**
@@ -1655,7 +1704,15 @@ public abstract class Window {
     protected abstract void _requestInput(long ptr, String text, int type, double width, double height,
                                             double Mxx, double Mxy, double Mxz, double Mxt,
                                             double Myx, double Myy, double Myz, double Myt,
+                                            double Mzx, double Mzy, double Mzz, double Mzt,
+                                            double fontSize, String fontColor, String backgroundColor);
+
+    protected abstract void _updateBounds(long ptr, double width, double height,
+                                            double Mxx, double Mxy, double Mxz, double Mxt,
+                                            double Myx, double Myy, double Myz, double Myt,
                                             double Mzx, double Mzy, double Mzz, double Mzt);
+
+    protected abstract void _updateInput(long ptr, String text);
 
     protected abstract void _releaseInput(long ptr);
 

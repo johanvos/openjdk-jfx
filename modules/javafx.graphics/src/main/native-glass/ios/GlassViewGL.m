@@ -181,6 +181,7 @@ static EAGLContext * ctx = nil;
 
     self = [super initWithFrame: frame withClientContext:clientContext withJProperties:(jobject)jproperties];
     GLASS_LOG("in GlassViewGL:initWithFrame ... self == %p, frame %@", self, NSStringFromCGRect(frame));
+    NSLog(@"in GlassViewGL:initWithFrame ... self == %p, frame %@", self, NSStringFromCGRect(frame));
 
     if (self != nil)
     {
@@ -228,6 +229,7 @@ static EAGLContext * ctx = nil;
          * This triggers a ViewEvent.REPAINT which triggers the GlassViewEventHandler
          * to perform a live repaint.  All other pulses are triggered from displayLinkUpdate:
          */
+         NSLog(@"Self repaint");
         [self setNeedsDisplay];
     }
 
@@ -376,11 +378,14 @@ static EAGLContext * ctx = nil;
                  mxx:(double)mxx mxy:(double)mxy mxz:(double)mxz mxt:(double)mxt
                  myx:(double)myx myy:(double)myy myz:(double)myz myt:(double)myt
                  mzx:(double)mzx mzy:(double)mzy mzz:(double)mzz mzt:(double)mzt
+                 fontSize:(double)fontSize fontColor:(NSString *)fontColor
+                 backgroundColor:(NSString *)backgroundColor
 {
-
+NSLog(@"[JVDBG] REQUESTINPUT will create a native component, type = %d %@ %@", type, fontColor, backgroundColor);
+    double nativeFontSize = fontSize * mxx;
     if (type == 0 || type == 1) { // TextField or PasswordField
 
-        UITextField* textField = [[UITextField alloc] initWithFrame:CGRectMake(mxt + 1, myt + 1, width - 2, height - 2)];
+        UITextField* textField = [[UITextField alloc] initWithFrame:CGRectMake(mxt + 1, myt + 1, mxx * (width - 2), myy * (height - 2))];
 
         textField.text = text;
 
@@ -392,12 +397,13 @@ static EAGLContext * ctx = nil;
 
         [self setUpLayerForText:(id)textField];
 
-        textField.font = [UIFont systemFontOfSize:15];
+        textField.font = [UIFont systemFontOfSize:nativeFontSize];
         textField.inputAccessoryView = inputAccessoryView;
         textField.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
         textField.borderStyle = UITextBorderStyleNone;
         textField.layer.borderColor =[[UIColor clearColor] CGColor];
-        // textField.backgroundColor = [UIColor clearColor];
+        textField.textColor = [self colorFromHexString:fontColor];
+        textField.backgroundColor = [self colorFromHexString:backgroundColor];
 
         textField.delegate = self->delegate;
 
@@ -405,7 +411,7 @@ static EAGLContext * ctx = nil;
 
     } else if (type == 3) { // TextArea
 
-        UITextView* textView = [[UITextView alloc] initWithFrame:CGRectMake(mxt + 1, myt + 1, width - 2, height - 2)];
+        UITextView* textView = [[UITextView alloc] initWithFrame:CGRectMake(mxt + 1, myt + 1, mxx * (width - 2), myy * (height - 2))];
 
         textView.text = text;
 
@@ -413,8 +419,12 @@ static EAGLContext * ctx = nil;
 
         [self setUpLayerForText:(id)textView];
 
-        textView.font = [UIFont systemFontOfSize:15];
+        textView.font = [UIFont systemFontOfSize:nativeFontSize];
         textView.inputAccessoryView = inputAccessoryView;
+        textView.textColor = [self colorFromHexString:fontColor];
+        textView.backgroundColor = [self colorFromHexString:backgroundColor];
+
+        textView.delegate = self->delegate;
 
         nativeView = textView;
 
@@ -424,17 +434,51 @@ static EAGLContext * ctx = nil;
 
         [self.superview addSubview:nativeView];
 
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(textChanged:)
-                                                     name:UITextViewTextDidChangeNotification
-                                                   object:nativeView];
-
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(textChanged:)
-                                                     name:UITextFieldTextDidChangeNotification
-                                                   object:nativeView];
+        if ([nativeView isKindOfClass:[UITextView class]]) {
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                selector:@selector(textChanged:)
+                                                name:UITextViewTextDidChangeNotification
+                                                object:nativeView];
+        } else if ([nativeView isKindOfClass:[UITextField class]]) {
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                selector:@selector(textChanged:)
+                                                name:UITextFieldTextDidChangeNotification
+                                                object:nativeView];
+        }
 
         [nativeView becomeFirstResponder];
+    }
+}
+
+// Assumes input like "0x00FF00FF"
+- (UIColor *)colorFromHexString:(NSString *)hexString {
+    unsigned rgbValue = 0;
+    NSScanner *scanner = [NSScanner scannerWithString:[hexString substringWithRange: NSMakeRange(2, 6)]];
+    [scanner scanHexInt:&rgbValue];
+    UIColor *color = [UIColor colorWithRed:((rgbValue & 0xFF0000) >> 16)/255.0 green:((rgbValue & 0xFF00) >> 8)/255.0 blue:(rgbValue & 0xFF)/255.0 alpha:1.0];
+    NSLog(@"String %@ gives color %@", hexString, color);
+    return color;
+}
+
+- (void)updateBounds:(double)width height:(double)height
+                 mxx:(double)mxx mxy:(double)mxy mxz:(double)mxz mxt:(double)mxt
+                 myx:(double)myx myy:(double)myy myz:(double)myz myt:(double)myt
+                 mzx:(double)mzx mzy:(double)mzy mzz:(double)mzz mzt:(double)mzt
+{
+    if (nativeView) {
+NSLog(@"Update bounds: %f %f %f %f %f %f",mxt, myt, mxx, myy, width, height);
+          nativeView.frame = CGRectMake(mxt + 1, myt + 1, mxx * (width - 2), myy * (height - 2));
+    }
+}
+
+- (void)updateInput:(NSString *)text
+{
+    if (nativeView) {
+        if ([nativeView isKindOfClass:[UITextField class]]) {
+            ((UITextField *) nativeView).text = text;
+        } else if ([nativeView isKindOfClass:[UITextView class]]) {
+            ((UITextView *) nativeView).text = text;
+        }
     }
 }
 
@@ -462,9 +506,13 @@ static EAGLContext * ctx = nil;
 
 - (void)releaseInput
 {
+    NSLog(@"[JVDBG] RELEASE INPUT will release native component");
     if (nativeView) {
-        [[NSNotificationCenter defaultCenter] removeObserver:self name:UITextViewTextDidChangeNotification object:nativeView];
-        [[NSNotificationCenter defaultCenter] removeObserver:self name:UITextFieldTextDidChangeNotification object:nativeView];
+        if ([nativeView isKindOfClass:[UITextView class]]) {
+            [[NSNotificationCenter defaultCenter] removeObserver:self name:UITextViewTextDidChangeNotification object:nativeView];
+        } else if ([nativeView isKindOfClass:[UITextField class]]) {
+            [[NSNotificationCenter defaultCenter] removeObserver:self name:UITextFieldTextDidChangeNotification object:nativeView];
+        }
         [nativeView resignFirstResponder];
         [nativeView removeFromSuperview];
 
@@ -524,4 +572,3 @@ static EAGLContext * ctx = nil;
 }
 
 @end
-

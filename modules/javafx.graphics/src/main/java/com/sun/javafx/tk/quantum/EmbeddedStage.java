@@ -36,6 +36,7 @@ import com.sun.javafx.embed.HostInterface;
 import com.sun.javafx.tk.TKScene;
 import com.sun.javafx.tk.Toolkit;
 import javafx.application.Platform;
+import javafx.scene.paint.Color;
 
 final class EmbeddedStage extends GlassStage implements EmbeddedStageInterface {
 
@@ -295,14 +296,33 @@ final class EmbeddedStage extends GlassStage implements EmbeddedStageInterface {
 
     @Override
     public void requestInput(String text, int type, double width, double height,
-                                double Mxx, double Mxy, double Mxz, double Mxt,
-                                double Myx, double Myy, double Myz, double Myt,
-                                double Mzx, double Mzy, double Mzz, double Mzt) {
+                             double Mxx, double Mxy, double Mxz, double Mxt,
+                             double Myx, double Myy, double Myz, double Myt,
+                             double Mzx, double Mzy, double Mzz, double Mzt,
+                             double fontSize, Color fontColor, Color backgroundColor) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void updateBounds(double width, double height,
+                                 double Mxx, double Mxy, double Mxz, double Mxt,
+                                 double Myx, double Myy, double Myz, double Myt,
+                                 double Mzx, double Mzy, double Mzz, double Mzt) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public void updateInput(String text) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void releaseInput() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public int getKeyboardHeight() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

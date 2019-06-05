@@ -83,9 +83,19 @@ final class IosWindow extends Window {
 
     @Override
     native protected void _requestInput(long ptr, String text, int type, double width, double height,
-                                                    double Mxx, double Mxy, double Mxz, double Mxt,
-                                                    double Myx, double Myy, double Myz, double Myt,
-                                                    double Mzx, double Mzy, double Mzz, double Mzt);
+                                        double Mxx, double Mxy, double Mxz, double Mxt,
+                                        double Myx, double Myy, double Myz, double Myt,
+                                        double Mzx, double Mzy, double Mzz, double Mzt,
+                                        double fontSize, String fontColor, String backgroundColor);
+
+    @Override
+    native protected void _updateBounds(long ptr, double width, double height,
+                                 double Mxx, double Mxy, double Mxz, double Mxt,
+                                 double Myx, double Myy, double Myz, double Myt,
+                                 double Mzx, double Mzy, double Mzz, double Mzt);
+
+    @Override
+    native protected void _updateInput(long ptr, String text);
 
     @Override
     native protected void _releaseInput(long ptr);

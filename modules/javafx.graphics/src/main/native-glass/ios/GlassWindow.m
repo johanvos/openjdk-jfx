@@ -65,17 +65,19 @@ static GlassWindow   * focusOwner; // currently focused GlassWindow - i.e. key e
 
 - (void) keyboardDidShow:(NSNotification *) notification
 {
-#if MAT_IOS_DEBUG
-    GLASS_LOG("[GlassMainWindow keyboardDidShow]");
     NSDictionary *info = [notification userInfo];
     CGRect keyboardFrame = [[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
+#if MAT_IOS_DEBUG
+    GLASS_LOG("[GlassMainWindow keyboardDidShow]");
     GLASS_LOG("Keyboard frame x = %f, y = %f, width = %f, height = %f", keyboardFrame.origin.x, keyboardFrame.origin.y, keyboardFrame.size.width, keyboardFrame.size.height);
 #endif
+    [focusOwner updateKeyboardHeight:keyboardFrame.size.height];
 }
 
 - (void) keyboardDidHide:(NSNotification *) notification
 {
-    GLASS_LOG("[GlassMainWindow keyboardidHide]");
+    GLASS_LOG("[GlassMainWindow keyboardDidHide]");
+    [focusOwner updateKeyboardHeight:0.0f];
     [self resignFocusOwner];
 }
 
@@ -140,6 +142,8 @@ static GlassMainView * masterWindowHost = nil;
 - (void)resignKeyWindow;
 - (void)windowWillClose;
 - (void)sendEvent:(UIEvent *)event;
+
+- (void)updateKeyboardHeight:(CGFloat)height;
 @end
 
 
@@ -732,18 +736,42 @@ static inline void setWindowFrame(GlassWindow *window, CGFloat x, CGFloat y, CGF
                   mxx:(double)mxx mxy:(double)mxy mxz:(double)mxz mxt:(double)mxt
                   myx:(double)myx myy:(double)myy myz:(double)myz myt:(double)myt
                   mzx:(double)mzx mzy:(double)mzy mzz:(double)mzz mzt:(double)mzt
+                  fontSize:(double)fontSize fontColor:(NSString *)fontColor
+                  backgroundColor:(NSString *)backgroundColor
 
 {
     [view requestInput:text type:type width:width height:height
                    mxx:mxx mxy:mxy mxz:mxz mxt:mxt
                    myx:myx myy:myy myz:myz myt:myt
+                   mzx:mzx mzy:mzy mzz:mzz mzt:mzt
+                   fontSize:fontSize fontColor:fontColor backgroundColor:backgroundColor];
+}
+
+- (void) updateBounds:(double)width height:(double)height
+                  mxx:(double)mxx mxy:(double)mxy mxz:(double)mxz mxt:(double)mxt
+                  myx:(double)myx myy:(double)myy myz:(double)myz myt:(double)myt
+                  mzx:(double)mzx mzy:(double)mzy mzz:(double)mzz mzt:(double)mzt
+{
+    [view updateBounds:width height:height
+                   mxx:mxx mxy:mxy mxz:mxz mxt:mxt
+                   myx:myx myy:myy myz:myz myt:myt
                    mzx:mzx mzy:mzy mzz:mzz mzt:mzt];
 }
 
+- (void) updateInput:(NSString *)text
+{
+    [view updateInput:text];
+}
 
 - (void) releaseInput
 {
     [view releaseInput];
+}
+
+- (void)updateKeyboardHeight:(CGFloat)height
+{
+    GET_MAIN_JENV;
+    (*env)->CallVoidMethod(env, self->jWindow, mat_jWindowNotifyKeyboard, (int) height);
 }
 
 @end
@@ -1623,13 +1651,14 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_ios_IosWindow__1setEnabled
 /*
  * Class:     com_sun_glass_ui_ios_IosWindow
  * Method:    _requestInput
- * Signature: (JLjava/lang/String;IDDDDDDDDDDDDDD)V
+ * Signature: (JLjava/lang/String;IDDDDDDDDDDDDDDLjava/lang/String;Ljava/lang/String;)V
  */
 JNIEXPORT void JNICALL Java_com_sun_glass_ui_ios_IosWindow__1requestInput
 (JNIEnv *env, jobject jwin, jlong ptr, jstring text, jint type, jdouble width, jdouble height,
     jdouble mxx, jdouble mxy, jdouble mxz, jdouble mxt,
     jdouble myx, jdouble myy, jdouble myz, jdouble myt,
-    jdouble mzx, jdouble mzy, jdouble mzz, jdouble mzt)
+    jdouble mzx, jdouble mzy, jdouble mzz, jdouble mzt,
+    jdouble fontSize, jstring fontColor, jstring backgroundColor)
 {
     GLASS_ASSERT_MAIN_JAVA_THREAD(env);
     GLASS_POOL_ENTER;
@@ -1644,7 +1673,50 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_ios_IosWindow__1requestInput
     NSString *nsstr = [NSString stringWithUTF8String:str];
     (*env)->ReleaseStringUTFChars(env, text, str);
 
+    const char *strFontColor;
+    strFontColor = (*env)->GetStringUTFChars(env, fontColor, NULL);
+    if (strFontColor == nil) {
+        return;
+    }
+    NSString *nsstrFontColor = [NSString stringWithUTF8String:strFontColor];
+    (*env)->ReleaseStringUTFChars(env, fontColor, strFontColor);
+
+    const char *strBackgroundColor;
+    strBackgroundColor = (*env)->GetStringUTFChars(env, backgroundColor, NULL);
+    if (strBackgroundColor == nil) {
+        return;
+    }
+    NSString *nsstrBackgroundColor = [NSString stringWithUTF8String:strBackgroundColor];
+    (*env)->ReleaseStringUTFChars(env, backgroundColor, strBackgroundColor);
+NSLog(@"TextArea with colors: %@ %@", nsstrFontColor, nsstrBackgroundColor);
+
     [window requestInput:nsstr type:(int)type width:(double)width height:(double)height
+                     mxx:(double)mxx mxy:(double)mxy mxz:(double)mxz mxt:(double)mxt
+                     myx:(double)myx myy:(double)myy myz:(double)myz myt:(double)myt
+                     mzx:(double)mzx mzy:(double)mzy mzz:(double)mzz mzt:(double)mzt
+                     fontSize:(double)fontSize fontColor:nsstrFontColor
+                     backgroundColor:nsstrBackgroundColor];
+    GLASS_POOL_EXIT;
+    GLASS_CHECK_EXCEPTION(env);
+}
+
+/*
+ * Class:     com_sun_glass_ui_ios_IosWindow
+ * Method:    _updateBounds
+ * Signature: (JLDDDDDDDDDDDDD)V
+ */
+JNIEXPORT void JNICALL Java_com_sun_glass_ui_ios_IosWindow__1updateBounds
+(JNIEnv *env, jobject jwin, jlong ptr, jdouble width, jdouble height,
+    jdouble mxx, jdouble mxy, jdouble mxz, jdouble mxt,
+    jdouble myx, jdouble myy, jdouble myz, jdouble myt,
+    jdouble mzx, jdouble mzy, jdouble mzz, jdouble mzt)
+{
+    GLASS_ASSERT_MAIN_JAVA_THREAD(env);
+    GLASS_POOL_ENTER;
+
+    GlassWindow *window = getGlassWindow(env, ptr);
+
+    [window updateBounds:(double)width height:(double)height
                      mxx:(double)mxx mxy:(double)mxy mxz:(double)mxz mxt:(double)mxt
                      myx:(double)myx myy:(double)myy myz:(double)myz myt:(double)myt
                      mzx:(double)mzx mzy:(double)mzy mzz:(double)mzz mzt:(double)mzt];
@@ -1652,6 +1724,32 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_ios_IosWindow__1requestInput
     GLASS_CHECK_EXCEPTION(env);
 }
 
+/*
+ * Class:     com_sun_glass_ui_ios_IosWindow
+ * Method:    _updateInput
+ * Signature: (JLjava/lang/String;)V
+ */
+JNIEXPORT void JNICALL Java_com_sun_glass_ui_ios_IosWindow__1updateInput
+(JNIEnv *env, jobject jwin, jlong ptr, jstring text)
+{
+    GLASS_ASSERT_MAIN_JAVA_THREAD(env);
+    GLASS_POOL_ENTER;
+
+    GlassWindow *window = getGlassWindow(env, ptr);
+
+    const char *str;
+    str = (*env)->GetStringUTFChars(env, text, NULL);
+    if (str == nil) {
+        return;
+    }
+    NSString *nsstr = [NSString stringWithUTF8String:str];
+    (*env)->ReleaseStringUTFChars(env, text, str);
+
+    [window updateInput:nsstr];
+
+    GLASS_POOL_EXIT;
+    GLASS_CHECK_EXCEPTION(env);
+}
 
 /*
  * Class:     com_sun_glass_ui_ios_IosWindow

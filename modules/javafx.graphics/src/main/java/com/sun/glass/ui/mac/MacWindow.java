@@ -157,7 +157,22 @@ final class MacWindow extends Window {
     protected void _requestInput(long ptr, String text, int type, double width, double height,
                                     double Mxx, double Mxy, double Mxz, double Mxt,
                                     double Myx, double Myy, double Myz, double Myt,
-                                    double Mzx, double Mzy, double Mzz, double Mzt) {
+                                    double Mzx, double Mzy, double Mzz, double Mzt,
+                                    double fontSize, String fontColor, String backgroundColor) {
+
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    protected void _updateBounds(long ptr, double width, double height,
+                                 double Mxx, double Mxy, double Mxz, double Mxt,
+                                 double Myx, double Myy, double Myz, double Myt,
+                                 double Mzx, double Mzy, double Mzz, double Mzt) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    protected void _updateInput(long ptr, String text) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 

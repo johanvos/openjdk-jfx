@@ -29,6 +29,7 @@ import java.security.AccessControlContext;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination.ModifierValue;
+import javafx.scene.paint.Color;
 
 /**
  * TKStage - Peer interface for a Stage
@@ -206,9 +207,32 @@ public interface TKStage {
      * @param M standard transformation matrix for drawing the native text component derived from JavaFX component
      */
     void requestInput(String text, int type, double width, double height,
+                      double Mxx, double Mxy, double Mxz, double Mxt,
+                      double Myx, double Myy, double Myz, double Myt,
+                      double Mzx, double Mzy, double Mzz, double Mzt,
+                      double fontSize, Color fontColor, Color backgroundColor);
+
+    /**
+     * Updates the bounds of the native text input for the text component
+     * contained by this Window. Native text input component is drawn on the place
+     * of JavaFX component to cover it completely and to provide native text editing
+     * techniques.
+     *
+     * @param width width of JavaFX text input component
+     * @param height height of JavaFX text input component
+     * @param M standard transformation matrix for drawing the native text component derived from JavaFX component
+     */
+    void updateBounds(double width, double height,
                         double Mxx, double Mxy, double Mxz, double Mxt,
                         double Myx, double Myy, double Myz, double Myt,
                         double Mzx, double Mzy, double Mzz, double Mzt);
+
+    /**
+     * While native text input component is visible, if any change is made in the
+     * text property of the JavaFX text component, update the native component.
+     * @param text
+     */
+    void updateInput(String text);
 
     /**
      * Native keyboard for text input is no longer necessary.
@@ -216,11 +240,19 @@ public interface TKStage {
      */
     void releaseInput();
 
+    /**
+     * Related to native soft keyboard for text input. Useful to move the scene
+     * if required so text input controls are visible at all time
+     *
+     * @return height of the soft keyboard if visible, else 0
+     */
+    int getKeyboardHeight();
+
     public void setRTL(boolean b);
 
     /**
      * Whether mouse/keyboard events should be sent to this window.
-     * @param whether this stage should receive events/focus
+     * @param enabled whether this stage should receive events/focus
      */
     public void setEnabled(boolean enabled);
 

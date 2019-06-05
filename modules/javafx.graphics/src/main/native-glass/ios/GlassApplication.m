@@ -93,6 +93,8 @@ jmethodID mat_jWindowNotifyMove = 0;
 jmethodID mat_jWindowNotifyMoveToAnotherScreen = 0;
 jmethodID mat_jWindowNotifyResize = 0;
 
+jmethodID mat_jWindowNotifyKeyboard = 0;
+
 jclass mat_jPixelsClass = NULL;
 
 jfieldID mat_jPixelsWidth = 0;
@@ -733,6 +735,10 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_ios_IosApplication__1initIDs
     mat_jWindowNotifyDestroy = (*env)->GetMethodID(env, mat_jWindowBaseClass, "notifyDestroy", "()V");
     mat_jWindowNotifyFocusDisabled = (*env)->GetMethodID(env, mat_jWindowBaseClass, "notifyFocusDisabled", "()V");
     jWindowNotifyFocusUngrab = (*env)->GetMethodID(env, mat_jWindowBaseClass, "notifyFocusUngrab", "()V");
+    GLASS_CHECK_EXCEPTION(env);
+
+    //keyboard specific
+    mat_jWindowNotifyKeyboard = (*env)->GetMethodID(env, mat_jWindowBaseClass, "notifyKeyboardHeight", "(I)V");
     GLASS_CHECK_EXCEPTION(env);
 
     //pixels specific

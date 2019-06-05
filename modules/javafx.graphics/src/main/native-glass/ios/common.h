@@ -86,6 +86,8 @@ extern jmethodID mat_jWindowNotifyMove;
 extern jmethodID mat_jWindowNotifyMoveToAnotherScreen;
 extern jmethodID mat_jWindowNotifyResize;
 
+extern jmethodID mat_jWindowNotifyKeyboard;
+
 extern jclass mat_jPixelsClass;
 
 extern jfieldID mat_jPixelsWidth;

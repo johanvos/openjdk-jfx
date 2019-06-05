@@ -53,4 +53,6 @@
     UIView              *nativeView; // view used for user input
 }
 
+- (UIColor *)colorFromHexString:(NSString *)hexString;
+
 @end

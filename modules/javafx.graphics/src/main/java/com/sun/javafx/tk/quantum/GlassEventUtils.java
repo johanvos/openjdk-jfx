@@ -119,6 +119,8 @@ class GlassEventUtils {
                 return "FOCUS_DISABLED";
             case WindowEvent.FOCUS_UNGRAB:
                 return "FOCUS_UNGRAB";
+            case WindowEvent.SOFT_KEYBOARD:
+                return "SOFT_KEYBOARD";
             default:
                 return "UNKNOWN";
         }

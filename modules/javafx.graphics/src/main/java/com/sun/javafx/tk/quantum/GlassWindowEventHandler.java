@@ -146,6 +146,9 @@ class GlassWindowEventHandler extends Window.EventHandler implements PrivilegedA
             case WindowEvent.CLOSE:
                 stage.stageListener.closing();
                 break;
+            case WindowEvent.SOFT_KEYBOARD:
+                stage.stageListener.softKeyboard();
+                break;
             default:
                 if (QuantumToolkit.verbose) {
                     System.err.println("GlassWindowEventHandler: unknown type: " + type);

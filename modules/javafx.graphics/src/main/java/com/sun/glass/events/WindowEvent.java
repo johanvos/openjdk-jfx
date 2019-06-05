@@ -47,6 +47,7 @@ public class WindowEvent {
 
     @Native final static public int FOCUS_DISABLED        = 545;
     @Native final static public int FOCUS_UNGRAB          = 546;
+    @Native final static public int SOFT_KEYBOARD         = 547;
 
     public static String getEventName(final int eventType) {
         switch(eventType) {
@@ -78,6 +79,8 @@ public class WindowEvent {
                 return "FOCUS_DISABLED";
             case WindowEvent.FOCUS_UNGRAB:
                 return "FOCUS_UNGRAB";
+            case WindowEvent.SOFT_KEYBOARD:
+                return "SOFT_KEYBOARD";
             default:
                 return "UNKNOWN";
         }

@@ -26,6 +26,7 @@
 package com.sun.javafx.scene.control.behavior;
 
 import com.sun.javafx.scene.control.Properties;
+import com.sun.javafx.stage.SoftKeyboardEvent;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.WeakChangeListener;
 import javafx.event.ActionEvent;
@@ -35,14 +36,17 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.TextField;
 import javafx.scene.control.skin.TextFieldSkin;
 import com.sun.javafx.scene.control.skin.Utils;
 import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
 import javafx.scene.text.HitInfo;
+import javafx.scene.text.Text;
 import javafx.stage.Screen;
 import javafx.stage.Window;
 import com.sun.javafx.PlatformUtil;
@@ -61,6 +65,9 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
     private TwoLevelFocusBehavior tlFocus;
     private ChangeListener<Scene> sceneListener;
     private ChangeListener<Node> focusOwnerListener;
+    private ChangeListener<String> textListener = null;
+    private WeakChangeListener<String> textWeakChangeListener = null;
+    private EventHandler<SoftKeyboardEvent> softKeyboardListener;
 
     public TextFieldBehavior(final TextField textField) {
         super(textField);
@@ -89,19 +96,39 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
             }
         };
 
+        if (PlatformUtil.isIOS()) {
+            textListener = (observable, oldValue, newValue) -> {
+                if (newValue != null) {
+                    WindowHelper.getPeer(textField.getScene().getWindow()).updateInput(newValue);
+                }
+            };
+            textWeakChangeListener = new WeakChangeListener<>(textListener);
+        }
+
         final WeakChangeListener<Node> weakFocusOwnerListener =
                                 new WeakChangeListener<Node>(focusOwnerListener);
         sceneListener = (observable, oldValue, newValue) -> {
             if (oldValue != null) {
+                if (PlatformUtil.isIOS()) {
+                    textField.textProperty().removeListener(textWeakChangeListener);
+                }
+
                 oldValue.focusOwnerProperty().removeListener(weakFocusOwnerListener);
             }
             if (newValue != null) {
+                if (PlatformUtil.isIOS()) {
+                    textField.textProperty().addListener(textWeakChangeListener);
+                }
+
                 newValue.focusOwnerProperty().addListener(weakFocusOwnerListener);
             }
         };
         textField.sceneProperty().addListener(new WeakChangeListener<Scene>(sceneListener));
 
         if (textField.getScene() != null) {
+            if (PlatformUtil.isIOS()) {
+                textField.textProperty().addListener(textWeakChangeListener);
+            }
             textField.getScene().focusOwnerProperty().addListener(weakFocusOwnerListener);
         }
 
@@ -130,6 +157,10 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
                 } else if (textField.getParent().getClass().equals(javafx.scene.control.ComboBox.class)) {
                     type = TextInputTypes.EDITABLE_COMBO;
                 }
+                if (softKeyboardListener == null) {
+                   softKeyboardListener = e -> adjustPosition(textField, WindowHelper.getPeer(textField.getScene().getWindow()).getKeyboardHeight());
+                }
+                textField.getScene().getWindow().addEventHandler(SoftKeyboardEvent.SOFT_KEYBOARD, softKeyboardListener);
                 final Bounds bounds = textField.getBoundsInParent();
                 double w = bounds.getWidth();
                 double h = bounds.getHeight();
@@ -138,6 +169,20 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
 //                w -= insets.getLeft() + insets.getRight();
 //                h -= insets.getTop() + insets.getBottom();
                 String text = textField.getText();
+                Color front = Color.BLACK;
+                Node textNode = textField.lookup(".text");
+                if (textNode != null && ((Text) textNode).getFill() instanceof Color) {
+                    front = (Color) ((Text) textNode).getFill();
+                }
+
+                Color back = textField.getBackground().getFills().stream()
+                        .map(BackgroundFill::getFill)
+                        .filter(Color.class::isInstance)
+                        .findFirst()
+                        .map(Color.class::cast)
+                        .orElse(Color.WHITE);
+                System.err.println("Got front color: " + front);
+                System.err.println("Got back color: " + back);
 
                 // we need to display native text input component on the place where JFX component is drawn
                 // all parameters needed to do that are passed to native impl. here
@@ -145,7 +190,8 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
                         text, type.ordinal(), w, h,
                         trans.getMxx(), trans.getMxy(), trans.getMxz(), trans.getMxt(),// + insets.getLeft(),
                         trans.getMyx(), trans.getMyy(), trans.getMyz(), trans.getMyt(),// + insets.getTop(),
-                        trans.getMzx(), trans.getMzy(), trans.getMzz(), trans.getMzt());
+                        trans.getMzx(), trans.getMzy(), trans.getMzz(), trans.getMzt(),
+                        textField.getFont().getSize(), front, back);
             }
             if (!focusGainedByMouseClick) {
                 setCaretAnimating(true);
@@ -154,6 +200,10 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
             if (PlatformUtil.isIOS() && textField.getScene() != null) {
                 // releasing the focus => we need to hide the native component and also native keyboard
                 WindowHelper.getPeer(textField.getScene().getWindow()).releaseInput();
+                if (softKeyboardListener != null) {
+                    textField.getScene().getWindow().removeEventHandler(SoftKeyboardEvent.SOFT_KEYBOARD, softKeyboardListener);
+                }
+                adjustPosition(textField, 0);
             }
             focusGainedByMouseClick = false;
             setCaretAnimating(false);
@@ -168,6 +218,32 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
         } while (node != null);
 
         return transform;
+    }
+
+    static void adjustPosition(Node node, int kh) {
+        if (node == null || node.getScene() == null || node.getScene().getWindow() == null ||
+                WindowHelper.getPeer(node.getScene().getWindow()) == null) {
+                return;
+            }
+        System.err.println("ADJUST " + node + " to " + kh);
+        double tTot = node.getScene().getHeight();
+        double ty = node.getLocalToSceneTransform().getTy() + node.getBoundsInParent().getHeight() + 2;
+        if (ty > tTot - kh) {
+            node.getScene().getRoot().setTranslateY(tTot - ty - kh);
+        } else if (kh == 0 && node.getScene().getRoot().getTranslateY() != 0) {
+            node.getScene().getRoot().setTranslateY(0);
+        } else {
+            return;
+        }
+
+        final Bounds bounds = node.getBoundsInParent();
+        double w = bounds.getWidth();
+        double h = bounds.getHeight();
+        Affine3D trans = calculateNodeToSceneTransform(node);
+        WindowHelper.getPeer(node.getScene().getWindow()).updateBounds(w, h,
+                        trans.getMxx(), trans.getMxy(), trans.getMxz(), trans.getMxt(),
+                        trans.getMyx(), trans.getMyy(), trans.getMyz(), trans.getMyt(),
+                        trans.getMzx(), trans.getMzy(), trans.getMzz(), trans.getMzt());
     }
 
     // An unholy back-reference!

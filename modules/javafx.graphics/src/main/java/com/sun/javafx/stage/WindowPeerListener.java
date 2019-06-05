@@ -109,4 +109,9 @@ public class WindowPeerListener implements TKStageListener {
     @Override public void focusUngrab() {
         Event.fireEvent(window, new FocusUngrabEvent());
     }
+
+    @Override
+    public void softKeyboard() {
+        Event.fireEvent(window, new SoftKeyboardEvent());
+    }
 }

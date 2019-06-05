@@ -1338,7 +1338,10 @@ class GlassViewEventHandler extends View.EventHandler {
             }
         }
 
-        gestures.notifyNextTouchEvent(time, type, touchId, x, y, xAbs, yAbs);
+        Window w = view.getWindow();
+        double pScaleX = (w == null) ? 1.0 : w.getPlatformScaleX();
+        double pScaleY = (w == null) ? 1.0 : w.getPlatformScaleY();
+        gestures.notifyNextTouchEvent(time, type, touchId, x / pScaleX, y / pScaleY, xAbs / pScaleX, yAbs / pScaleY);
     }
 
     @Override public void handleEndTouchEvent(View view, long time) {
