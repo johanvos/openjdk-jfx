@@ -58,7 +58,7 @@ static const char * gtk3_chain[] = {
 static JavaVM* javaVM;
 
 JNIEXPORT jint JNICALL
-JNI_OnLoad(JavaVM *jvm, void *reserved)
+JNI_OnLoad_glass(JavaVM *jvm, void *reserved)
 {
     (void) reserved;
 
