@@ -181,8 +181,8 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
                         .findFirst()
                         .map(Color.class::cast)
                         .orElse(Color.WHITE);
-                System.err.println("Got front color: " + front);
-                System.err.println("Got back color: " + back);
+                // System.err.println("Got front color: " + front);
+                // System.err.println("Got back color: " + back);
 
                 // we need to display native text input component on the place where JFX component is drawn
                 // all parameters needed to do that are passed to native impl. here
@@ -225,7 +225,7 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
                 WindowHelper.getPeer(node.getScene().getWindow()) == null) {
                 return;
             }
-        System.err.println("ADJUST " + node + " to " + kh);
+        // System.err.println("ADJUST " + node + " to " + kh);
         double tTot = node.getScene().getHeight();
         double ty = node.getLocalToSceneTransform().getTy() + node.getBoundsInParent().getHeight() + 2;
         if (ty > tTot - kh) {

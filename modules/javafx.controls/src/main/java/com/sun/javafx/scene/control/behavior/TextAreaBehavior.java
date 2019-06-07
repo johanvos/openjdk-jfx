@@ -206,7 +206,7 @@ public class TextAreaBehavior extends TextInputControlBehavior<TextArea> {
                 final Bounds bounds = textArea.getBoundsInParent();
                 double w = bounds.getWidth();
                 double h = bounds.getHeight();
-                System.err.println("FX TextArea focused " + w + " " + h);
+                // System.err.println("FX TextArea focused " + w + " " + h);
                 Affine3D trans = TextFieldBehavior.calculateNodeToSceneTransform(textArea);
                 String text = textArea.textProperty().getValueSafe();
 
@@ -227,8 +227,8 @@ public class TextAreaBehavior extends TextInputControlBehavior<TextArea> {
                     .findFirst()
                     .map(Color.class::cast)
                     .orElse(Color.WHITE);
-                System.err.println("Got front color: " + front);
-                System.err.println("Got back color: " + back);
+                // System.err.println("Got front color: " + front);
+                // System.err.println("Got back color: " + back);
                 tkStage.requestInput(
                         text, TextFieldBehavior.TextInputTypes.TEXT_AREA.ordinal(), w, h,
                         trans.getMxx(), trans.getMxy(), trans.getMxz(), trans.getMxt(),
@@ -242,7 +242,7 @@ public class TextAreaBehavior extends TextInputControlBehavior<TextArea> {
         } else {
 //                    skin.hideCaret();
             if (PlatformUtil.isIOS() && tkStage != null) {
-                System.err.println("Release TextArea");
+                // System.err.println("Release TextArea");
                 // releasing the focus => we need to hide the native component and also native keyboard
                 tkStage.releaseInput();
                 if (softKeyboardListener != null) {

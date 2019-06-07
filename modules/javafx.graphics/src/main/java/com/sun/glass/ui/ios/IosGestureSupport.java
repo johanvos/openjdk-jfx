@@ -34,9 +34,9 @@ import com.sun.glass.ui.View;
 final class IosGestureSupport {
 
     private native static void _initIDs();
-//    static {
-//        _initIDs();
-//    }
+    static {
+        _initIDs();
+    }
 
     // The multiplier used to convert scroll units to pixels
     private final static double multiplier = 1.0;
