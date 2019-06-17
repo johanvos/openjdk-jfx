@@ -169,7 +169,11 @@ public class NativeLibLoader {
                 //is recognized by existence of JNI_OnLoad_libraryname() C function.
                 //If libraryname contains hyphen, it needs to be translated
                 //to underscore to form valid C function indentifier.
-                if ("iOS".equals(System.getProperty("os.name"))
+                String osName = System.getProperty("os.name");
+                if (osName != null) {
+                    osName = osName.toLowerCase();
+                }
+                if ("ios".equals(osName)
                         && libraryName.contains("-")) {
                     libraryName = libraryName.replace("-", "_");
                     try {
