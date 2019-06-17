@@ -39,6 +39,7 @@ import java.security.PrivilegedAction;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 
 public class NativeLibLoader {
 
@@ -171,7 +172,7 @@ public class NativeLibLoader {
                 //to underscore to form valid C function indentifier.
                 String osName = System.getProperty("os.name");
                 if (osName != null) {
-                    osName = osName.toLowerCase();
+                    osName = osName.toLowerCase(Locale.ROOT);
                 }
                 if ("ios".equals(osName)
                         && libraryName.contains("-")) {
