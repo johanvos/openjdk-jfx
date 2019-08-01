@@ -175,23 +175,25 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
                     front = (Color) ((Text) textNode).getFill();
                 }
 
-                Color back = textField.getBackground().getFills().stream()
-                        .map(BackgroundFill::getFill)
-                        .filter(Color.class::isInstance)
-                        .findFirst()
-                        .map(Color.class::cast)
-                        .orElse(Color.WHITE);
-                // System.err.println("Got front color: " + front);
-                // System.err.println("Got back color: " + back);
+                if (textField.getBackground != null) {
+                    Color back = textField.getBackground().getFills().stream()
+                            .map(BackgroundFill::getFill)
+                            .filter(Color.class::isInstance)
+                            .findFirst()
+                            .map(Color.class::cast)
+                            .orElse(Color.WHITE);
+                    // System.err.println("Got front color: " + front);
+                    // System.err.println("Got back color: " + back);
 
-                // we need to display native text input component on the place where JFX component is drawn
-                // all parameters needed to do that are passed to native impl. here
-                WindowHelper.getPeer(textField.getScene().getWindow()).requestInput(
-                        text, type.ordinal(), w, h,
-                        trans.getMxx(), trans.getMxy(), trans.getMxz(), trans.getMxt(),// + insets.getLeft(),
-                        trans.getMyx(), trans.getMyy(), trans.getMyz(), trans.getMyt(),// + insets.getTop(),
-                        trans.getMzx(), trans.getMzy(), trans.getMzz(), trans.getMzt(),
-                        textField.getFont().getSize(), front, back);
+                    // we need to display native text input component on the place where JFX component is drawn
+                    // all parameters needed to do that are passed to native impl. here
+                    WindowHelper.getPeer(textField.getScene().getWindow()).requestInput(
+                            text, type.ordinal(), w, h,
+                            trans.getMxx(), trans.getMxy(), trans.getMxz(), trans.getMxt(),// + insets.getLeft(),
+                            trans.getMyx(), trans.getMyy(), trans.getMyz(), trans.getMyt(),// + insets.getTop(),
+                            trans.getMzx(), trans.getMzy(), trans.getMzz(), trans.getMzt(),
+                            textField.getFont().getSize(), front, back); 
+                }
             }
             if (!focusGainedByMouseClick) {
                 setCaretAnimating(true);
