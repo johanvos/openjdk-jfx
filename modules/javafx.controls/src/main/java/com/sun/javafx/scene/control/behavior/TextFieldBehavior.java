@@ -175,7 +175,7 @@ public class TextFieldBehavior extends TextInputControlBehavior<TextField> {
                     front = (Color) ((Text) textNode).getFill();
                 }
 
-                if (textField.getBackground != null) {
+                if (textField.getBackground() != null) {
                     Color back = textField.getBackground().getFills().stream()
                             .map(BackgroundFill::getFill)
                             .filter(Color.class::isInstance)
