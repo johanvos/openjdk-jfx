@@ -139,8 +139,8 @@ project(":controls") {
 
     apply plugin: 'java'
 
-    sourceSets.main.java.srcDir('src/android/java')
 /*
+    sourceSets.main.java.srcDir('src/android/java')
     sourceSets.main.java {
         exclude 'javafx/scene/control/Date*.java'
         exclude 'com/sun/javafx/scene/control/skin/Date*.java'
@@ -215,18 +215,16 @@ com.sun.javafx.gestures.scroll=true
 """
 def sysroot = "$ndk/platforms/$ndk_target/arch-arm"
 
-def ccFlags = ["--sysroot=$sysroot","-std=c99", "-DANDROID", "-c", "-nostdlib",
-               "-DANDROID_NDK", "-DANDROID_VM"]
+def ccFlags = ["-target",platform, "-c", "-DANDROID_NDK", "-DANDROID_VM"]
 
-def ccOptFlags = ["-fpic", "-ffunction-sections", "-funwind-tables","-fstack-protector",
-                  "-Os", "-O2", "-fno-strict-aliasing", "-finline-limit=64", "-fomit-frame-pointer"]
-def ccWarnFlags = ["-Wa,--noexecstack", "-Wno-psabi"]
-def ccArchFlags = ["-mthumb", "-msoft-float", "-D__ARM_ARCH_5__", "-D__ARM_ARCH_5T__", "-D__ARM_ARCH_5E__",
-                   "-D__ARM_ARCH_5TE__", "-march=armv5te" , "-mtune=xscale"]
+def ccOptFlags = ["-fPIC", "-ffunction-sections", "-funwind-tables","-fstack-protector",
+                  "-Os", "-O2", "-fno-strict-aliasing", "-fomit-frame-pointer"]
+def ccWarnFlags = ["-Wa,--noexecstack"]
+def ccArchFlags = []
 def ccDebugFlags = [IS_DEBUG_NATIVE ? "-DDEBUG" : "-DNDEBUG"]
 def ccDefaultIncludeFlags = ["-I$ndk/platforms/$ndk_target/arch-arm/usr/include"]
 
-def linkFlags = ["--sysroot=$sysroot",
+def linkFlags = ["-target", platform,
                  "-Wl,--no-undefined", "-Wl,-z,noexecstack", "-lc", "-lm", "-shared",
                  "-L$ndk/platforms/$ndk_target/arch-arm/usr/lib"]
 

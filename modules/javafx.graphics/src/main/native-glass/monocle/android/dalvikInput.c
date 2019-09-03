@@ -30,7 +30,7 @@
 #include "com_sun_glass_events_TouchEvent.h"
 #include "com_sun_glass_ui_android_SoftwareKeyboard.h"
 #include "com_sun_glass_ui_android_Activity.h"
-#include "javafxports_android_FXDalvikEntity_InternalSurfaceView.h"
+// #include "javafxports_android_FXDalvikEntity_InternalSurfaceView.h"
 #include "com_sun_glass_ui_android_DalvikInput.h"
 
 #define asPtr(x) ((void *) (unsigned long) (x))
@@ -150,6 +150,8 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_android_SoftwareKeyboard__1hide
 JNIEXPORT void JNICALL Java_com_sun_glass_ui_android_DalvikInput_onMultiTouchEventNative
   (JNIEnv *env, jobject that, jint jcount, jintArray jactions, jintArray jids, jintArray jxs, jintArray jys) {
     GLASS_LOG_FINE("Call InternalSurfaceView_onMultiTouchEventNative");
+fprintf(stderr, "IGNORE FOR NOW\n");
+/*
 
     jlong jlongids[jcount];
     int count = jcount;
@@ -176,6 +178,7 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_android_DalvikInput_onMultiTouchEve
     (*env)->ReleaseIntArrayElements(env, jids, ids, 0);
     (*env)->ReleaseIntArrayElements(env, jxs, xs, 0);
     (*env)->ReleaseIntArrayElements(env, jys, ys, 0);
+*/
 }
 
 
@@ -186,10 +189,14 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_android_DalvikInput_onMultiTouchEve
  */
 JNIEXPORT void JNICALL Java_com_sun_glass_ui_android_DalvikInput_onKeyEventNative
   (JNIEnv *env, jobject that, jint action, jint keycode, jstring s) {
+GLASS_LOG_FINEST("IGNORE KEY FOR NOW");
+fprintf(stderr, "IGNORE KEY FOR NOW\n");
+/*
     int linux_keycode = to_linux_keycode(keycode);
     (*env)->CallStaticVoidMethod(env, jAndroidInputDeviceRegistryClass, monocle_gotKeyEventFromNative,
             action,linux_keycode);
 
+*/
 }
 
 /*
@@ -238,7 +245,8 @@ JNIEXPORT void JNICALL Java_com_sun_glass_ui_android_DalvikInput_onConfiguration
 
 
 JNIEXPORT jlong JNICALL Java_com_sun_glass_ui_monocle_LinuxSystem_dlopen
-  (JNIEnv *env, jobject UNUSED(obj), jstring filenameS, jint flag) {
+  // (JNIEnv *env, jobject UNUSED(obj), jstring filenameS, jint flag) {
+  (JNIEnv *env, jobject obj, jstring filenameS, jint flag) {
     const char *filename = (*env)->GetStringUTFChars(env, filenameS, NULL);
     GLASS_LOG_FINE("I have to Call dlopen %s\n",filename);
     void *handle = dlopen(filename, RTLD_LAZY | RTLD_GLOBAL);

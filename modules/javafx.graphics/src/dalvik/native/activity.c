@@ -28,8 +28,8 @@
 #include <string.h>
 #include <sys/types.h>
 #include <android/native_window_jni.h>
-#include "javafxports_android_FXActivity.h"
-#include "javafxports_android_FXDalvikEntity.h"
+// #include "javafxports_android_FXActivity.h"
+// #include "javafxports_android_FXDalvikEntity.h"
 #include "EventLoop.h"
 #include "activity.h"
 #include "logging.h"
