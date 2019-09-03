@@ -1586,10 +1586,10 @@ void addMavenPublication(Project project, List<String> projectDependencies) {
                     artifactId = "javafx-${project.name}"
 
                     afterEvaluate {
-                        artifact project.tasks."moduleEmptyPublicationJar$t.capital"
-                        artifact project.tasks."modularPublicationJar$t.capital" {
-                            classifier "$t.name"
-                        }
+                        // artifact project.tasks."moduleEmptyPublicationJar$t.capital"
+                        // artifact project.tasks."modularPublicationJar$t.capital" {
+                            // classifier "$t.name"
+                        // }
                     }
 
                     pom.withXml {
