@@ -100,12 +100,15 @@ public abstract class NativePlatformFactory {
                 }
                 try {
                     final ClassLoader loader = NativePlatformFactory.class.getClassLoader();
+System.err.println("TRY NativePlatform: "+factoryClassName);
                     final Class<?> clazz = Class.forName(factoryClassName, false, loader);
+System.err.println("GOT CLASS: "+clazz);
                     if (!NativePlatformFactory.class.isAssignableFrom(clazz)) {
                         throw new IllegalArgumentException("Unrecognized Monocle platform: "
                                 + factoryClassName);
                     }
                     NativePlatformFactory npf = (NativePlatformFactory) clazz.newInstance();
+System.err.println("NPF = "+npf);
                     if (npf.matches() &&
                         npf.getMajorVersion() == majorVersion &&
                         npf.getMinorVersion() == minorVersion) {

@@ -33,9 +33,11 @@ class AndroidPlatformFactory extends NativePlatformFactory {
 
     @Override
     protected boolean matches() {
-       String platform = AccessController.doPrivileged(
-                (PrivilegedAction<String>) () -> System.getProperty("javafx.platform"));
-        return platform != null && platform.equals("android");
+System.setProperty("javafx.platform", "android");
+return true;
+       // String platform = AccessController.doPrivileged(
+                // (PrivilegedAction<String>) () -> System.getProperty("javafx.platform"));
+        // return platform != null && platform.equals("android");
     }
 
     @Override
