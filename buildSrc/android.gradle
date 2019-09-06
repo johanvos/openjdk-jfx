@@ -41,7 +41,7 @@ ANDROID.armArch = "arm64-v8a"
 ANDROID.libDest = "lib"
 ANDROID.jfxdvklib = "jfxdvk.jar"
 ANDROID.library = { name -> return "lib${name}.so" as String }
-ANDROID.includeMonocole = true
+ANDROID.includeMonocle = true
 ANDROID.includeLens = false
 ANDROID.canBuild = true
 
