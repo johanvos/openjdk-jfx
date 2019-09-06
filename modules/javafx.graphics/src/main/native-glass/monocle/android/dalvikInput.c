@@ -65,7 +65,7 @@
 
 static int bind = 0;
 
-static ANativeWindow *(*_ANDROID_getNativeWindow)();
+// static ANativeWindow *(*_ANDROID_getNativeWindow)();
 static jfloat        *(*_ANDROID_getDensity)();
 static char          *(*_ANDROID_getDataDir)();
 static void          *(*_ANDROID_notifyGlassStarted)();
@@ -80,21 +80,22 @@ static jmethodID monocle_gotKeyEventFromNative;
 static jmethodID monocle_repaintAll;
 
 void bind_activity(JNIEnv *env) {
-    GLASS_LOG_FINEST("Binding to %s", ANDROID_LIB);
+fprintf(stderr, "bindactivity called\n");
+    GLASS_LOG_FINEST("----- Binding to %s", ANDROID_LIB);
     void *libandroid = dlopen(ANDROID_LIB, RTLD_LAZY | RTLD_GLOBAL);
     if (!libandroid) {
         THROW_RUNTIME_EXCEPTION(env, "dlopen failed with error: ", dlerror());
         return;
     }
 
-    _ANDROID_getNativeWindow = GET_SYMBOL(env, libandroid, "android_getNativeWindow");
+    // _ANDROID_getNativeWindow = GET_SYMBOL(env, libandroid, "android_getNativeWindow");
     _ANDROID_getDensity = GET_SYMBOL(env, libandroid, "android_getDensity");
     _ANDROID_getDataDir = GET_SYMBOL(env, libandroid, "android_getDataDir");
     _ANDROID_notifyGlassStarted = GET_SYMBOL(env, libandroid, "android_notifyGlassStarted");
     _ANDROID_notifyGlassShutdown = GET_SYMBOL(env, libandroid, "android_notifyGlassShutdown");
     _ANDROID_notifyShowIME = GET_SYMBOL(env, libandroid, "android_notifyShowIME");
     _ANDROID_notifyHideIME = GET_SYMBOL(env, libandroid, "android_notifyHideIME");
-GLASS_LOG_FINEST("GetNativeWindow = %p, getDensitiy = %p",_ANDROID_getNativeWindow, _ANDROID_getDensity );
+// GLASS_LOG_FINEST("GetNativeWindow = %p, getDensitiy = %p",_ANDROID_getNativeWindow, _ANDROID_getDensity );
     bind = JNI_TRUE;
     (*_ANDROID_notifyGlassStarted)();
     jAndroidInputDeviceRegistryClass = (*env)->NewGlobalRef(env,
@@ -113,30 +114,45 @@ GLASS_LOG_FINEST("GetNativeWindow = %p, getDensitiy = %p",_ANDROID_getNativeWind
 
 }
 
+ANativeWindow* myWindow;
+
+void setGraalWindow(ANativeWindow* anw) {
+fprintf(stderr, "Set GraalWindow to %p\n", anw);
+    myWindow = anw;
+}
+
 ANativeWindow *android_getNativeWindow(JNIEnv *env) {
-    if(!bind) bind_activity(env);
-    return (*_ANDROID_getNativeWindow)();
+    // return graalGetNativeWindow();
+fprintf(stderr, "GraalWindow asked, return %p\n", myWindow);
+    return myWindow;
+    // if(!bind) bind_activity(env);
+    // return (*_ANDROID_getNativeWindow)();
 }
 
 jfloat android_getDensity(JNIEnv *env) {
+fprintf(stderr, "GETDENSITY ASKED, return bogus for now\n");
+return 100.;
     if(!bind) bind_activity(env);
     jfloat* answer = (*_ANDROID_getDensity)();
     return *answer;
 }
 
 const char *android_getDataDir(JNIEnv *env) {
+fprintf(stderr, "GETdatadir ASKED\n");
     if(!bind) bind_activity(env);
     return (*_ANDROID_getDataDir)();
 }
 
 JNIEXPORT void JNICALL Java_com_sun_glass_ui_android_SoftwareKeyboard__1show
 (JNIEnv *env, jclass clazz) {
+fprintf(stderr, "sohwkeyboarw ASKED\n");
     if(!bind) bind_activity(env);
     (*_ANDROID_notifyShowIME)();
 }
 
 JNIEXPORT void JNICALL Java_com_sun_glass_ui_android_SoftwareKeyboard__1hide
 (JNIEnv *env, jclass clazz) {
+fprintf(stderr, "hidekeyboard ASKED\n");
     if(!bind) bind_activity(env);
     (*_ANDROID_notifyHideIME)();
 }

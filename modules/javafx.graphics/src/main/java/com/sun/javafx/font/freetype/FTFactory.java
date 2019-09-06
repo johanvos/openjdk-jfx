@@ -37,6 +37,7 @@ public class FTFactory extends PrismFontFactory {
     static boolean LCD_SUPPORT;
 
     public static PrismFontFactory getFactory() {
+System.err.println("FTFactory, GETFACTORY");
         PrismFontFactory factory = null;
         long[] ptr = new long[1];
         int error = OSFreetype.FT_Init_FreeType(ptr);

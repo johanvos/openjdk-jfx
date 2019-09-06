@@ -47,7 +47,7 @@ ANDROID.canBuild = true
 
 def toolchainHome = "$ndk/toolchains/llvm"
 def compilerHome = "$toolchainHome/prebuilt/linux-x86_64"
-def freetypeDir = null;
+def freetypeDir = project.hasProperty("FREETYPE_DIR") ? "${FREETYPE_DIR}" : null
 def compileNativeText = freetypeDir != null
 
 def compiler = file("$compilerHome/bin/clang").getAbsolutePath()
@@ -173,8 +173,8 @@ ANDROID.jfxrtJarExcludes = [
     // "com/sun/javafx/media",
     "com/sun/javafx/font/directwrite", //exclude non freetype font support
     "com/sun/javafx/font/coretext",
-    "com/sun/javafx/font/freetype/Pango*",
-    "com/sun/javafx/font/freetype/OSPango*",
+    // "com/sun/javafx/font/freetype/Pango*",
+    // "com/sun/javafx/font/freetype/OSPango*",
     // "com/sun/webkit",   //exclude all WebView for now
     // "com/sun/javafx/webkit",
     // "com/sun/javafx/scene/web",

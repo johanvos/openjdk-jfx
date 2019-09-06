@@ -272,6 +272,8 @@ public class PrismFontLoader extends FontLoader {
             Object ffo = gfm.invoke(plo);
             installedFontFactory = (FontFactory)ffo;
         } catch (Exception e) {
+e.printStackTrace();
+System.err.println("Error loading font factory from pipeline");
         }
         return installedFontFactory;
     }

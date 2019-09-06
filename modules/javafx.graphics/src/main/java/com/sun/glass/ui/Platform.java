@@ -39,11 +39,14 @@ final class Platform {
     static private String type = null;
 
     static public synchronized String determinePlatform() {
+System.err.println("PLATFORM.determinePlatform() is called, type = "+type);
         if (type == null) {
 
             // Provide for a runtime override, allowing EGL for example
             String userPlatform =
                 AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty("glass.platform"));
+System.err.println("PLATFORM.determinaPlatform() is called, userPlatform = "+userPlatform+", move to Monocle");
+userPlatform = "Monocle";
 
             if (userPlatform != null) {
                 if (userPlatform.equals("macosx"))

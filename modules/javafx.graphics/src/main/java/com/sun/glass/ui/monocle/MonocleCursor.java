@@ -39,7 +39,7 @@ final class MonocleCursor extends Cursor {
 
     MonocleCursor(int type) {
         super(type);
-        image = getImage(type);
+        // image = getImage(type);
         hotspotX = 0;
         hotspotY = 0;
     }
@@ -56,6 +56,7 @@ final class MonocleCursor extends Cursor {
             ((MonocleApplication) Application.GetApplication())
                     .staticCursor_setVisible(false);
         } else {
+System.err.println("Whoops, shouldn't have a cursor now");
             NativeCursor cursor = NativePlatformFactory.getNativePlatform().getCursor();
             cursor.setImage(image);
             ((MonocleApplication) Application.GetApplication())

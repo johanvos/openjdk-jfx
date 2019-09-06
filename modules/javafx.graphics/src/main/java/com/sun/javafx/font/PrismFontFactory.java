@@ -96,7 +96,7 @@ public abstract class PrismFontFactory implements FontFactory {
         debugFonts = AccessController.doPrivileged(
                 (PrivilegedAction<Boolean>) () -> {
                     NativeLibLoader.loadLibrary("javafx_font");
-                    String dbg = System.getProperty("prism.debugfonts", "");
+                    String dbg = System.getProperty("prism.debugfonts", "true");
                     boolean debug = "true".equals(dbg);
                     jreFontDir = getJDKFontDir();
                     String s = System.getProperty("com.sun.javafx.fontSize");
@@ -210,6 +210,7 @@ public abstract class PrismFontFactory implements FontFactory {
             if (debugFonts) {
                 System.err.println("Loading font factory failed "+ factoryClass);
             }
+t.printStackTrace();
         }
         return null;
     }

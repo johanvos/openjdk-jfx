@@ -52,11 +52,12 @@ public class PlatformUtil {
     private static String javafxPlatform;
 
     static {
-        javafxPlatform = AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty("javafx.platform"));
+        javafxPlatform = AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty("javafx.platform", "android"));
         loadProperties();
         embedded = AccessController.doPrivileged((PrivilegedAction<Boolean>) () -> Boolean.getBoolean("com.sun.javafx.isEmbedded"));
-        embeddedType = AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty("embedded"));
+        embeddedType = AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty("embedded", "monocle"));
         useEGL = AccessController.doPrivileged((PrivilegedAction<Boolean>) () -> Boolean.getBoolean("use.egl"));
+System.err.println("javafxplatform = "+javafxPlatform+", embedded = "+embedded+", embeddedType = "+embeddedType);
         if (useEGL) {
             doEGLCompositing = AccessController.doPrivileged((PrivilegedAction<Boolean>) () -> Boolean.getBoolean("doNativeComposite"));
         } else
@@ -160,6 +161,7 @@ public class PlatformUtil {
      * Returns true if the platform is embedded.
      */
     public static boolean isEmbedded() {
+System.err.println("UTIL: embedded asked, return "+embedded);
         return embedded;
     }
 
@@ -167,6 +169,7 @@ public class PlatformUtil {
      * Returns a string with the embedded type - ie eglx11, eglfb, dfb or null.
      */
     public static String getEmbeddedType() {
+System.err.println("UTIL: embeddedtype asked, return "+embeddedType);
         return embeddedType;
     }
 
@@ -277,6 +280,7 @@ public class PlatformUtil {
     }
 
     public static boolean isAndroid() {
+System.err.println("Platformutil.isAndroid asked, return "+ANDROID);
        return ANDROID;
     }
 }
