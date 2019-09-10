@@ -1950,6 +1950,7 @@ public abstract class NGNode {
      * @param g The graphics object we're rendering to. This must never be null.
      */
     public final void render(Graphics g) {
+System.err.println("[NGNode] need to render "+this+" on "+g);
         if (PULSE_LOGGING_ENABLED) {
             PulseLogger.incrementCounter("Nodes visited during render");
         }
@@ -1961,7 +1962,9 @@ public abstract class NGNode {
         // We know that we are going to render this node, so we call the
         // doRender method, which subclasses implement to do the actual
         // rendering work.
+System.err.println("[NGNode] will call doRender on "+this);
         doRender(g);
+System.err.println("[NGNode] I did render "+this);
     }
 
     /**
@@ -1990,11 +1993,12 @@ public abstract class NGNode {
      * of this method should make sure to save & restore the transform state.
      */
     protected void doRender(Graphics g) {
-
+System.err.println("[NGNODE] doRender "+this);
         g.setState3D(isShape3D());
 
         boolean preCullingTurnedOff = false;
         if (PrismSettings.dirtyOptsEnabled) {
+System.err.println("dirtyOptsEnabled");
             if (g.hasPreCullingBits()) {
                 //preculling bits available
                 final int bits = cullingBits >> (g.getClipRectIndex() * 2);
@@ -2010,10 +2014,13 @@ public abstract class NGNode {
                     preCullingTurnedOff = true;
                 }
             }
-        }
+        } else {
+System.err.println("dirtyOptsDisabled");
+}
 
         // save current depth test state
         boolean prevDepthTest = g.isDepthTest();
+System.err.println("[NGNODE] prevDepthTest = "+prevDepthTest);
 
         // Apply Depth test for this node
         // (note that this will only be used if we have a depth buffer for the
@@ -2053,27 +2060,35 @@ public abstract class NGNode {
         // groups which don't paint anything themselves).
         boolean p = false;
         // NOTE: Opt out 2D operations on 3D Shapes, which are not yet handled by Prism
+System.err.println("[NGNODE] doRender, real work starts ");
         if (!isShape3D() && g instanceof ReadbackGraphics && needsBlending()) {
+System.err.println("[NGNODE] doRender1");
             renderNodeBlendMode(g);
             p = true;
         } else if (!isShape3D() && getOpacity() < 1f) {
+System.err.println("[NGNODE] doRender2");
             renderOpacity(g);
             p = true;
         } else if (!isShape3D() && getCacheFilter() != null) {
+System.err.println("[NGNODE] doRender3");
             renderCached(g);
             p = true;
         } else if (!isShape3D() && getClipNode() != null) {
+System.err.println("[NGNODE] doRender4");
             renderClip(g);
             p = true;
         } else if (!isShape3D() && getEffectFilter() != null && effectsSupported) {
+System.err.println("[NGNODE] doRender5");
             renderEffect(g);
             p = true;
         } else {
+System.err.println("[NGNODE] doRender6");
             renderContent(g);
             if (PrismSettings.showOverdraw) {
                 p = this instanceof NGRegion || !(this instanceof NGGroup);
             }
         }
+System.err.println("[NGNODE] doRender7");
 
         if (preCullingTurnedOff) {
             g.setHasPreCullingBits(true);

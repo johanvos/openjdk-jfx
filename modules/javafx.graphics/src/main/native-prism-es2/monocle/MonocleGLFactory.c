@@ -34,6 +34,8 @@
 
 #include "../PrismES2Defs.h"
 
+#include <GL/gl.h>
+
 #include "com_sun_prism_es2_MonocleGLContext.h"
 
 extern void *get_dlsym(void *handle, const char *symbol, int warn);
@@ -42,6 +44,24 @@ extern void *get_dlsym(void *handle, const char *symbol, int warn);
 
 #define asPtr(x) ((void *) (unsigned long) (x))
 #define asJLong(x) ((jlong) (unsigned long) (x))
+
+void testGL() {
+ glClearColor(0.0f, 1.0f, 0.0f, 1.0f); // Set background color to black and opaque
+   glClear(GL_COLOR_BUFFER_BIT);         // Clear the color buffer
+ 
+/*
+   // Draw a Red 1x1 Square centered at origin
+   glBegin(GL_QUADS);              // Each set of 4 vertices form a quad
+      glColor3f(1.0f, 0.0f, 0.0f); // Red
+      glVertex2f(-0.5f, -0.5f);    // x, y
+      glVertex2f( 0.5f, -0.5f);
+      glVertex2f( 0.5f,  0.5f);
+      glVertex2f(-0.5f,  0.5f);
+   glEnd();
+*/
+ 
+   glFlush();  // Render now
+}
 
 JNIEXPORT jlong JNICALL Java_com_sun_prism_es2_MonocleGLFactory_nPopulateNativeCtxInfo
 (JNIEnv *env, jclass clazz, jlong libraryHandle) {
@@ -92,6 +112,7 @@ JNIEXPORT jlong JNICALL Java_com_sun_prism_es2_MonocleGLFactory_nPopulateNativeC
 
     // from the eglWrapper.c
     void *handle = asPtr(libraryHandle);
+fprintf(stderr, "[GLINIT] passed handle = %p\n", handle);
 
     /* set function pointers */
     ctxInfo->glActiveTexture = (PFNGLACTIVETEXTUREPROC)
@@ -108,6 +129,7 @@ JNIEXPORT jlong JNICALL Java_com_sun_prism_es2_MonocleGLFactory_nPopulateNativeC
                                         GET_DLSYM(handle, "glCheckFramebufferStatus");
     ctxInfo->glCreateProgram = (PFNGLCREATEPROGRAMPROC)
                                GET_DLSYM(handle, "glCreateProgram");
+fprintf(stderr, "CREATE program at %p\n",ctxInfo->glCreateProgram);
     ctxInfo->glCreateShader = (PFNGLCREATESHADERPROC)
                               GET_DLSYM(handle, "glCreateShader");
     ctxInfo->glCompileShader = (PFNGLCOMPILESHADERPROC)
@@ -144,6 +166,7 @@ JNIEXPORT jlong JNICALL Java_com_sun_prism_es2_MonocleGLFactory_nPopulateNativeC
                                     GET_DLSYM(handle, "glGetUniformLocation");
     ctxInfo->glLinkProgram = (PFNGLLINKPROGRAMPROC)
                              GET_DLSYM(handle, "glLinkProgram");
+fprintf(stderr, "LINK program at %p\n",ctxInfo->glLinkProgram);
     ctxInfo->glRenderbufferStorage = (PFNGLRENDERBUFFERSTORAGEPROC)
                                      GET_DLSYM(handle, "glRenderbufferStorage");
     ctxInfo->glShaderSource = (PFNGLSHADERSOURCEPROC)
@@ -196,6 +219,9 @@ JNIEXPORT jlong JNICALL Java_com_sun_prism_es2_MonocleGLFactory_nPopulateNativeC
                             GET_DLSYM(handle, "glBlitFramebuffer");
 
     initState(ctxInfo);
+fprintf(stderr, "[GLINIT], ctxInfo created at %p\n",ctxInfo);
+testGL();
+fprintf(stderr, "[GLINIT], gl tested, ctxInfo created at %p\n",ctxInfo);
     return ctxInfo;
 }
 

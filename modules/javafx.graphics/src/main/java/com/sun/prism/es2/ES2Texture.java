@@ -97,6 +97,7 @@ class ES2Texture<T extends ES2TextureData> extends BaseTexture<ES2TextureResourc
 
     static ES2Texture create(ES2Context context, PixelFormat format,
             WrapMode wrapMode, int w, int h, boolean useMipmap) {
+System.err.println("[ES2Texture] Create texture, context = "+context+", format = "+format+", w = "+w+", h = "+h+", wrapmode = "+wrapMode+", mip = "+useMipmap);
         if (!context.getResourceFactory().isFormatSupported(format)) {
             throw new UnsupportedOperationException(
                     "Pixel format " + format
@@ -188,27 +189,34 @@ class ES2Texture<T extends ES2TextureData> extends BaseTexture<ES2TextureResourc
         }
 
         if (!glCtx.canCreateNonPowTwoTextures()) {
+System.err.println("ES2Texture, no NPOT ");
             texWidth = nextPowerOfTwo(texWidth, maxSize);
             texHeight = nextPowerOfTwo(texHeight, maxSize);
         }
 
         ES2VramPool pool = ES2VramPool.instance;
+System.err.println("ES2Texture, pool = "+pool);
         long size = pool.estimateTextureSize(texWidth, texHeight, format);
         if (!pool.prepareForAllocation(size)) {
             return null;
         }
+System.err.println("ES2Texture 1");
 
         // save current texture object for this texture unit
         int savedTex = glCtx.getBoundTexture();
+System.err.println("ES2Texture 2");
         ES2TextureData texData =
             new ES2TextureData(context, glCtx.genAndBindTexture(),
                                texWidth, texHeight, size);
+System.err.println("ES2Texture 3");
         ES2TextureResource texRes = new ES2TextureResource(texData);
+System.err.println("ES2Texture 4");
 
         boolean result = uploadPixels(glCtx, GLContext.GL_TEXTURE_2D, null, format,
                                       texWidth, texHeight,
                                       contentX, contentY,
                                       0, 0, contentW, contentH, 0, true, useMipmap);
+System.err.println("ES2Texture 5, result = "+result);
         glCtx.texParamsMinMax(GLContext.GL_LINEAR, useMipmap);
 
         // restore previous texture objects

@@ -54,7 +54,8 @@ public class PlatformUtil {
     static {
         javafxPlatform = AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty("javafx.platform", "android"));
         loadProperties();
-        embedded = AccessController.doPrivileged((PrivilegedAction<Boolean>) () -> Boolean.getBoolean("com.sun.javafx.isEmbedded"));
+        // embedded = AccessController.doPrivileged((PrivilegedAction<Boolean>) () -> Boolean.getBoolean("com.sun.javafx.isEmbedded"));
+embedded = true;
         embeddedType = AccessController.doPrivileged((PrivilegedAction<String>) () -> System.getProperty("embedded", "monocle"));
         useEGL = AccessController.doPrivileged((PrivilegedAction<Boolean>) () -> Boolean.getBoolean("use.egl"));
 System.err.println("javafxplatform = "+javafxPlatform+", embedded = "+embedded+", embeddedType = "+embeddedType);

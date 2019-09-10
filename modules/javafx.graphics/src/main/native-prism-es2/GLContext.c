@@ -64,6 +64,7 @@ void printGLError(GLenum errCode) {
 }
 
 void initializeCtxInfo(ContextInfo *ctxInfo) {
+fprintf(stderr, "[GLCONTEXT] initializeCtx\n");
     if (ctxInfo == NULL) {
         return;
     }
@@ -72,6 +73,7 @@ void initializeCtxInfo(ContextInfo *ctxInfo) {
 }
 
 void deleteCtxInfo(ContextInfo *ctxInfo) {
+fprintf(stderr, "[GLCONTEXT] deleteCtx\n");
     if (ctxInfo == NULL) {
         return;
     }
@@ -117,6 +119,7 @@ void deleteCtxInfo(ContextInfo *ctxInfo) {
 }
 
 void initState(ContextInfo *ctxInfo) {
+fprintf(stderr, "[GLCONTEXT] initState\n");
     if (ctxInfo == NULL) {
         return;
     }
@@ -156,6 +159,7 @@ void initState(ContextInfo *ctxInfo) {
 void clearBuffers(ContextInfo *ctxInfo,
         GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha,
         jboolean clearColor, jboolean clearDepth, jboolean ignoreScissor) {
+fprintf(stderr, "[GLCONTEXT] nonjavaclearBuffers\n");
     GLbitfield clearBIT = 0;
 
     if (ctxInfo == NULL) {
@@ -203,6 +207,7 @@ void clearBuffers(ContextInfo *ctxInfo,
 }
 
 void bindFBO(ContextInfo *ctxInfo, GLuint fboId) {
+fprintf(stderr, "[GLCONTEXT] bindFBO\n");
     if ((ctxInfo == NULL) || (ctxInfo->glBindFramebuffer == NULL)) {
         return;
     }
@@ -217,6 +222,7 @@ void bindFBO(ContextInfo *ctxInfo, GLuint fboId) {
  */
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nActiveTexture
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint texUnit) {
+fprintf(stderr, "[GLCONTEXT] activeTexture\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if ((ctxInfo == NULL) || (ctxInfo->glActiveTexture == NULL)) {
         return;
@@ -231,6 +237,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nActiveTexture
  */
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nBindFBO
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint fboId) {
+fprintf(stderr, "[GLCONTEXT] nbindFBO\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     bindFBO(ctxInfo, (GLuint)fboId);
 }
@@ -242,6 +249,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nBindFBO
  */
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nBindTexture
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint texID) {
+fprintf(stderr, "[GLCONTEXT] bindTexture\n");
     glBindTexture(GL_TEXTURE_2D, texID);
 }
 
@@ -290,6 +298,7 @@ GLenum translateScaleFactor(jint scaleFactor) {
  */
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nBlendFunc
 (JNIEnv *env, jclass class, jint sFactor, jint dFactor) {
+fprintf(stderr, "[GLCONTEXT] nBlend\n");
     glBlendFunc(translateScaleFactor(sFactor), translateScaleFactor(dFactor));
 }
 
@@ -302,6 +311,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nClearBuffers
 (JNIEnv *env, jclass class, jlong nativeCtxInfo,
         jfloat red, jfloat green, jfloat blue, jfloat alpha,
         jboolean clearColor, jboolean clearDepth, jboolean ignoreScissor) {
+fprintf(stderr, "[GLCONTEXT] clearBuffers\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if (ctxInfo == NULL) {
         return;
@@ -313,6 +323,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nClearBuffers
 }
 
 int checkFramebufferStatus(ContextInfo *ctxInfo) {
+fprintf(stderr, "[GLCONTEXT] checkFrambufferStatus\n");
     GLenum status;
     status = ctxInfo->glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
@@ -364,6 +375,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nBlit
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint srcFBO, jint dstFBO,
             jint jsrcX0, jint jsrcY0, jint srcX1, jint srcY1,
             jint jdstX0, jint jdstY0, jint dstX1, jint dstY1) {
+fprintf(stderr, "[GLCONTEXT] nBlit\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if ((ctxInfo == NULL) || (ctxInfo->glGenFramebuffers == NULL)
             || (ctxInfo->glBindFramebuffer == NULL)
@@ -404,6 +416,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nBlit
 }
 
 GLuint attachRenderbuffer(ContextInfo *ctxInfo, GLuint rbID, GLenum attachment) {
+fprintf(stderr, "[GLCONTEXT] attachRenderBuffer\n");
     //GLenum status;
     ctxInfo->glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment,
             GL_RENDERBUFFER, rbID);
@@ -424,6 +437,7 @@ GLuint attachRenderbuffer(ContextInfo *ctxInfo, GLuint rbID, GLenum attachment) 
 GLuint createAndAttachRenderBuffer(ContextInfo *ctxInfo, GLsizei width, GLsizei height, GLsizei msaa, GLenum attachment) {
     GLuint rbID;
     GLenum internalFormat;
+fprintf(stderr, "[GLCONTEXT] createattachRenderBuffer\n");
 
     if ((ctxInfo == NULL) || (ctxInfo->glGenRenderbuffers == NULL)
             || (ctxInfo->glBindRenderbuffer == NULL)
@@ -468,6 +482,7 @@ GLuint createAndAttachRenderBuffer(ContextInfo *ctxInfo, GLsizei width, GLsizei 
  */
 JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nCreateDepthBuffer
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint width, jint height, jint msaa) {
+fprintf(stderr, "[GLCONTEXT] nCreateDepthBuffer\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     return createAndAttachRenderBuffer(ctxInfo, width, height, msaa, GL_DEPTH_ATTACHMENT);
 }
@@ -479,6 +494,7 @@ JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nCreateDepthBuffer
  */
 JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nCreateRenderBuffer
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint width, jint height, jint msaa) {
+fprintf(stderr, "[GLCONTEXT] nCreateRenderBuffer\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     return createAndAttachRenderBuffer(ctxInfo, width, height, msaa, GL_COLOR_ATTACHMENT0);
 }
@@ -490,6 +506,7 @@ JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nCreateRenderBuffer
  */
 JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nCreateFBO
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint texID) {
+fprintf(stderr, "[GLCONTEXT] nCreateFBO\n");
     GLuint fboID;
 
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
@@ -539,7 +556,9 @@ JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nCreateProgram
     char *attrNameString;
     jint *fragIDs;
     jsize length;
+fprintf(stderr, "[GLCONTEXT] nCreateProgram\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
+fprintf(stderr, "GLC nCreateProgram, ctxinfo at %p, vertId = %d, numattr = %d\n", ctxInfo, vertID, numAttrs);
     if ((ctxInfo == NULL) || (attrs == NULL) || (indexs == NULL)
             || (ctxInfo->glCreateProgram == NULL)
             || (ctxInfo->glAttachShader == NULL)
@@ -562,8 +581,10 @@ JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nCreateProgram
     // create the program object and attach it to the shader
     shaderProgram = ctxInfo->glCreateProgram();
     ctxInfo->glAttachShader(shaderProgram, vertID);
+fprintf(stderr, "GCL, attach vertex Shader program %p\n", vertID);
     for (i = 0; i < length; i++) {
         ctxInfo->glAttachShader(shaderProgram, fragIDs[i]);
+fprintf(stderr, "GCL, attachShader program %p\n", fragIDs[i]);
     }
 
     // bind any user-defined index values to their corresponding names
@@ -572,11 +593,14 @@ JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nCreateProgram
         attrName = (*env)->GetObjectArrayElement(env, attrs, i);
         attrNameString = strJavaToC(env, attrName);
         ctxInfo->glBindAttribLocation(shaderProgram, indexsPtr[i], attrNameString);
+fprintf(stderr, "GCL, bindatt named %s with val %p\n", attrNameString, indexsPtr[i]);
         free(attrNameString);
     }
 
     // link the program
+fprintf(stderr, "GCL LINK...\n");
     ctxInfo->glLinkProgram(shaderProgram);
+fprintf(stderr, "GCL LINK done ...\n");
     ctxInfo->glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
 
     if (success == GL_FALSE) {
@@ -614,6 +638,7 @@ JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nCreateProgram
  */
 JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nCompileShader
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jstring src, jboolean vertex) {
+fprintf(stderr, "[GLCONTEXT] CompileShader\n");
     GLenum shaderType;
     GLuint shaderID;
     GLint success;
@@ -635,6 +660,8 @@ JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nCompileShader
     shaderType = vertex ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER;
     shaderID = ctxInfo->glCreateShader(shaderType);
     shaderString = (GLchar *) strJavaToC(env, src);
+fprintf(stderr, "COMPILING SHADER %s\n", shaderString);
+    // ALOG("[JVDBG] compile shader: %s", shaderString);
     if (shaderString == NULL) {
         /* Just return, since strJavaToC will throw OOM if it returns NULL */
         return 0;
@@ -661,6 +688,7 @@ JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nCompileShader
         ctxInfo->glDeleteShader(shaderID);
         return 0;
     }
+fprintf(stderr, "shader compiled, id = %d\n", shaderID);
 
     return shaderID;
 }
@@ -672,6 +700,7 @@ JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nCompileShader
  */
 JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nCreateTexture
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint width, jint height) {
+fprintf(stderr, "[GLCONTEXT] nCreateTexture\n");
     GLuint texID = 0;
     GLenum err;
 
@@ -714,6 +743,7 @@ JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nCreateTexture
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nDisposeShaders
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint shaderProgram,
         jint vertID, jintArray fragIDArr) {
+fprintf(stderr, "[GLCONTEXT] nDisposeShader\n");
     jsize length;
     jint* fragIDs;
     int i;
@@ -755,6 +785,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nDisposeShaders
  */
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nDeleteFBO
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint fboID) {
+fprintf(stderr, "[GLCONTEXT] nDeleeteFBO\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if ((ctxInfo == NULL) || (ctxInfo->glDeleteFramebuffers == NULL)) {
         return;
@@ -771,6 +802,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nDeleteFBO
  */
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nDeleteRenderBuffer
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint rbID) {
+fprintf(stderr, "[GLCONTEXT] nDeleeteRB\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if ((ctxInfo == NULL) || (ctxInfo->glDeleteRenderbuffers == NULL)) {
         return;
@@ -787,6 +819,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nDeleteRenderBuffer
  */
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nDeleteShader
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint shaderID) {
+fprintf(stderr, "[GLCONTEXT] nDeleeteShader\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if ((ctxInfo == NULL) || (ctxInfo->glDeleteShader == NULL)) {
         return;
@@ -803,6 +836,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nDeleteShader
  */
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nDeleteTexture
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint texID) {
+fprintf(stderr, "[GLCONTEXT] nDeleeteTexture\n");
     GLuint tID = (GLuint) texID;
     if (tID != 0) {
         glDeleteTextures(1, &tID);
@@ -816,6 +850,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nDeleteTexture
  */
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nFinish
 (JNIEnv *env, jclass class) {
+fprintf(stderr, "[GLCONTEXT] finish\n");
     glFinish();
 }
 
@@ -826,6 +861,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nFinish
  */
 JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nGenAndBindTexture
 (JNIEnv *env, jclass class) {
+fprintf(stderr, "[GLCONTEXT] AAAA\n");
     GLuint texID;
     glGenTextures(1, &texID);
     glBindTexture(GL_TEXTURE_2D, texID);
@@ -839,6 +875,7 @@ JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nGenAndBindTexture
  */
 JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nGetFBO
 (JNIEnv *env, jclass class) {
+fprintf(stderr, "[GLCONTEXT] GetFBO\n");
     GLint param;
     /* The caching logic has been done on Java side if
      * platform isn't MAC or IOS. On these platforms Glass
@@ -856,6 +893,7 @@ JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nGetFBO
  */
 JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nGetMaxSampleSize
 (JNIEnv *env, jclass class) {
+fprintf(stderr, "[GLCONTEXT] getmaxsamples\n");
     GLint samples;
     glGetIntegerv(GL_MAX_SAMPLES, &samples);
     return (jint)samples;
@@ -868,6 +906,7 @@ JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nGetMaxSampleSize
  */
 JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nGetUniformLocation
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint programID, jstring name) {
+fprintf(stderr, "[GLCONTEXT] getuniloc\n");
     GLint result;
     char *nameString;
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
@@ -884,6 +923,7 @@ JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nGetUniformLocation
 }
 
 int translatePrismToGL(int value) {
+fprintf(stderr, "[GLCONTEXT] translatePrismToGL for %d\n", value);
     switch (value) {
         case com_sun_prism_es2_GLContext_GL_FLOAT:
             return GL_FLOAT;
@@ -961,6 +1001,7 @@ int translatePrismToGL(int value) {
 }
 
 GLint translatePixelStore(int pname) {
+fprintf(stderr, "[GLCONTEXT] translatepixelstore for %d\n", pname);
     switch (pname) {
             // Use by glPixelStorei
         case com_sun_prism_es2_GLContext_GL_UNPACK_ALIGNMENT:
@@ -985,6 +1026,7 @@ GLint translatePixelStore(int pname) {
  */
 JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nGetIntParam
 (JNIEnv *env, jclass class, jint pname) {
+fprintf(stderr, "[GLCONTEXT] getIntrparam\n");
     GLint param;
 
     glGetIntegerv((GLenum) translatePrismToGL(pname), &param);
@@ -998,11 +1040,13 @@ JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nGetIntParam
  */
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nPixelStorei
 (JNIEnv *env, jclass class, jint pname, jint value) {
+fprintf(stderr, "[GLCONTEXT] AAAA\n");
     glPixelStorei((GLenum) translatePixelStore(pname), (GLint) value);
 }
 
 jboolean doReadPixels(JNIEnv *env, jlong nativeCtxInfo, jint length, jobject buffer,
         jarray pixelArr, jint x, jint y, jint width, jint height) {
+fprintf(stderr, "[GLCONTEXT] AAAA\n");
     GLvoid *ptr = NULL;
 
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
@@ -1060,6 +1104,7 @@ jboolean doReadPixels(JNIEnv *env, jlong nativeCtxInfo, jint length, jobject buf
 JNIEXPORT jboolean JNICALL Java_com_sun_prism_es2_GLContext_nReadPixelsByte
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint length, jobject buffer,
         jbyteArray pixelArr, jint x, jint y, jint w, jint h) {
+fprintf(stderr, "[GLCONTEXT] AAAA\n");
     return doReadPixels(env, nativeCtxInfo, length, buffer, pixelArr, x, y, w, h);
 }
 
@@ -1071,6 +1116,7 @@ JNIEXPORT jboolean JNICALL Java_com_sun_prism_es2_GLContext_nReadPixelsByte
 JNIEXPORT jboolean JNICALL Java_com_sun_prism_es2_GLContext_nReadPixelsInt
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint length, jobject buffer,
         jintArray pixelArr, jint x, jint y, jint w, jint h) {
+fprintf(stderr, "[GLCONTEXT] AAAA\n");
     return doReadPixels(env, nativeCtxInfo, length, buffer, pixelArr, x, y, w, h);
 }
 
@@ -1082,6 +1128,7 @@ JNIEXPORT jboolean JNICALL Java_com_sun_prism_es2_GLContext_nReadPixelsInt
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nScissorTest
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jboolean enable,
         jint x, jint y, jint w, jint h) {
+fprintf(stderr, "[GLCONTEXT] AAAA\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if (ctxInfo == NULL) {
         return;
@@ -1106,6 +1153,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nScissorTest
  */
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nTexParamsMinMax
 (JNIEnv *env, jclass class, jint min, jint max) {
+fprintf(stderr, "[GLCONTEXT] AAAA\n");
     GLenum param = translatePrismToGL(max);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, param);
     param = translatePrismToGL(min);
@@ -1121,6 +1169,7 @@ JNIEXPORT jboolean JNICALL Java_com_sun_prism_es2_GLContext_nTexImage2D0
 (JNIEnv *env, jclass class, jint target, jint level, jint internalFormat,
         jint width, jint height, jint border, jint format, jint type,
         jobject pixels, jint pixelsByteOffset, jboolean useMipmap) {
+fprintf(stderr, "[GLCONTEXT] AAAA\n");
     GLvoid *ptr = NULL;
     GLenum err;
 
@@ -1153,6 +1202,7 @@ JNIEXPORT jboolean JNICALL Java_com_sun_prism_es2_GLContext_nTexImage2D1
 (JNIEnv *env, jclass class, jint target, jint level, jint internalFormat,
         jint width, jint height, jint border, jint format, jint type,
         jobject pixels, jint pixelsByteOffset, jboolean useMipmap) {
+printf(stderr, "[GLCONTEXT] AAAA\n");
     char *ptr = NULL;
     char *ptrPlusOffset = NULL;
     GLenum err;
@@ -1199,6 +1249,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nTexSubImage2D0
 (JNIEnv *env, jclass class, jint target, jint level,
         jint xoffset, jint yoffset, jint width, jint height, jint format,
         jint type, jobject pixels, jint pixelsByteOffset) {
+fprintf(stderr, "[GLCONTEXT] AAAA\n");
     GLvoid *ptr = NULL;
     if (pixels != NULL) {
         ptr = (GLvoid *) (((char *) (*env)->GetDirectBufferAddress(env, pixels))
@@ -1219,6 +1270,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nTexSubImage2D1
 (JNIEnv *env, jclass class, jint target, jint level,
         jint xoffset, jint yoffset, jint width, jint height, jint format,
         jint type, jobject pixels, jint pixelsByteOffset) {
+fprintf(stderr, "[GLCONTEXT] AAAA\n");
     char *ptr = NULL;
     char *ptrPlusOffset = NULL;
     if (pixels != NULL) {
@@ -1246,6 +1298,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nTexSubImage2D1
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUpdateViewport
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint x, jint y,
         jint w, jint h) {
+fprintf(stderr, "[GLCONTEXT] updateVP\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if (ctxInfo == NULL) {
         return;
@@ -1262,6 +1315,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUpdateViewport
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nSetMSAA
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jboolean msaa) {
 #ifndef IS_EGL
+fprintf(stderr, "[GLCONTEXT] AAAA\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if (ctxInfo == NULL) {
         return;
@@ -1282,6 +1336,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nSetMSAA
  */
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nSetDepthTest
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jboolean depthTest) {
+fprintf(stderr, "[GLCONTEXT] AAAA\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if (ctxInfo == NULL) {
         return;
@@ -1306,6 +1361,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nSetDepthTest
  */
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform1f
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint location, jfloat v0) {
+fprintf(stderr, "[GLCONTEXT] uniform1\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if (ctxInfo == NULL) {
         return;
@@ -1321,6 +1377,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform1f
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform2f
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint location,
         jfloat v0, jfloat v1) {
+fprintf(stderr, "[GLCONTEXT] uniform2\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if (ctxInfo == NULL) {
         return;
@@ -1336,6 +1393,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform2f
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform3f
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint location,
         jfloat v0, jfloat v1, jfloat v2) {
+fprintf(stderr, "[GLCONTEXT] uniform3\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if (ctxInfo == NULL) {
         return;
@@ -1351,6 +1409,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform3f
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform4f
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint location,
         jfloat v0, jfloat v1, jfloat v2, jfloat v3) {
+fprintf(stderr, "[GLCONTEXT] uniform4\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if (ctxInfo == NULL) {
         return;
@@ -1366,6 +1425,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform4f
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform4fv0
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint location, jint count,
         jobject value, jint valueByteOffset) {
+fprintf(stderr, "[GLCONTEXT] uniform4\n");
     GLfloat *_ptr2 = NULL;
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if ((env == NULL) || (ctxInfo == NULL)) {
@@ -1386,6 +1446,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform4fv0
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform4fv1
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint location, jint count,
         jobject value, jint valueByteOffset) {
+fprintf(stderr, "[GLCONTEXT] uniform4\n");
     char *ptr = NULL;
     char *ptrPlusOffset = NULL;
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
@@ -1414,6 +1475,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform4fv1
  */
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform1i
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint location, jint v0) {
+fprintf(stderr, "[GLCONTEXT] uniform1\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if ((ctxInfo == NULL) || (ctxInfo->glUniform1i == NULL)) {
         return;
@@ -1428,6 +1490,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform1i
  */
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform2i
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint location, jint v0, jint v1) {
+fprintf(stderr, "[GLCONTEXT] uniform2\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if ((ctxInfo == NULL) || (ctxInfo->glUniform2i == NULL)) {
         return;
@@ -1444,6 +1507,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform3i
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint location,
         jint v0, jint v1, jint v2) {
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
+fprintf(stderr, "[GLCONTEXT] uniform3\n");
     if ((ctxInfo == NULL) || (ctxInfo->glUniform3i == NULL)) {
         return;
     }
@@ -1458,6 +1522,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform3i
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform4i
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint location,
         jint v0, jint v1, jint v2, jint v3) {
+fprintf(stderr, "[GLCONTEXT] uniform4i\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if ((ctxInfo == NULL) || (ctxInfo->glUniform4i == NULL)) {
         return;
@@ -1473,6 +1538,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform4i
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform4iv0
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint location, jint count,
         jobject value, jint valueByteOffset) {
+fprintf(stderr, "[GLCONTEXT] uniform4i\n");
     GLint *_ptr2 = NULL;
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if ((ctxInfo == NULL) || (ctxInfo->glUniform4iv == NULL)) {
@@ -1494,6 +1560,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform4iv0
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform4iv1
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint location, jint count,
         jobject value, jint valueByteOffset) {
+fprintf(stderr, "[GLCONTEXT] uniform4i\n");
     char *ptr = NULL;
     char *ptrPlusOffset = NULL;
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
@@ -1523,6 +1590,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniform4iv1
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniformMatrix4fv
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint location,
         jboolean transpose, jfloatArray values) {
+fprintf(stderr, "[GLCONTEXT] uniform4i\n");
     GLfloat *_ptr = NULL;
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if ((ctxInfo == NULL) || (ctxInfo->glUniformMatrix4fv == NULL)) {
@@ -1548,6 +1616,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUniformMatrix4fv
  */
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUpdateFilterState
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint texID, jboolean linearFiler) {
+fprintf(stderr, "[GLCONTEXT] updatefs\n");
     int glFilter;
 
     glFilter = linearFiler ? GL_LINEAR : GL_NEAREST;
@@ -1562,6 +1631,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUpdateFilterState
  */
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUpdateWrapState
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint texID, jint wrapMode) {
+fprintf(stderr, "[GLCONTEXT] updatews\n");
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
             (GLenum) translatePrismToGL(wrapMode));
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
@@ -1575,6 +1645,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUpdateWrapState
  */
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUseProgram
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint pID) {
+fprintf(stderr, "[GLCONTEXT] useprogram\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if ((ctxInfo == NULL) || (ctxInfo->glUseProgram == NULL)) {
         return;
@@ -1589,6 +1660,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nUseProgram
  */
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nDisableVertexAttributes
 (JNIEnv *env, jclass class, jlong nativeCtxInfo) {
+fprintf(stderr, "[GLCONTEXT] AAAAAAAA\n");
     int i;
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if ((ctxInfo == NULL) || (ctxInfo->glDisableVertexAttribArray == NULL)) {
@@ -1607,6 +1679,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nDisableVertexAttributes
  */
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nEnableVertexAttributes
 (JNIEnv *env, jclass class, jlong nativeCtxInfo) {
+fprintf(stderr, "[GLCONTEXT] AAAAAAAA\n");
     int i;
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if ((ctxInfo == NULL) || (ctxInfo->glEnableVertexAttribArray == NULL)) {
@@ -1631,6 +1704,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nEnableVertexAttributes
  */
 
 static void setVertexAttributePointers(ContextInfo *ctx, float *pFloat, char *pByte) {
+fprintf(stderr, "[GLCONTEXT] setVAP\n");
     if (pFloat != ctx->vbFloatData) {
         ctx->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, coordStride, pFloat);
         ctx->glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, coordStride,
@@ -1654,6 +1728,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nDrawIndexedQuads
   (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint numVertices,
    jfloatArray dataf, jbyteArray datab)
 {
+fprintf(stderr, "[GLCONTEXT] drawindexquads\n");
     float *pFloat;
     char *pByte;
     int numQuads = numVertices / 4;
@@ -1683,6 +1758,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nDrawIndexedQuads
 JNIEXPORT jint JNICALL Java_com_sun_prism_es2_GLContext_nCreateIndexBuffer16
   (JNIEnv *env, jclass class, jlong nativeCtxInfo, jshortArray array, jint n)
 {
+fprintf(stderr, "[GLCONTEXT] createindexbuff\n");
     GLuint id = 0;
     void *pData;
 
@@ -1722,6 +1798,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nSetIndexBuffer
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nSetDeviceParametersFor2D
   (JNIEnv *env, jclass class, jlong nativeCtxInfo)
 {
+fprintf(stderr, "[GLCONTEXT] setDevparam\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if ((ctxInfo == NULL) || (ctxInfo->glBindBuffer == NULL) ||
             (ctxInfo->glBufferData == NULL) ||
@@ -1765,6 +1842,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nSetDeviceParametersFor2
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nSetDeviceParametersFor3D
   (JNIEnv *env, jclass class, jlong nativeCtxInfo)
 {
+fprintf(stderr, "[GLCONTEXT] setDevicePara\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if (ctxInfo == NULL) {
         return;
@@ -1801,6 +1879,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nSetDeviceParametersFor3
 JNIEXPORT jlong JNICALL Java_com_sun_prism_es2_GLContext_nCreateES2Mesh
   (JNIEnv *env, jclass class, jlong nativeCtxInfo)
 {
+fprintf(stderr, "[GLCONTEXT] createMesh\n");
     MeshInfo *meshInfo = NULL;
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if ((ctxInfo == NULL) || (ctxInfo->glGenBuffers == NULL)) {
@@ -1834,6 +1913,7 @@ JNIEXPORT jlong JNICALL Java_com_sun_prism_es2_GLContext_nCreateES2Mesh
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nReleaseES2Mesh
   (JNIEnv *env, jclass class, jlong nativeCtxInfo, jlong nativeMeshInfo)
 {
+fprintf(stderr, "[GLCONTEXT] releasemesh\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     MeshInfo *meshInfo = (MeshInfo *) jlong_to_ptr(nativeMeshInfo);
     if ((ctxInfo == NULL) || (meshInfo == NULL) ||
@@ -1856,6 +1936,7 @@ JNIEXPORT jboolean JNICALL Java_com_sun_prism_es2_GLContext_nBuildNativeGeometry
   (JNIEnv *env, jclass class, jlong nativeCtxInfo, jlong nativeMeshInfo,
         jfloatArray vbArray, jint vbSize, jshortArray ibArray, jint ibSize)
 {
+fprintf(stderr, "[GLCONTEXT] buildbnatvegeinshort\n");
     GLuint vertexBufferSize;
     GLuint indexBufferSize;
     GLushort *indexBuffer;
@@ -1925,6 +2006,7 @@ JNIEXPORT jboolean JNICALL Java_com_sun_prism_es2_GLContext_nBuildNativeGeometry
 (JNIEnv *env, jclass class, jlong nativeCtxInfo, jlong nativeMeshInfo,
         jfloatArray vbArray, jint vbSize, jintArray ibArray, jint ibSize)
 {
+fprintf(stderr, "[GLCONTEXT] buildbnatvegeinint\n");
     GLuint vertexBufferSize;
     GLuint indexBufferSize;
     GLuint *indexBuffer;
@@ -1993,6 +2075,7 @@ JNIEXPORT jboolean JNICALL Java_com_sun_prism_es2_GLContext_nBuildNativeGeometry
 JNIEXPORT jlong JNICALL Java_com_sun_prism_es2_GLContext_nCreateES2PhongMaterial
   (JNIEnv *env, jclass class, jlong nativeCtxInfo)
 {
+fprintf(stderr, "[GLCONTEXT] createES2Phong\n");
     PhongMaterialInfo *pmInfo = NULL;
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     if (ctxInfo == NULL) {
@@ -2026,6 +2109,7 @@ JNIEXPORT jlong JNICALL Java_com_sun_prism_es2_GLContext_nCreateES2PhongMaterial
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nReleaseES2PhongMaterial
   (JNIEnv *env, jclass class, jlong nativeCtxInfo, jlong nativePhongMaterialInfo)
 {
+fprintf(stderr, "[GLCONTEXT] releaseS2Phong\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     PhongMaterialInfo *pmInfo = (PhongMaterialInfo *) jlong_to_ptr(nativePhongMaterialInfo);
     if ((ctxInfo == NULL) || (pmInfo == NULL)) {
@@ -2047,6 +2131,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nSetSolidColor
   (JNIEnv *env, jclass class, jlong nativeCtxInfo, jlong nativePhongMaterialInfo,
         jfloat r, jfloat g, jfloat b, jfloat a)
 {
+fprintf(stderr, "[GLCONTEXT] setsolidcol\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     PhongMaterialInfo *pmInfo = (PhongMaterialInfo *) jlong_to_ptr(nativePhongMaterialInfo);
     if ((ctxInfo == NULL) || (pmInfo == NULL)) {
@@ -2068,6 +2153,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nSetMap
   (JNIEnv *env, jclass class, jlong nativeCtxInfo, jlong nativePhongMaterialInfo,
         jint mapType, jint texID)
 {
+fprintf(stderr, "[GLCONTEXT] nsetMap\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     PhongMaterialInfo *pmInfo = (PhongMaterialInfo *) jlong_to_ptr(nativePhongMaterialInfo);
     if ((ctxInfo == NULL) || (pmInfo == NULL)) {
@@ -2091,6 +2177,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nSetMap
 JNIEXPORT jlong JNICALL Java_com_sun_prism_es2_GLContext_nCreateES2MeshView
   (JNIEnv *env, jclass class, jlong nativeCtxInfo, jlong nativeMeshInfo)
 {
+fprintf(stderr, "[GLCONTEXT] createMV\n");
     MeshViewInfo *meshViewInfo;
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     MeshInfo *meshInfo = (MeshInfo *) jlong_to_ptr(nativeMeshInfo);
@@ -2134,6 +2221,7 @@ JNIEXPORT jlong JNICALL Java_com_sun_prism_es2_GLContext_nCreateES2MeshView
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nReleaseES2MeshView
   (JNIEnv *env, jclass class, jlong nativeCtxInfo, jlong nativeMeshInfo)
 {
+fprintf(stderr, "[GLCONTEXT] releaseMV\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     MeshViewInfo *mvInfo = (MeshViewInfo *) jlong_to_ptr(nativeMeshInfo);
     if ((ctxInfo == NULL) || (mvInfo == NULL)) {
@@ -2146,6 +2234,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nReleaseES2MeshView
 }
 
 void setCullMode(ContextInfo *ctxInfo, MeshViewInfo *mvInfo) {
+fprintf(stderr, "[GLCONTEXT] setCullMode\n");
     if (mvInfo->cullEnable != ctxInfo->state.cullEnable) {
         if (mvInfo->cullEnable) {
             glEnable(GL_CULL_FACE);
@@ -2170,6 +2259,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nSetCullingMode
   (JNIEnv *env, jclass class, jlong nativeCtxInfo, jlong nativeMeshViewInfo,
         jint cullMode)
 {
+fprintf(stderr, "[GLCONTEXT] setCullingMode\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     MeshViewInfo *meshViewInfo = (MeshViewInfo *) jlong_to_ptr(nativeMeshViewInfo);
     if ((ctxInfo == NULL) || (meshViewInfo == NULL)) {
@@ -2200,6 +2290,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nSetMaterial
   (JNIEnv *env, jclass class, jlong nativeCtxInfo, jlong nativeMeshViewInfo,
         jlong nativePhongMaterialInfo)
 {
+fprintf(stderr, "[GLCONTEXT] setMaterial\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     MeshViewInfo *mvInfo = (MeshViewInfo *) jlong_to_ptr(nativeMeshViewInfo);
     PhongMaterialInfo *pmInfo = (PhongMaterialInfo *) jlong_to_ptr(nativePhongMaterialInfo);
@@ -2211,6 +2302,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nSetMaterial
 
 void setPolyonMode(ContextInfo *ctxInfo, MeshViewInfo *mvInfo) {
 #ifndef IS_EGL
+fprintf(stderr, "[GLCONTEXT] setPolyong\n");
     if (mvInfo->fillMode != ctxInfo->state.fillMode) {
         glPolygonMode(GL_FRONT_AND_BACK, mvInfo->fillMode);
         ctxInfo->state.fillMode = mvInfo->fillMode;
@@ -2227,6 +2319,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nSetWireframe
   (JNIEnv *env, jclass class, jlong nativeCtxInfo, jlong nativeMeshViewInfo,
         jboolean wireframe)
 {
+fprintf(stderr, "[GLCONTEXT] setWireframe\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     MeshViewInfo *meshViewInfo = (MeshViewInfo *) jlong_to_ptr(nativeMeshViewInfo);
     if ((ctxInfo == NULL) || (meshViewInfo == NULL)) {
@@ -2248,6 +2341,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nSetAmbientLight
   (JNIEnv *env, jclass class, jlong nativeCtxInfo, jlong nativeMeshViewInfo,
         jfloat r, jfloat g, jfloat b)
 {
+fprintf(stderr, "[GLCONTEXT] setAmbientL\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     MeshViewInfo *meshViewInfo = (MeshViewInfo *) jlong_to_ptr(nativeMeshViewInfo);
     if ((ctxInfo == NULL) || (meshViewInfo == NULL)) {
@@ -2267,6 +2361,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nSetPointLight
   (JNIEnv *env, jclass class, jlong nativeCtxInfo, jlong nativeMeshViewInfo,
         jint index, jfloat x, jfloat y, jfloat z, jfloat r, jfloat g, jfloat b, jfloat w)
 {
+fprintf(stderr, "[GLCONTEXT] setPointLights\n");
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);
     MeshViewInfo *meshViewInfo = (MeshViewInfo *) jlong_to_ptr(nativeMeshViewInfo);
     // NOTE: We only support up to 3 point lights at the present
@@ -2291,6 +2386,7 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nSetPointLight
 JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nRenderMeshView
   (JNIEnv *env, jclass class, jlong nativeCtxInfo, jlong nativeMeshViewInfo)
 {
+fprintf(stderr, "[GLCONTEXT] renderMeshView\n");
     GLuint offset = 0;
     MeshInfo *mInfo;
     ContextInfo *ctxInfo = (ContextInfo *) jlong_to_ptr(nativeCtxInfo);

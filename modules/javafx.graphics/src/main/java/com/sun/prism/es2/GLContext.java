@@ -315,12 +315,15 @@ abstract class GLContext {
 
     void clearBuffers(Color color, boolean clearColor,
             boolean clearDepth, boolean ignoreScissor) {
+System.err.println("[GLCONTEXTJAVA] ClearBuffer");
+Thread.dumpStack();
         float r = color.getRedPremult();
         float g = color.getGreenPremult();
         float b = color.getBluePremult();
         float a = color.getAlpha();
         nClearBuffers(nativeCtxInfo, r, g, b, a, clearColor, clearDepth,
                 ignoreScissor);
+System.err.println("[GLCONTEXTJAVA] ClearBuffer done");
     }
 
     /**
@@ -359,6 +362,11 @@ abstract class GLContext {
      */
     int createProgram(int vertexShaderID, int[] fragmentShaderIDArr,
             String[] attrs, int[] indexs) {
+Thread.dumpStack();
+System.err.println("CreateProgram asked, vertexShaderId = "+vertexShaderID);
+if (1 < 2 ) {
+// return 0;
+}
 
         if (fragmentShaderIDArr == null) {
             System.err.println("Error: fragmentShaderIDArr is null");
