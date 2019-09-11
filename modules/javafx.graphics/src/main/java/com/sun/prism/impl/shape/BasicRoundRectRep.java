@@ -84,11 +84,15 @@ public class BasicRoundRectRep extends BasicShapeRep {
     // theshold is 0.06 (picked visually - this is when we start to see
     // parital pixel coverage with AA on) to cut off tx errors
     private static boolean notIntEnough(float f) {
+System.err.println("notintenough called for "+f);
         // not flar-proof
-        return Math.abs(f - Math.round(f)) > 0.06;
+        boolean answer = Math.abs(f - Math.round(f)) > 0.06;
+System.err.println("Mathr = "+Math.round(f));
+return answer;
     }
 
     private static boolean notOnIntGrid(float x1, float y1, float x2, float y2) {
+System.err.println("noig asked, x1 = "+x1+", y1 = "+y1+", x2 = "+x2+", y2 = "+y2);
         return
             notIntEnough(x1) || notIntEnough(y1) ||
             notIntEnough(x2) || notIntEnough(y2);
@@ -97,17 +101,22 @@ public class BasicRoundRectRep extends BasicShapeRep {
     protected static boolean isAARequiredForFill(Graphics g,
                                                  RoundRectangle2D rrect)
     {
+System.err.println("AAAREQ, g = "+g+", rrect = "+rrect);
         BaseTransform xform = g.getTransformNoClone();
         long t = xform.getType();
+System.err.println("AAAREQ, xform = "+xform+" and type = "+t);
 
         boolean aaRequiredForSure =
             // if current transform is too complex
             (t & ~(TYPE_TRANSLATION|TYPE_QUADRANT_ROTATION|TYPE_MASK_SCALE)) != 0;
 
         if (aaRequiredForSure) {
+System.err.println("for sure!");
             return true;
         } else {
+System.err.println("not for sure!");
             if (xform == null || xform.isIdentity()) {
+System.err.println("xformnull or identifi");
                 return notOnIntGrid(rrect.x, rrect.y,
                                     rrect.x + rrect.width,
                                     rrect.y + rrect.height);

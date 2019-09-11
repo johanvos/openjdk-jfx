@@ -79,8 +79,10 @@ JNIEXPORT jlong JNICALL Java_com_sun_glass_ui_monocle_AndroidScreen__1getNativeH
  */
 JNIEXPORT jfloat JNICALL Java_com_sun_glass_ui_monocle_AndroidScreen__1getDensity
   (JNIEnv *env, jobject obj) {
+LOGI("DENSITY", "I will ask density...");
+fprintf(stderr, "will ask density\n");
     jfloat answer = android_getDensity();
-LOGI("DENSITY", "GETDENSITY, answer = %f\n",answer);
+LOGI("DENSITY", "AndroidScreen_getDensity, answer = %f\n",answer);
     return answer;
 }
 

@@ -115,10 +115,16 @@ fprintf(stderr, "bindactivity called\n");
 }
 
 ANativeWindow* myWindow;
+jfloat density;
 
 void setGraalWindow(ANativeWindow* anw) {
 fprintf(stderr, "Set GraalWindow to %p\n", anw);
     myWindow = anw;
+}
+
+void setDensity(float dens) {
+    density = dens;
+fprintf(stderr, "Density set to %f\n", density);
 }
 
 ANativeWindow *android_getNativeWindow(JNIEnv *env) {
@@ -130,11 +136,13 @@ fprintf(stderr, "GraalWindow asked, return %p\n", myWindow);
 }
 
 jfloat android_getDensity(JNIEnv *env) {
-fprintf(stderr, "GETDENSITY ASKED, return bogus for now\n");
-return 100.;
+fprintf(stderr, "android_getDensityu ASKED, return %f\n",density);
+return density;
+/*
     if(!bind) bind_activity(env);
     jfloat* answer = (*_ANDROID_getDensity)();
     return *answer;
+*/
 }
 
 const char *android_getDataDir(JNIEnv *env) {

@@ -30,7 +30,7 @@
 
 #include <stdlib.h>
 
-void setEGLAttrs(jint *attrs, int *eglAttrs) {
+int setEGLAttrs(jint *attrs, int *eglAttrs) {
     int index = 0;
 
     eglAttrs[index++] = EGL_SURFACE_TYPE;
@@ -67,6 +67,7 @@ void setEGLAttrs(jint *attrs, int *eglAttrs) {
     eglAttrs[index++] = EGL_RENDERABLE_TYPE;
     eglAttrs[index++] = EGL_OPENGL_ES2_BIT;
     eglAttrs[index] = EGL_NONE;
+return index;
 }
 
 JNIEXPORT jlong JNICALL Java_com_sun_glass_ui_monocle_EGL_eglGetDisplay
@@ -81,7 +82,7 @@ JNIEXPORT jboolean JNICALL Java_com_sun_glass_ui_monocle_EGL_eglInitialize
      jintArray minorArray){
 
     EGLint major, minor;
-    if (eglInitialize(asPtr(eglDisplay), &major, &minor)) {
+    if (eglInitialize(eglDisplay, &major, &minor)) {
          (*env)->SetIntArrayRegion(env, majorArray, 0, 1, &major);
          (*env)->SetIntArrayRegion(env, minorArray, 0, 1, &minor);
         return JNI_TRUE;
@@ -110,14 +111,18 @@ JNIEXPORT jboolean JNICALL Java_com_sun_glass_ui_monocle_EGL_eglChooseConfig
     jint *attrArray;
 
     attrArray = (*env)->GetIntArrayElements(env, attribs, JNI_FALSE);
-    setEGLAttrs(attrArray, eglAttrs);
+    int cnt = setEGLAttrs(attrArray, eglAttrs);
     (*env)->ReleaseIntArrayElements(env, attribs, attrArray, JNI_ABORT);
     EGLConfig *configArray = malloc(sizeof(EGLConfig) * configSize);
     jlong *longConfigArray = malloc(sizeof(long) * configSize);
     EGLint numConfigPtr=0;
     jboolean retval;
+     for (int i =0; i < cnt; i++) {
+         fprintf(stderr, "attributes for config %d: %d\n", i, eglAttrs[i]);
+     }
 
-    if (!eglChooseConfig(asPtr(eglDisplay), eglAttrs, configArray, configSize,
+
+    if (!eglChooseConfig(eglDisplay, eglAttrs, configArray, configSize,
                                &numConfigPtr)) {
         retval = JNI_FALSE;
     } else {
@@ -131,6 +136,7 @@ JNIEXPORT jboolean JNICALL Java_com_sun_glass_ui_monocle_EGL_eglChooseConfig
     }
     free(configArray);
     free(longConfigArray);
+fprintf(stderr, "GLERR after config?  %d\n",eglGetError());
     return retval;
 }
 
@@ -144,12 +150,14 @@ JNIEXPORT jlong JNICALL Java_com_sun_glass_ui_monocle_EGL__1eglCreateWindowSurfa
     if (attribs != NULL)
         attrArray = (*env)->GetIntArrayElements(env, attribs, JNI_FALSE);
 
-    eglSurface =  eglCreateWindowSurface(asPtr(eglDisplay), asPtr(config),
-                                         (EGLNativeWindowType) asPtr(nativeWindow),
+    eglSurface =  eglCreateWindowSurface(eglDisplay, config,
+                                         (EGLNativeWindowType) nativeWindow,
                                          (EGLint *) NULL);
     if (attrArray != NULL) {
         (*env)->ReleaseIntArrayElements(env, attribs, attrArray, JNI_ABORT);
     }
+fprintf(stderr, "EGL Surface at %p\n", eglSurface);
+fprintf(stderr, "GLERR?  %d\n",eglGetError());
     return asJLong(eglSurface);
 }
 
@@ -160,17 +168,22 @@ JNIEXPORT jlong JNICALL Java_com_sun_glass_ui_monocle_EGL_eglCreateContext
     // we don't support any passed-in context attributes presently
     // we don't support any share context presently
     EGLint contextAttrs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
-    EGLContext context = eglCreateContext(asPtr(eglDisplay), asPtr(config),
+    EGLContext context = eglCreateContext(eglDisplay, config,
                                           NULL, contextAttrs);
+fprintf(stderr, "EGL Context at %p\n", context);
+fprintf(stderr, "GLERR?  %d\n",eglGetError());
     return asJLong(context);
 }
 
 JNIEXPORT jboolean JNICALL Java_com_sun_glass_ui_monocle_EGL_eglMakeCurrent
    (JNIEnv *UNUSED(env), jclass UNUSED(clazz), jlong eglDisplay, jlong drawSurface,
     jlong readSurface, jlong eglContext) {
+fprintf(stderr, "EGL MakeCurrent! disp = %p, surface = %p, readS = %p, context = %p\n", eglDisplay, drawSurface, readSurface, eglContext);
+fprintf(stderr, "GLERR?  %d\n",eglGetError());
 
-    if (eglMakeCurrent(asPtr(eglDisplay), asPtr(drawSurface), asPtr(readSurface),
-                   asPtr(eglContext))) {
+
+    if (eglMakeCurrent(eglDisplay, drawSurface, readSurface,
+                   eglContext)) {
         return JNI_TRUE;
     } else {
         return JNI_FALSE;
@@ -179,7 +192,7 @@ JNIEXPORT jboolean JNICALL Java_com_sun_glass_ui_monocle_EGL_eglMakeCurrent
 
 JNIEXPORT jboolean JNICALL Java_com_sun_glass_ui_monocle_EGL_eglSwapBuffers
     (JNIEnv *UNUSED(env), jclass UNUSED(clazz), jlong eglDisplay, jlong eglSurface) {
-    if (eglSwapBuffers(asPtr(eglDisplay), asPtr(eglSurface))) {
+    if (eglSwapBuffers(eglDisplay, eglSurface)) {
         return JNI_TRUE;
     } else {
         return JNI_FALSE;

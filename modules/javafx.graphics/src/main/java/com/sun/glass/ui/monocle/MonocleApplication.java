@@ -220,6 +220,8 @@ public final class MonocleApplication extends Application {
     @Override
     protected Screen[] staticScreen_getScreens() {
         NativeScreen ns = platform.getScreen();
+System.err.println("NATIVE SCREEN created, width = "+ns.getWidth()+ "and scale = "+ns.getScale()+" and height = "+ns.getHeight()+" and dpi = "+ns.getDPI());
+
         Screen screen = new Screen(1l, // dummy native pointer;
                                    ns.getDepth(),
                                    0, 0, ns.getWidth(), ns.getHeight(),

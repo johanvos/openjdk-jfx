@@ -102,6 +102,11 @@ public class AcceleratedScreen {
             throw new GLException(egl.eglGetError(),
                                   "Error choosing EGL config");
         }
+for (int i = 0; i < attributes.length; i++) {
+System.err.println("ATTR ["+i+"] = "+attributes[i]);
+}
+System.err.println("EGLCONFIG = "+eglConfigs[0]);
+
 
         eglSurface =
                 egl.eglCreateWindowSurface(eglDisplay, eglConfigs[0],
@@ -132,6 +137,7 @@ public class AcceleratedScreen {
      * @param flag
      */
     public void enableRendering(boolean flag) {
+Thread.dumpStack();
         if (flag) {
             egl.eglMakeCurrent(eglDisplay, eglSurface, eglSurface,
                                        eglContext);
