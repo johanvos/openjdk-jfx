@@ -22,8 +22,10 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-
 #include <EGL/egl.h>
+#include "jni.h"
+#include <android/native_window_jni.h>
+
 
 #include "com_sun_glass_ui_monocle_EGL.h"
 #include "Monocle.h"
@@ -70,8 +72,15 @@ int setEGLAttrs(jint *attrs, int *eglAttrs) {
 return index;
 }
 
+JNIEXPORT void testGraalGL(ANativeWindow *mywindow);
+
 JNIEXPORT jlong JNICALL Java_com_sun_glass_ui_monocle_EGL_eglGetDisplay
     (JNIEnv *UNUSED(env), jclass UNUSED(clazz), jlong display) {
+// ANativeWindow* androidWindow = android_getNativeWindow(env);
+
+// testGraalGL(androidWindow);
+// fprintf(stderr, "YEAAAAAAAAAAAAAAAAAH\n\n");
+// return 0;
     // EGLNativeDisplayType is defined differently on different systems; can be an int or a ptr so cast with care
     EGLDisplay dpy = eglGetDisplay(((EGLNativeDisplayType) (unsigned long)(display)));
     return asJLong(dpy);
@@ -93,6 +102,7 @@ JNIEXPORT jboolean JNICALL Java_com_sun_glass_ui_monocle_EGL_eglInitialize
 
 JNIEXPORT jboolean JNICALL Java_com_sun_glass_ui_monocle_EGL_eglBindAPI
     (JNIEnv *UNUSED(env), jclass UNUSED(clazz), jint api) {
+fprintf(stderr, "[EEEEGGGGGLLLL] bindApi\n");
 
     if (eglBindAPI(api)) {
         return JNI_TRUE;
@@ -107,7 +117,7 @@ JNIEXPORT jboolean JNICALL Java_com_sun_glass_ui_monocle_EGL_eglChooseConfig
 
     int i=0;
 
-    int eglAttrs[50]; /* value, attr pair plus a None */
+    int eglAttrs[50]; // value, attr pair plus a None
     jint *attrArray;
 
     attrArray = (*env)->GetIntArrayElements(env, attribs, JNI_FALSE);
@@ -144,6 +154,7 @@ JNIEXPORT jlong JNICALL Java_com_sun_glass_ui_monocle_EGL__1eglCreateWindowSurfa
     (JNIEnv *UNUSED(env), jclass UNUSED(clazz), jlong eglDisplay, jlong config,
      jlong nativeWindow, jintArray attribs) {
 
+fprintf(stderr, "[EEEEGGGGGLLLL] createWindowSurface\n");
     EGLSurface eglSurface;
     EGLint *attrArray = NULL;
 
@@ -204,7 +215,55 @@ JNIEXPORT jint  JNICALL Java_com_sun_glass_ui_monocle_EGL_eglGetError
     return (jint)eglGetError();
 }
 
+JNIEXPORT void testGraalGL(ANativeWindow *mywindow) {
+// void testGraalGL(ANativeWindow* mywindow) {
+    fprintf(stderr, "TEST GL (from monocle) !\n\n\n\n\n\n");
+    EGLDisplay eglDisplay = eglGetDisplay((EGLNativeDisplayType) 0);
+    fprintf(stderr, "GLERR? after disp %d\n",eglGetError());
+    fprintf(stderr, "DISPLAY = %p\n", eglDisplay);
+    int* major = malloc(4);
+    int minor = 0;
+    EGLBoolean initial = eglInitialize(eglDisplay, major, &minor);
+    fprintf(stderr, "GLERR afterinit? %d\n",eglGetError());
+    fprintf(stderr, "init, %d -- %d\n", *major, minor);
+    eglBindAPI(EGL_OPENGL_ES_API);
+    fprintf(stderr, "GLERR afterbindapi? %d\n",eglGetError());
+int eglAttrs[50];
+int jniAttrs[50];
+jniAttrs[0] = 8;
+jniAttrs[1] = 8;
+jniAttrs[2] = 8;
+jniAttrs[3] = 8;
+jniAttrs[4] = 16;
+jniAttrs[5] = 1;
+jniAttrs[6] = 1;
+int cnt = setEGLAttrs(jniAttrs, eglAttrs);
+for (int i =0; i < cnt; i++) {
+    fprintf(stderr, "attributes for config %d: %d\n", i, eglAttrs[i]);
+}
+int configSize = 1;
+EGLConfig *configArray = malloc(sizeof(EGLConfig) * configSize);
+    jlong *longConfigArray = malloc(sizeof(long) * configSize);
+    EGLint numConfigPtr=0;
+EGLBoolean configChoose = eglChooseConfig(eglDisplay, eglAttrs, configArray, configSize,
+                               &numConfigPtr);
+    fprintf(stderr, "GLERR afterconfigchoose? %d\n",eglGetError());
+    fprintf(stderr, "result? %d\n", configChoose);
 
+EGLSurface eglSurface = eglCreateWindowSurface(eglDisplay, configArray[0], (EGLNativeWindowType)mywindow, NULL);
+    fprintf(stderr, "GLERR eglSurface? %d\n",eglGetError());
+    fprintf(stderr, "surface =  %p\n", eglSurface);
+
+
+EGLint contextAttrs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+EGLContext eglContext = eglCreateContext(eglDisplay, configArray[0], 0, contextAttrs);
+    fprintf(stderr, "GLERR eglContext? %d\n",eglGetError());
+    fprintf(stderr, "context =  %p\n", eglContext);
+EGLBoolean makec = eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext);
+    fprintf(stderr, "GLERR egmakecurrent? %d\n",eglGetError());
+    fprintf(stderr, "current =  %d\n", makec);
+
+}
 
 
 

@@ -63,6 +63,7 @@ EGLSurface dummySurface = NULL;
 #endif
 
 EGLSurface getDummyWindowSurface(EGLDisplay dpy, EGLConfig cfg) {
+fprintf(stderr, "GETDUMMYWINSURFACE\n");
 #ifdef EGL_X11_FB_CONTAINER
     if (dummySurface == NULL) {
         Display *display;
@@ -100,6 +101,7 @@ EGLSurface getSharedWindowSurface(EGLDisplay dpy,
             window = getNativeWindowType();
         }
 #endif
+fprintf(stderr, "WAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n\n\n");
         sharedWindowSurface = eglCreateWindowSurface(dpy, cfg, window, NULL);
         if (sharedWindowSurface == EGL_NO_SURFACE) {
             fprintf(stderr, "eglCreateWindowSurface failed! eglGetError %d\n", eglGetError());
