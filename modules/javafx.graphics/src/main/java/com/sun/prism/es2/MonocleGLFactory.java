@@ -26,6 +26,7 @@
 package com.sun.prism.es2;
 
 import com.sun.glass.ui.monocle.GLException;
+import com.sun.glass.ui.monocle.NativePlatform;
 import com.sun.glass.ui.monocle.NativePlatformFactory;
 import com.sun.prism.es2.GLPixelFormat.Attributes;
 import java.util.HashMap;
@@ -104,9 +105,11 @@ class MonocleGLFactory extends GLFactory {
         attrArr[GLPixelFormat.Attributes.ONSCREEN] = attrs.isOnScreen() ? 1 : 0;
 
         try {
-            accScreen = NativePlatformFactory.getNativePlatform().getAcceleratedScreen(
-
-                    attrArr);
+System.err.println("MonocleGLFactory.initialize, getting native platform");
+            NativePlatform nativePlatform = NativePlatformFactory.getNativePlatform();
+System.err.println("MonocleGLFactory.initialize, got native platform");
+System.err.println("MonocleGLFactory.initialize, getting acclerated screen");
+            accScreen = nativePlatform.getAcceleratedScreen( attrArr);
 
             // If the native platform can't provide hardware accelerated rendering,
             // accScreen can be null
@@ -114,7 +117,10 @@ class MonocleGLFactory extends GLFactory {
                 return false;
             }
 
+// Thread.dumpStack();
+System.err.println("MonocleGLFactory (in prism), enable rendering");
             accScreen.enableRendering(true);
+System.err.println("MonocleGLFactory (in prism), enable rendering done");
 
             nativeCtxInfo = nPopulateNativeCtxInfo(accScreen.getGLHandle());
 

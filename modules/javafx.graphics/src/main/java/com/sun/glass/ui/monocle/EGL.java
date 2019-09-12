@@ -171,6 +171,8 @@ class EGL {
         }
     }
 
+    native void testGraal(long nativewindowhandle, int[] major, int[] minor, int[] attrs, long[] eglConfigs, int[] configcount);
+
     native void loadFunctions(long dlHandle);
 
     native boolean eglBindAPI(int api);

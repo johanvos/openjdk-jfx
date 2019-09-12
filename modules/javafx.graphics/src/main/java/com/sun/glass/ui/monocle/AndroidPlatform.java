@@ -29,7 +29,10 @@ import com.sun.glass.utils.NativeLibLoader;
 class AndroidPlatform extends NativePlatform {
 
     AndroidPlatform() {
+Thread.dumpStack();
+        System.err.println("Loading native glass_monocle library");
         NativeLibLoader.loadLibrary("glass_monocle");
+        System.err.println("Loaded native glass_monocle library");
     }
 
     @Override

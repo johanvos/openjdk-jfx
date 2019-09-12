@@ -64,12 +64,17 @@ public class AcceleratedScreen {
      * @throws UnsatisfiedLinkError
      */
     AcceleratedScreen(int[] attributes) throws GLException, UnsatisfiedLinkError {
+System.err.println("AccelearedScreen constructor. get egl.");
         egl = EGL.getEGL();
+System.err.println("AccelearedScreen constructor. got egl.");
         initPlatformLibraries();
+System.err.println("AccelearedScreen constructor. inited pfl.");
 
+        int configCount[] = {0};
         int major[] = {0}, minor[]={0};
         long nativeDisplay = platformGetNativeDisplay();
         long nativeWindow = platformGetNativeWindow();
+egl.testGraal(nativeWindow, major, minor, attributes, eglConfigs, configCount);
 
         if (nativeDisplay == -1l) { // error condition
             throw new GLException(0, "Could not get native display");
@@ -95,7 +100,6 @@ public class AcceleratedScreen {
                                   "Error binding OPENGL API");
         }
 
-        int configCount[] = {0};
 
         if (!egl.eglChooseConfig(eglDisplay, attributes, eglConfigs,
                                          1, configCount)) {
@@ -152,6 +156,9 @@ Thread.dumpStack();
      * @throws UnsatisfiedLinkError
      */
     boolean initPlatformLibraries() throws UnsatisfiedLinkError{
+System.err.println("AcceleratedScreen, initPlatformLibraries, skip this");
+Thread.dumpStack();
+/*
         if (!initialized) {
             glesLibraryHandle = ls.dlopen("libGLESv2.so",
                     LinuxSystem.RTLD_LAZY | LinuxSystem.RTLD_GLOBAL);
@@ -165,6 +172,7 @@ Thread.dumpStack();
             }
             initialized = true;
         }
+*/
         return true;
     }
 
@@ -185,11 +193,13 @@ Thread.dumpStack();
      * @return success or failure
      */
     public boolean swapBuffers() {
+System.err.println("[SWAPBUFFERS]\n\n\n");
         boolean result = false;
         synchronized(NativeScreen.framebufferSwapLock) {
             result = egl.eglSwapBuffers(eglDisplay, eglSurface);
 // TODO this shouldn't happen. In case the surface is invalid, we need to have recreated it before this method is called
             if (!result) {
+System.err.println("THIS SHOULD NOT HAPPEN! SWAPBUFFERS FAILED, and we are going to create the surface again!?!?");
                 createSurface();
                 result = egl.eglSwapBuffers(eglDisplay, eglSurface);
             }
