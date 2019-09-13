@@ -36,7 +36,6 @@ public class AcceleratedScreen {
     private long eglSurface;
     private long eglContext;
     private long eglDisplay;
-    private long nativeWindow;
     protected static final LinuxSystem ls = LinuxSystem.getLinuxSystem();
     private EGL egl;
     long eglConfigs[] = {0};
@@ -64,16 +63,17 @@ public class AcceleratedScreen {
      * @throws UnsatisfiedLinkError
      */
     AcceleratedScreen(int[] attributes) throws GLException, UnsatisfiedLinkError {
-System.err.println("AccelearedScreen constructor. get egl.");
         egl = EGL.getEGL();
-System.err.println("AccelearedScreen constructor. got egl.");
+System.err.println("AccelearedScreen constructor, got egl = "+egl);
         initPlatformLibraries();
-System.err.println("AccelearedScreen constructor. inited pfl.");
 
         int configCount[] = {0};
         int major[] = {0}, minor[]={0};
         long nativeDisplay = platformGetNativeDisplay();
         long nativeWindow = platformGetNativeWindow();
+
+System.err.println("nativeWindow = "+nativeWindow);
+System.err.println("nativeDisplay = "+nativeDisplay);
 egl.testGraal(nativeWindow, major, minor, attributes, eglConfigs, configCount);
 
         if (nativeDisplay == -1l) { // error condition
@@ -83,42 +83,41 @@ egl.testGraal(nativeWindow, major, minor, attributes, eglConfigs, configCount);
             throw new GLException(0, "Could not get native window");
         }
 
-        eglDisplay =
-                egl.eglGetDisplay(nativeDisplay);
+        eglDisplay = egl.eglGetDisplay(nativeDisplay);
+System.err.println("[ACC] got eglDisplay at "+eglDisplay);
         if (eglDisplay == EGL.EGL_NO_DISPLAY) {
-            throw new GLException(egl.eglGetError(),
-                                 "Could not get EGL display");
+            throw new GLException(egl.eglGetError(), "Could not get EGL display");
         }
 
         if (!egl.eglInitialize(eglDisplay, major, minor)) {
-            throw new GLException(egl.eglGetError(),
-                                  "Error initializing EGL");
+            throw new GLException(egl.eglGetError(), "Error initializing EGL");
         }
-
+System.err.println("[ACC] egl initialized, now bind with API "+EGL.EGL_OPENGL_ES_API);
         if (!egl.eglBindAPI(EGL.EGL_OPENGL_ES_API)) {
-            throw new GLException(egl.eglGetError(),
-                                  "Error binding OPENGL API");
+            throw new GLException(egl.eglGetError(), "Error binding OPENGL API");
         }
 
 
-        if (!egl.eglChooseConfig(eglDisplay, attributes, eglConfigs,
-                                         1, configCount)) {
-            throw new GLException(egl.eglGetError(),
-                                  "Error choosing EGL config");
+System.err.println("[ACC] now call eglChooseConfig, eglConfigssize = "+eglConfigs.length+" and 0 = "+eglConfigs[0]+" and numconfsize = "+configCount.length+" and [0] = "+configCount[0]);
+        if (!egl.eglChooseConfig(eglDisplay, attributes, eglConfigs, 1, configCount)) {
+            throw new GLException(egl.eglGetError(), "Error choosing EGL config");
         }
+System.err.println("[ACC] did call eglChooseConfig, eglConfigssize = "+eglConfigs.length+" and 0 = "+eglConfigs[0]+" and numconfsize = "+configCount.length+" and [0] = "+configCount[0]);
+/*
 for (int i = 0; i < attributes.length; i++) {
 System.err.println("ATTR ["+i+"] = "+attributes[i]);
 }
 System.err.println("EGLCONFIG = "+eglConfigs[0]);
+*/
 
 
-        eglSurface =
-                egl.eglCreateWindowSurface(eglDisplay, eglConfigs[0],
-                                                   nativeWindow, null);
+System.err.println("[ACC] call eglCreateWindowSurface");
+        eglSurface = egl.eglCreateWindowSurface(eglDisplay, eglConfigs[0], nativeWindow, null);
         if (eglSurface == EGL.EGL_NO_SURFACE) {
             throw new GLException(egl.eglGetError(),
                                   "Could not get EGL surface");
         }
+System.err.println("[ACC] called eglCreateWindowSurface, answer = "+ eglSurface);
 
         int emptyAttrArray [] = {};
         eglContext = egl.eglCreateContext(eglDisplay, eglConfigs[0],
@@ -127,13 +126,19 @@ System.err.println("EGLCONFIG = "+eglConfigs[0]);
             throw new GLException(egl.eglGetError(),
                                   "Could not get EGL context");
         }
+System.err.println("[ACC] called eglCreateContext, answer = "+ eglContext);
+ boolean mc = egl.eglMakeCurrent(eglDisplay, eglSurface, eglSurface, eglContext);
+System.err.println("[ACC] called eglMakeContext, answer = "+ mc);
+
     }
 
+/*
     private void createSurface() {
         nativeWindow = platformGetNativeWindow();
         eglSurface = egl._eglCreateWindowSurface(eglDisplay, eglConfigs[0],
                                                    nativeWindow, null);
     }
+*/
 
 
     /** Make the EGL drawing surface current or not
@@ -157,7 +162,7 @@ Thread.dumpStack();
      */
     boolean initPlatformLibraries() throws UnsatisfiedLinkError{
 System.err.println("AcceleratedScreen, initPlatformLibraries, skip this");
-Thread.dumpStack();
+// Thread.dumpStack();
 /*
         if (!initialized) {
             glesLibraryHandle = ls.dlopen("libGLESv2.so",
@@ -200,7 +205,7 @@ System.err.println("[SWAPBUFFERS]\n\n\n");
 // TODO this shouldn't happen. In case the surface is invalid, we need to have recreated it before this method is called
             if (!result) {
 System.err.println("THIS SHOULD NOT HAPPEN! SWAPBUFFERS FAILED, and we are going to create the surface again!?!?");
-                createSurface();
+                // createSurface();
                 result = egl.eglSwapBuffers(eglDisplay, eglSurface);
             }
         }
