@@ -163,6 +163,7 @@ System.err.println("javafxplatform = "+javafxPlatform+", embedded = "+embedded+"
      */
     public static boolean isEmbedded() {
 System.err.println("UTIL: embedded asked, return "+embedded);
+Thread.dumpStack();
         return embedded;
     }
 

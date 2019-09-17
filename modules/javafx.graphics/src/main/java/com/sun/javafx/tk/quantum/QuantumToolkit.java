@@ -238,12 +238,16 @@ public final class QuantumToolkit extends Toolkit {
     private final PerformanceTracker perfTracker = new PerformanceTrackerImpl();
 
     @Override public boolean init() {
+System.err.println("[JAVAFX] initialize QuantumToolkit");
         /*
          * Glass Mac, X11 need Application.setDeviceDetails to happen prior to Glass Application.Run
          */
         renderer = QuantumRenderer.getInstance();
+System.err.println("[JAVAFX] initialize QuantumToolkit, got renderer: "+renderer);
         collector = PaintCollector.createInstance(this);
+System.err.println("[JAVAFX] initialize QuantumToolkit, got collector: "+collector);
         pipeline = GraphicsPipeline.getPipeline();
+System.err.println("[JAVAFX] initialize QuantumToolkit, got pipeline: "+pipeline);
 
         /* shutdown the pipeline on System.exit, ^c
          * needed with X11 and Windows, see RT-32501
@@ -257,6 +261,7 @@ public final class QuantumToolkit extends Toolkit {
             Runtime.getRuntime().addShutdownHook(shutdownHook);
             return null;
         });
+System.err.println("[JAVAFX] initialize QuantumToolkit done");
         return true;
     }
 

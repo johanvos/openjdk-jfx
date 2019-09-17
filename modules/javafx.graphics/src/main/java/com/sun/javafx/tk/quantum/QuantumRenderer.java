@@ -255,15 +255,22 @@ final class QuantumRenderer extends ThreadPoolExecutor  {
     }
 
     public static synchronized QuantumRenderer getInstance() {
+System.err.println("[JAVAFX] QR, getinstance0");
         if (instanceReference.get() == null) {
             synchronized (QuantumRenderer.class) {
+System.err.println("[JAVAFX] QR, getinstance1");
                 QuantumRenderer newTk = null;
                 try {
+System.err.println("[JAVAFX] QR, getinstance2");
                     newTk = new QuantumRenderer();
+System.err.println("[JAVAFX] QR, getinstance3");
                     newTk.prestartCoreThread();
+System.err.println("[JAVAFX] QR, getinstance4");
 
                     newTk.initLatch.await();
+System.err.println("[JAVAFX] QR, getinstance5");
                 } catch (Throwable t) {
+System.err.println("[JAVAFX] QR, getinstance6");
                     if (newTk != null) {
                         newTk.setInitThrowable(t);
                     }
@@ -271,7 +278,9 @@ final class QuantumRenderer extends ThreadPoolExecutor  {
                         t.printStackTrace();
                     }
                 }
+System.err.println("[JAVAFX] QR, getinstance7");
                 if (newTk != null && newTk.initThrowable() != null) {
+System.err.println("[JAVAFX] QR, getinstance8");
                     if (PrismSettings.noFallback) {
                         System.err.println("Cannot initialize a graphics pipeline, and Prism fallback is disabled");
                         throw new InternalError("Could not initialize prism toolkit, " +
@@ -280,9 +289,11 @@ final class QuantumRenderer extends ThreadPoolExecutor  {
                         throw new RuntimeException(newTk.initThrowable());
                     }
                 }
+System.err.println("[JAVAFX] QR, getinstance9");
                 instanceReference.set(newTk);
             }
         }
+System.err.println("[JAVAFX] QR, getinstance10");
         return instanceReference.get();
     }
 }
