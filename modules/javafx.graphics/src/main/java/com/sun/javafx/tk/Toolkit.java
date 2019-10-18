@@ -106,7 +106,7 @@ public abstract class Toolkit {
 
     private static final Map gradientMap = new WeakHashMap();
 
-    private static final boolean verbose = AccessController.doPrivileged((PrivilegedAction<Boolean>) () -> Boolean.getBoolean("javafx.verbose"));
+    private static final boolean verbose = true; // AccessController.doPrivileged((PrivilegedAction<Boolean>) () -> Boolean.getBoolean("javafx.verbose"));
 
     private static final String[] msLibNames = {
         "api-ms-win-core-console-l1-1-0",
@@ -256,7 +256,9 @@ public abstract class Toolkit {
                         + forcedToolkit);
             }
 
+System.err.println("[JAVAFX] instantiate toolkit from class "+clz);
             TOOLKIT = (Toolkit)clz.newInstance();
+System.err.println("[JAVAFX] instantiated toolkit from class "+clz);
             if (TOOLKIT.init()) {
                 if (printToolkit) {
                     System.err.println("JavaFX: using " + forcedToolkit);

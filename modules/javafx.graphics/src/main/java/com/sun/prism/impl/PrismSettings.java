@@ -182,7 +182,7 @@ public final class PrismSettings {
         useNewImageLoader = getBoolean(systemProperties, "prism.newiio", true);
 
         /* Verbose output*/
-        verbose = getBoolean(systemProperties, "prism.verbose", true);
+        verbose = true; // getBoolean(systemProperties, "prism.verbose", true);
 
         /* Prism statistics print frequency, <=0 means "do not print" */
         prismStatFrequency =
@@ -190,13 +190,13 @@ public final class PrismSettings {
                        0, 1, "Try -Dprism.printStats=<true or number>");
 
         /* Debug output*/
-        debug = getBoolean(systemProperties, "prism.debug", false);
+        debug = true; // getBoolean(systemProperties, "prism.debug", false);
 
         /* Trace output*/
-        trace = getBoolean(systemProperties, "prism.trace", false);
+        trace = true; //  getBoolean(systemProperties, "prism.trace", false);
 
         /* Print texture allocation data */
-        printAllocs = getBoolean(systemProperties, "prism.printallocs", false);
+        printAllocs = true; // getBoolean(systemProperties, "prism.printallocs", false);
 
         /* Disable bad driver check warning */
         disableBadDriverWarning = getBoolean(systemProperties,
