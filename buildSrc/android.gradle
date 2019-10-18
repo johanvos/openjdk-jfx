@@ -40,7 +40,7 @@ ANDROID.glassPlatform = "android"
 ANDROID.armArch = "arm64-v8a"
 ANDROID.libDest = "lib"
 ANDROID.jfxdvklib = "jfxdvk.jar"
-ANDROID.library = { name -> return "lib${name}.so" as String }
+ANDROID.library = { name -> return IS_STATIC_BUILD ? "lib${name}.a" : "lib${name}.so" as String }
 ANDROID.includeMonocle = true
 ANDROID.includeLens = false
 ANDROID.canBuild = true
@@ -51,7 +51,7 @@ def freetypeDir = project.hasProperty("FREETYPE_DIR") ? "${FREETYPE_DIR}" : null
 def compileNativeText = freetypeDir != null
 
 def compiler = file("$compilerHome/bin/clang").getAbsolutePath()
-def linker = file("$compilerHome/bin/clang").getAbsolutePath()
+def linker =  IS_STATIC_BUILD ? file("$compilerHome/bin/llvm-ar").getAbsolutePath() : file("$compilerHome/bin/clang").getAbsolutePath()
 
 // Log the settings we're building with
 logger.quiet("ANDROID_SDK: $sdk")
@@ -121,7 +121,7 @@ project(":graphics") {
     }
 
     afterEvaluate {
-        addNative(project, "activity")
+        // addNative(project, "activity")
         if (compileNativeText) {
             addNative(project, "fontNativeFreetype")
         }
@@ -224,9 +224,9 @@ def ccArchFlags = []
 def ccDebugFlags = [IS_DEBUG_NATIVE ? "-DDEBUG" : "-DNDEBUG"]
 def ccDefaultIncludeFlags = ["-I$ndk/platforms/$ndk_target/arch-arm/usr/include"]
 
-def linkFlags = ["-target", platform,
+def linkFlags = IS_STATIC_BUILD ? [] : ["-target", platform,
                  "-Wl,--no-undefined", "-Wl,-z,noexecstack", "-lc", "-lm", "-shared",
-                 "-L$ndk/platforms/$ndk_target/arch-arm/usr/lib"]
+                 "-L$ndk/platforms/$ndk_target/arch-arm/usr/lib", "-landroid", "-llog"]
 
 ANDROID.activity = [:]
 ANDROID.activity.javahSource = files("${project("graphics").buildDir}/classes/dalvik")
@@ -238,7 +238,7 @@ ANDROID.activity.linker = linker
 ANDROID.activity.lib = "activity"
 ANDROID.activity.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags].flatten()
-ANDROID.activity.linkFlags = [linkFlags, "-landroid", "-llog"].flatten()
+ANDROID.activity.linkFlags = IS_STATIC_BUILD ? [linkFlags].flatten() : [linkFlags, "-landroid", "-llog"].flatten()
 
 ANDROID.webview = [:]
 ANDROID.webview.javahSource = files("${project("web").buildDir}/classes/android")
@@ -255,7 +255,7 @@ ANDROID.webview.linker = linker
 ANDROID.webview.lib = "webview"
 ANDROID.webview.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags].flatten()
-ANDROID.webview.linkFlags = [linkFlags, "-ldl", "-llog"].flatten()
+ANDROID.webview.linkFlags = IS_STATIC_BUILD ? [linkFlags].flatten() : [linkFlags, "-ldl", "-llog"].flatten()
 
 ANDROID.dvkwebview = [:]
 ANDROID.dvkwebview.javahSource = files("${project("web").buildDir}/classes/android")
@@ -271,7 +271,7 @@ ANDROID.dvkwebview.linker = linker
 ANDROID.dvkwebview.lib = "android_webview"
 ANDROID.dvkwebview.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags].flatten()
-ANDROID.dvkwebview.linkFlags = [linkFlags, "-ldl", "-llog"].flatten()
+ANDROID.dvkwebview.linkFlags = IS_STATIC_BUILD ? [linkFlags].flatten() : [linkFlags, "-ldl", "-llog"].flatten()
 
 ANDROID.glass = [:]
 // ANDROID.glass.variants = ["eglfb", "lensport"]
@@ -319,7 +319,7 @@ ANDROID.glass.monocle.nativeSource = [
 ANDROID.glass.monocle.compiler = compiler
 ANDROID.glass.monocle.ccFlags = monocleCFlags
 ANDROID.glass.monocle.linker = linker
-ANDROID.glass.monocle.linkFlags =  [linkFlags, "-ldl", "-llog", "-landroid", "-lGLESv2", "-lEGL"].flatten()
+ANDROID.glass.monocle.linkFlags =  IS_STATIC_BUILD ? [linkFlags].flatten() : [linkFlags, "-ldl", "-llog", "-landroid", "-lGLESv2", "-lEGL"].flatten()
 
 ANDROID.glass.monocle.lib = "glass_monocle"
 
@@ -414,7 +414,7 @@ ANDROID.prismES2.monocle.compiler = compiler
 ANDROID.prismES2.monocle.ccFlags = [ccFlags, ccWarnFlags, ccArchFlags, ccOptFlags,
     ccDebugFlags, ccDefaultIncludeFlags, "-DIS_EGLFB"].flatten()
 ANDROID.prismES2.monocle.linker = linker
-ANDROID.prismES2.monocle.linkFlags = [linkFlags, "-ldl", "-llog", "-lGLESv2", "-lEGL"].flatten()
+ANDROID.prismES2.monocle.linkFlags = IS_STATIC_BUILD ? [linkFlags].flatten() : [linkFlags, "-ldl", "-llog", "-lGLESv2", "-lEGL"].flatten()
 ANDROID.prismES2.monocle.lib = "prism_es2_monocle"
 
 ANDROID.prismES2.eglfb = [:]
@@ -462,6 +462,7 @@ if (compileNativeText) {
         "-I$freetypeDir/include", "-I$freetypeDir/include/freetype2"].flatten()
 
     ANDROID.fontNativeFreetype.linkFlags =
+IS_STATIC_BUILD ? [linkFlags].flatten() : 
         [linkFlags, "-llog",
          "-L$freetypeDir/lib", "$freetypeDir/lib/libfreetype.a"].flatten()
 }

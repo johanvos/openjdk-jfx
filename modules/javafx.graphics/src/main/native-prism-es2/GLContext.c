@@ -207,7 +207,11 @@ fprintf(stderr, "[GLCONTEXT] nonjavaclearBuffers\n");
 }
 
 void bindFBO(ContextInfo *ctxInfo, GLuint fboId) {
-fprintf(stderr, "[GLCONTEXT] bindFBO\n");
+fprintf(stderr, "[GLCONTEXT] NONONObindFBO\n");
+ glClearColor(0.0f, 0.0f, 1.0f, 1.0f); // Set background color to black and opaque
+  glClear(GL_COLOR_BUFFER_BIT);  
+glFlush();
+
     if ((ctxInfo == NULL) || (ctxInfo->glBindFramebuffer == NULL)) {
         return;
     }
@@ -1728,7 +1732,13 @@ JNIEXPORT void JNICALL Java_com_sun_prism_es2_GLContext_nDrawIndexedQuads
   (JNIEnv *env, jclass class, jlong nativeCtxInfo, jint numVertices,
    jfloatArray dataf, jbyteArray datab)
 {
-fprintf(stderr, "[GLCONTEXT] drawindexquads\n");
+fprintf(stderr, "[GLCONTEXT] NONOdrawindexquads\n");
+ glClearColor(0.0f, 1.0f, 0.0f, 1.0f); // Set background color to black and opaque
+  glClear(GL_COLOR_BUFFER_BIT);  
+glFlush();
+
+if (1 <2) 
+return;
     float *pFloat;
     char *pByte;
     int numQuads = numVertices / 4;
