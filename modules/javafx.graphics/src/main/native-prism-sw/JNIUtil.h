@@ -43,6 +43,6 @@ jboolean initializeStaticFieldIds(jfieldID* dest, JNIEnv* env,
 
 void JNI_ThrowNew(JNIEnv* env, const char* throwable, const char* message);
 
-jboolean checkAndClearException(JNIEnv *env);
+jboolean checkAndClearException2(JNIEnv *env);
 
 #endif

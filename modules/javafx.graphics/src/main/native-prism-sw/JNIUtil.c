@@ -47,7 +47,7 @@ initializeFieldIds(jfieldID* dest, JNIEnv* env, jclass classHandle,
     while (fields->name != NULL) {
         *dest = (*env)->GetFieldID(env, classHandle, fields->name,
                                    fields->signature);
-        checkAndClearException(env);
+        checkAndClearException2(env);
         if (*dest == NULL) {
             retVal = JNI_FALSE;
             break;
@@ -67,7 +67,7 @@ initializeStaticFieldIds(jfieldID* dest, JNIEnv* env, jclass classHandle,
     while (fields->name != NULL) {
         *dest = (*env)->GetStaticFieldID(env, classHandle, fields->name,
                                          fields->signature);
-        checkAndClearException(env);
+        checkAndClearException2(env);
         if (*dest == NULL) {
             retVal = JNI_FALSE;
             break;
@@ -97,7 +97,7 @@ JNI_ThrowNew(JNIEnv* env, const char* throwable, const char* message) {
 }
 
 jboolean
-checkAndClearException(JNIEnv *env) {
+checkAndClearException2(JNIEnv *env) {
     if (!(*env)->ExceptionCheck(env)) {
         return JNI_FALSE;
     }
