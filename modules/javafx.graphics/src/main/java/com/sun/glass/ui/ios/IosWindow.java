@@ -37,9 +37,13 @@ import com.sun.glass.ui.Window;
 final class IosWindow extends Window {
     protected IosWindow(Window owner, Screen screen, int styleMask) {
         super(owner, screen, styleMask);
+        new IosGestureSupport();
+
     }
     protected IosWindow(long parent) {
         super(parent);
+        new IosGestureSupport();
+
     }
 
     // See Window for documentation
